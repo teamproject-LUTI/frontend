@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import '../../styles/Login.css';
 
 const Login = () => {
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const handleClosePopup = () => {
+    setIsPopupOpen(false);
+  };
+
   return (
       <div className="login-container">
         <div className="login-form-wrapper">
@@ -11,6 +17,7 @@ const Login = () => {
             <div className="logo-placeholder">
               <span className="logo-text">로고 이미지</span>
             </div>
+
             <p className="tagline">Let's Use Travel Intelligence</p>
           </div>
 
@@ -83,6 +90,7 @@ const Login = () => {
             </div>
           </div>
         </div>
+
       </div>
   );
 };

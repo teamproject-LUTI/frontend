@@ -142,6 +142,20 @@
     display: none;
 }
 
+.logo-image {
+    width: 80px;  /* 기존 아이콘과 비슷한 크기 */
+    height: 80px;
+    object-fit: contain;  /* 비율 유지 */
+}
+
+/* 텍스트 없이 이미지만 사용하려면 */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
 @media (min-width: 640px) {
     .user-name {
         display: block;

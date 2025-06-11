@@ -5,7 +5,6 @@
     min-height: 100vh;
     position: sticky;
     top: 4rem;
-    transition: width 0.3s ease;
 }
 
 .sidebar.collapsed {
@@ -91,4 +90,23 @@
 
 .nav-label.hidden {
     display: none;
+}
+
+
+
+.nav-item.sub-item {
+    padding-left: 2.5rem;
+    font-size: 0.85rem;
+    color: #4b5563;
+}
+
+.nav-item.sub-item {
+    padding-left: 2.5rem;
+    font-size: 0.85rem;
+    color: #4b5563;
+}
+
+.nav-item.sub-item:hover{
+    background-color: #F76B59;
+    color: white;
 }

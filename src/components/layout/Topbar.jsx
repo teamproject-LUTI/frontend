@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plane, Bell, User, Search } from 'lucide-react';
-import '../../../styles/layout/Topbar.css';
+import '../../styles/layout/Topbar.css';
 
 const Topbar = () => {
   return (
@@ -10,8 +10,8 @@ const Topbar = () => {
             {/* Logo */}
             <div className="logo-section">
               <div className="logo-container">
-                <Plane className="logo-icon" />
-                <span className="logo-text">LUTI</span>
+                <img src="/images/topbar/luti_logo.png" alt="LUTI Logo" className="logo-image" />
+                {/*<span className="logo-text">LUTI</span>*/}
               </div>
             </div>
 
@@ -29,10 +29,6 @@ const Topbar = () => {
 
             {/* Right Menu */}
             <div className="user-section">
-              <button className="notification-btn">
-                <Bell className="notification-icon" />
-                <span className="notification-badge"></span>
-              </button>
 
               <div className="user-info">
                 <div className="user-avatar">
