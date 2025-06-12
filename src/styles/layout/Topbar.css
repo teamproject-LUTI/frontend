@@ -1,4 +1,4 @@
-/* Topbar.css */
+/* ===== 탑바 기본 스타일 ===== */
 .topbar {
     background-color: white;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
@@ -21,6 +21,7 @@
     height: 4rem;
 }
 
+/* ===== 로고 섹션 ===== */
 .logo-section {
     display: flex;
     align-items: center;
@@ -29,6 +30,7 @@
 .logo-container {
     display: flex;
     align-items: center;
+    gap: 8px;
 }
 
 .logo-icon {
@@ -38,12 +40,19 @@
     margin-right: 0.5rem;
 }
 
+.logo-image {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
 .logo-text {
     font-size: 1.5rem;
     font-weight: bold;
     color: #F76B59;
 }
 
+/* ===== 검색 섹션 ===== */
 .search-section {
     flex: 1;
     max-width: 32rem;
@@ -78,6 +87,7 @@
     box-shadow: 0 0 0 2px #F76B59;
 }
 
+/* ===== 사용자 섹션 ===== */
 .user-section {
     display: flex;
     align-items: center;
@@ -142,20 +152,7 @@
     display: none;
 }
 
-.logo-image {
-    width: 80px;  /* 기존 아이콘과 비슷한 크기 */
-    height: 80px;
-    object-fit: contain;  /* 비율 유지 */
-}
-
-/* 텍스트 없이 이미지만 사용하려면 */
-.logo-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-
+/* ===== 반응형 스타일 ===== */
 @media (min-width: 640px) {
     .user-name {
         display: block;
