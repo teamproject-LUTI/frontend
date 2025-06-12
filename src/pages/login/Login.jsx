@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import '../../styles/Login.css';
+import { useNavigate } from 'react-router-dom';
+import '../../styles/login/Login.css';
 
 const Login = () => {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const handleClosePopup = () => {
-    setIsPopupOpen(false);
+  // 회원가입 버튼 클릭 핸들러 추가
+  const handleSignupClick = () => {
+    navigate('/membership');
   };
 
   return (
@@ -45,7 +47,7 @@ const Login = () => {
             </button>
 
             {/* Signup Button */}
-            <button className="btn btn-secondary">
+            <button className="btn btn-secondary" onClick={handleSignupClick}>
               회원가입
             </button>
           </div>

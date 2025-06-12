@@ -1,0 +1,149 @@
+.membershipContainer {
+    min-height: 100vh;
+    background-color: #f9fafb;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.membershipFormWrapper {
+    max-width: 32rem;
+    width: 100%;
+    padding: 2rem;
+    background-color: #f3f4f6;
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+.membershipHeader {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.tagline {
+    color: #4b5563;
+    font-size: 1.125rem;
+    margin: 0
+}
+
+.membershipForm {
+    margin-top: 2rem;
+}
+
+.formGroup {
+    margin-bottom: 1rem;
+}
+
+.formLabel {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #374151;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.formInput{
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    color: #374151;
+    box-sizing: border-box;
+}
+
+.birthGroup{
+    display: flex;
+    gap: 0.5rem;
+}
+
+.birthSelect{
+    flex: 1;
+    padding: 0.75rem 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    color: #374151;
+    background-color: white;
+}
+
+.phoneGroup {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.phoneSelect {
+    width: 120px;
+    padding: 0.75rem 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    color: #374151;
+    background-color: white;
+}
+
+.phoneInput {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    color: #374151;
+}
+
+.radioGroup {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.radioItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.radioInput {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #F76B59
+}
+
+.radioLabel {
+    color: #374151;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.btn{
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-size: 1rem;
+    margin-top: 1rem;
+    background-color: #F76B59;
+    color: white;
+}
+.btn:hover {
+    background-color: #e55a48;
+}
+
+.loginLink {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.loginLinkAnchor {
+    color: #F76B59;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s;
+}
+.login-link-anchor:hover {
+    color: #e55a48;
+}
