@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import '../../styles/login/Membership.css'
+import '../../styles/login/Membership.css';
+import Layout from '../../components/layout/Layout';
 
 const Membership = () => {
     const [formData, setFormData] = useState({
@@ -70,6 +71,7 @@ const Membership = () => {
 
 
     return (
+        <Layout>
         <div className="membershipContainer">
             <div className="membershipFormWrapper">
                 <div className="membershipHeader">
@@ -300,6 +302,7 @@ const Membership = () => {
                 </div>
             </div>
         </div>
+        </Layout>
     );
 };
 
