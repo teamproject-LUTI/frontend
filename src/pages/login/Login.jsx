@@ -4,28 +4,36 @@ import { authUtils } from '../../util/authUtils';
 import '../../styles/login/Login.css';
 
 const Login = () => {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        console.log('Login 페이지 - 인증 상태 확인 시작');
+        // 개발 환경에서 디버그 로그 최소화
+        if (process.env.REACT_APP_DEBUG !== 'true') {
+          console.log('인증 상태 확인 중...');
+        }
+
         const isAuthenticated = await authUtils.isAuthenticated();
 
         if (isAuthenticated) {
-          console.log('이미 로그인된 사용자 - 메인 페이지로 리다이렉트');
           // 현재 경로가 루트가 아닌 경우에만 리다이렉트 (무한 리다이렉트 방지)
           if (window.location.pathname === '/' || window.location.pathname === '/login') {
+            console.log('인증된 사용자 - 메인 페이지로 리다이렉트');
             window.location.href = '/main';
           }
           return;
         } else {
-          console.log('로그인되지 않은 사용자 - 로그인 페이지 표시');
+          if (process.env.REACT_APP_DEBUG === 'true') {
+            console.log('미인증 사용자 - 로그인 페이지 유지');
+          }
         }
       } catch (error) {
-        console.log('인증 확인 중 오류:', error);
+        // 네트워크 에러 등 예외적인 경우만 로그 출력
+        if (process.env.REACT_APP_DEBUG === 'true') {
+          console.log('인증 확인 중 오류:', error);
+        }
       } finally {
         setIsCheckingAuth(false);
       }
@@ -34,6 +42,7 @@ const Login = () => {
     checkAuthStatus();
   }, []);
 
+  // 인증 상태 확인 중일 때 로딩 표시
   if (isCheckingAuth) {
     return (
         <div className="login-container">
@@ -47,16 +56,13 @@ const Login = () => {
     );
   }
 
-  const handleClosePopup = () => {
-    setIsPopupOpen(false);
-  };
-
   // 구글 로그인 핸들러
   const handleGoogleLogin = () => {
     if (isLoading) return;
 
     setIsLoading(true);
     try {
+      console.log('구글 로그인 시작');
       authUtils.startGoogleLogin();
     } catch (error) {
       console.error('구글 로그인 시작 중 오류:', error);
@@ -64,13 +70,15 @@ const Login = () => {
     }
   };
 
-  // 나머지 코드는 그대로...
+  // 일반 로그인 (향후 구현)
   const handleRegularLogin = () => {
     console.log('일반 로그인 - 팀원이 구현할 예정');
+    // TODO: 일반 로그인 로직 구현
   };
 
+  // 회원가입 페이지로 이동
   const handleSignup = () => {
-    console.log('회원가입 - 팀원이 구현할 예정');
+    window.location.href = '/membership';
   };
 
   return (

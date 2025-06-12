@@ -13,8 +13,8 @@ const ProtectedRoute = ({ children }) => {
       try {
         console.log('인증 상태 확인 시작...');
 
-        // 먼저 로컬에 사용자 정보가 있는지 확인
-        const localUserInfo = authUtils.getUserInfo();
+        // 먼저 로컬 저장소에 사용자 정보가 있는지 확인 (서버 호출 없이)
+        const localUserInfo = sessionStorage.getItem('userInfo');
         if (!localUserInfo) {
           console.log('로컬 사용자 정보 없음 - 서버 인증 확인 진행');
         }
@@ -102,7 +102,7 @@ const ProtectedRoute = ({ children }) => {
             <p>인증 확인 중...</p>
           </div>
 
-          <style jsx>{`
+          <style>{`
           .auth-loading-container {
             display: flex;
             justify-content: center;
@@ -131,7 +131,7 @@ const ProtectedRoute = ({ children }) => {
             margin: 0 auto 20px;
           }
 
-          p {
+          .auth-loading-content p {
             margin: 0;
             color: #666;
             font-size: 14px;
