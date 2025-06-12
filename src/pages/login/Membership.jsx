@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/login/Membership.css';
 import Layout from '../../components/layout/Layout';
+import Swal from 'sweetalert2';
 
 const Membership = () => {
     const [formData, setFormData] = useState({
@@ -52,7 +53,13 @@ const Membership = () => {
 
     const handleSubmit = () => {
         if (formData.password !== formData.confirmPassword) {
-            alert('비밀번호가 일치하지 않습니다.');
+            Swal.fire({
+                icon: 'error',
+                title: '비밀번호 불일치',
+                text: '비밀번호가 일치하지 않습니다.',
+                confirmButtonText: '확인',
+                confirmButtonColor: '#d33'
+            });
             return;
         }
 
@@ -61,12 +68,27 @@ const Membership = () => {
         const emptyFields = requiredFields.filter(field => !formData[field]);
 
         if (emptyFields.length > 0) {
-            alert('모든 필수 항목을 입력해주세요.');
+            Swal.fire({
+                icon: 'warning',
+                title: '필수 정보 누락',
+                text: '모든 필수 항목을 입력해주세요.',
+                confirmButtonText: '확인',
+                confirmButtonColor: '#3085d6'
+            });
             return;
         }
 
-        console.log('회원가입 데이터:', formData);
-        alert('회원가입이 완료되었습니다!');
+        Swal.fire({
+            icon: 'success',
+            title: '회원가입 완료!',
+            text: '회원가입이 성공적으로 완료되었습니다.',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#28a745'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // 회원가입 완료 후 추가 처리 (예: 로그인 페이지로 이동)
+            }
+        });
     };
 
 
