@@ -1,8 +1,9 @@
 .sidebar {
     position: relative;
-    /*top: 4rem; !* topbar 높이만큼 아래에 위치 *!*/
+    top: 0;
     left: 0;
-    height: calc(100vh - 4rem - 248px);
+    min-height: calc(100vh - 4rem - 248px);
+    height: auto;
     background-color: white;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
     border-right: 1px solid #e5e7eb;
@@ -10,7 +11,7 @@
     overflow-x: hidden;
     z-index: 20;
     padding-top: 1rem;
-
+    padding-bottom: 1rem;
 }
 .sidebar-overlay {
     position: fixed;
