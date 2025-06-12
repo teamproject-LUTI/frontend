@@ -1,19 +1,39 @@
 .sidebar {
+    position: relative;
+    top: 0;
+    left: 0;
+    min-height: calc(100vh - 4rem - 248px);
+    height: auto;
     background-color: white;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
     border-right: 1px solid #e5e7eb;
-    min-height: 100vh;
-    position: sticky;
-    top: 4rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 20;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 998;
 }
 
 .sidebar.collapsed {
     width: 4rem;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15); /* collapsed 상태에서는 약간 약한 그림자 */
 }
+
 
 .sidebar.expanded {
     width: 16rem;
+    box-shadow: 6px 0 20px rgba(0, 0, 0, 0.25); /* expanded 상태에서는 더 강한 그림자 */
 }
+
 
 .sidebar-content {
     padding: 1rem;

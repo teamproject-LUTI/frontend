@@ -4,6 +4,7 @@ import Main from "./pages/Main";
 import Login from "./pages/login/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import OAuth2ErrorPage from "./pages/login/OAuth2ErrorPage";
+import Membership from "./pages/login/Membership";
 
 const App = () => {
   return (
@@ -20,6 +21,12 @@ const App = () => {
           <Route path='/main' element={
             <ProtectedRoute>
               <Main />
+            </ProtectedRoute>
+          } />
+          {/*멤버쉽 페이지*/}
+          <Route path='/membership' element={
+            <ProtectedRoute>
+              <Membership />
             </ProtectedRoute>
           } />
         </Routes>
