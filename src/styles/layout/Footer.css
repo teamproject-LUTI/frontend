@@ -2,12 +2,15 @@
 .footer {
     background-color: #111827;
     color: white;
+    flex-shrink: 0; /* 푸터가 줄어들지 않도록 */
+    margin-top: auto
+
 }
 
 .footer-container {
     max-width: 80rem;
     margin: 0 auto;
-    padding: 3rem 1rem;
+    padding: 2rem 1rem;
 }
 
 .footer-content {
