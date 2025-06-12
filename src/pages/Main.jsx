@@ -11,7 +11,7 @@ const Main = ({ children }) => {
     const handleClosePopup = () => setIsPopupOpen(false);
 
 
-    // ✅ 팝업에 넘길 action 버튼들
+    //팝업에 넘길 action 버튼들
     const popupActions = (
         <div className="popup-buttons">
             <button className="cancel" onClick={handleClosePopup}>닫기</button>
