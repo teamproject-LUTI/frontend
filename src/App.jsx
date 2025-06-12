@@ -5,6 +5,8 @@ import Login from "./pages/login/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import OAuth2ErrorPage from "./pages/login/OAuth2ErrorPage";
 import Membership from "./pages/login/Membership";
+import Login from "./pages/login/Login"
+import PaymentTestPage from "./routes/PaymentTestPage";
 
 const App = () => {
   return (
@@ -29,6 +31,8 @@ const App = () => {
               <Membership />
             </ProtectedRoute>
           } />
+
+            <Route path="/test-payment" element={<PaymentTestPage />} />
         </Routes>
       </div>
   );
