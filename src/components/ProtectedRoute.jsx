@@ -1,99 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { authUtils } from '../util/authUtils';
+import React from 'react';
+import { useAuth } from '../util/AuthContext';
+import { Outlet } from 'react-router-dom';
 
-/**
- * 인증이 필요한 라우트를 보호하는 컴포넌트 (HttpOnly 쿠키 방식)
- */
 const ProtectedRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, isLoading } = useAuth();
 
-  useEffect(() => {
-    const checkAuthentication = async () => {
-      try {
-        console.log('인증 상태 확인 시작...');
-
-        // 먼저 로컬 저장소에 사용자 정보가 있는지 확인 (서버 호출 없이)
-        const localUserInfo = sessionStorage.getItem('userInfo');
-        if (!localUserInfo) {
-          console.log('로컬 사용자 정보 없음 - 서버 인증 확인 진행');
-        }
-
-        //서버에서 쿠키 기반 인증 확인 (fetch 직접 사용)
-        const isAuth = await authUtils.isAuthenticated();
-
-        if (isAuth) {
-          console.log('서버 인증 성공 - 사용자 정보 조회 시작');
-          setIsAuthenticated(true);
-
-          // 인증된 경우 사용자 정보도 가져오기
-          try {
-            const userResponse = await fetch('/api/auth/me', {
-              credentials: 'include',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            });
-
-            if (userResponse.ok) {
-              const userData = await userResponse.json();
-              if (userData.success) {
-                // 민감하지 않은 정보만 저장
-                const safeUserInfo = {
-                  userId: userData.user.userId,
-                  name: userData.user.name,
-                  nickname: userData.user.nickname,
-                  email: userData.user.email,
-                  profileImageUrl: userData.user.profileImageUrl,
-                  socialProvider: userData.user.socialProvider,
-                  userTypeId: userData.user.userTypeId
-                };
-                sessionStorage.setItem('userInfo', JSON.stringify(safeUserInfo));
-                console.log('사용자 정보 저장 완료');
-              }
-            }
-          } catch (userError) {
-            console.warn('사용자 정보 조회 실패:', userError);
-            // 사용자 정보 조회 실패해도 인증은 성공으로 처리
-          }
-        } else {
-          console.log('서버 인증 실패 - 로그인 필요');
-          setIsAuthenticated(false);
-        }
-
-      } catch (error) {
-        console.error('인증 확인 중 오류:', error);
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuthentication();
-  }, []);
-
-  // 인증 상태 변화 감지 (다른 탭에서 로그인/로그아웃 시)
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === 'userInfo') {
-        const hasUserInfo = !!e.newValue;
-        if (!hasUserInfo) {
-          // 사용자 정보가 삭제되면 로그인 페이지로 리다이렉트
-          console.log('사용자 정보 삭제됨 - 로그인 페이지로 이동');
-          window.location.href = '/';
-        }
-      }
-    };
-
-    // 다른 탭에서의 sessionStorage 변화 감지
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
-  // 로딩 중일 때 로딩 화면 표시
   if (isLoading) {
     return (
         <div className="auth-loading-container">
@@ -162,7 +73,7 @@ const ProtectedRoute = ({ children }) => {
 
   // 인증된 경우 자식 컴포넌트 렌더링
   console.log('인증 성공 - 컴포넌트 렌더링');
-  return children;
+  return children ? children : <Outlet/>;
 };
 
 export default ProtectedRoute;

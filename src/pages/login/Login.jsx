@@ -1,49 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import GoogleLoginButton from '../login/GoogleLoginButton';
 import { authUtils } from '../../util/authUtils';
+import { useAuth } from '../../util/AuthContext';
 import '../../styles/login/Login.css';
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
+  // AuthContext에서 관리하는 인증 상태를 사용
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        // 개발 환경에서 디버그 로그 최소화
-        if (process.env.REACT_APP_DEBUG !== 'true') {
-          console.log('인증 상태 확인 중...');
-        }
-
-        const isAuthenticated = await authUtils.isAuthenticated();
-
-        if (isAuthenticated) {
-          // 현재 경로가 루트가 아닌 경우에만 리다이렉트 (무한 리다이렉트 방지)
-          if (window.location.pathname === '/' || window.location.pathname === '/login') {
-            console.log('인증된 사용자 - 메인 페이지로 리다이렉트');
-            window.location.href = '/main';
-          }
-          return;
-        } else {
-          if (process.env.REACT_APP_DEBUG === 'true') {
-            console.log('미인증 사용자 - 로그인 페이지 유지');
-          }
-        }
-      } catch (error) {
-        // 네트워크 에러 등 예외적인 경우만 로그 출력
-        if (process.env.REACT_APP_DEBUG === 'true') {
-          console.log('인증 확인 중 오류:', error);
-        }
-      } finally {
-        setIsCheckingAuth(false);
+    // AuthContext가 인증 확인을 완료한 후에만 처리
+    if (!authLoading && isAuthenticated) {
+      console.log('인증된 사용자 - 메인 페이지로 리다이렉트');
+      // 현재 경로가 루트가 아닌 경우에만 리다이렉트 (무한 리다이렉트 방지)
+      if (window.location.pathname === '/' || window.location.pathname === '/login') {
+        window.location.href = '/main';
       }
-    };
+    }
+  }, [isAuthenticated, authLoading]);
 
-    checkAuthStatus();
-  }, []);
-
-  // 인증 상태 확인 중일 때 로딩 표시
-  if (isCheckingAuth) {
+  // AuthContext의 로딩 상태를 사용
+  if (authLoading) {
     return (
         <div className="login-container">
           <div className="login-form-wrapper">
