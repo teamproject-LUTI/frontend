@@ -1,0 +1,150 @@
+.payment-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.payment-table thead {
+  background: linear-gradient(135deg, #F76B59 0%, #E75A4E 100%);
+  color: white;
+}
+
+.payment-table th {
+  padding: 12px 12px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payment-table tbody tr {
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.payment-table tbody tr:hover {
+  background-color: #f1f3f5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.payment-table td {
+  padding: 10px 12px;
+  text-align: center;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 14px;
+  color: #495057;
+  line-height: 1.5;
+  vertical-align: middle;
+}
+
+.payment-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.payment-table button {
+  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%); /* Medium Blue gradient for refund button (2nd priority) */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 5px rgba(74, 144, 226, 0.2); /* Medium Blue shadow for button */
+}
+
+.payment-table button:hover {
+  background: linear-gradient(135deg, #357ABD 0%, #285F8F 100%); /* Darker Medium Blue on hover */
+  transform: translateY(-2px);
+  box-shadow: none; /* Highlight shadow removed on hover */
+}
+
+.payment-table button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(74, 144, 226, 0.2);
+}
+
+/* 상태별 색상 */
+.payment-table .status-completed {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.payment-table .status-cancelled {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* 금액 스타일 */
+.payment-table .amount {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* 결제수단 스타일 */
+.payment-table .payment-method {
+  background-color: #ffebe7; /* Light peach/orange background */
+  color: #e75a4e; /* Darker orange/red text for contrast */
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* 빈 데이터 스타일 */
+.payment-table .empty-data {
+  color: #6c757d;
+  font-style: italic;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .payment-table {
+    font-size: 12px;
+  }
+  
+  .payment-table th,
+  .payment-table td {
+    padding: 8px 6px;
+  }
+  
+  .payment-table button {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+}
+
+/* 로딩 스타일 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  font-size: 16px;
+  color: #6c757d;
+  font-weight: 500;
+  text-align: center;
+}
+
+.loading-container::before {
+  content: "⏳";
+  margin-right: 10px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+} 

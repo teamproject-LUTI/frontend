@@ -5,6 +5,8 @@ import Login from "./pages/login/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import OAuth2ErrorPage from "./pages/login/OAuth2ErrorPage";
 import Membership from "./pages/login/Membership";
+import Review from './pages/community/Review';
+import Payment from './pages/Payment';
 
 const App = () => {
   return (
@@ -29,6 +31,21 @@ const App = () => {
               <Membership />
             </ProtectedRoute>
           } />
+
+          {/*리뷰 페이지*/}
+          <Route path='/community/review' element={
+            <ProtectedRoute>
+              <Review />
+            </ProtectedRoute>
+          } />
+
+          {/*리뷰 페이지*/}
+          <Route path='/payment' element={
+            <ProtectedRoute>
+              <Payment />
+            </ProtectedRoute>
+          } />
+
         </Routes>
       </div>
   );
