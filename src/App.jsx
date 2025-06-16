@@ -5,7 +5,10 @@ import Login from "./pages/login/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import OAuth2ErrorPage from "./pages/login/OAuth2ErrorPage";
 import Membership from "./pages/login/Membership";
+
 import ReviewList from './pages/community/review/ReviewList';
+import ReviewDetail from './pages/community/review/ReviewDetail';
+import ReviewWrite from './pages/community/review/ReviewWrite';
 import NoticeList from './pages/community/notice/NoticeList';
 import QnaList from './pages/community/qna/QnaList';
 
@@ -34,21 +37,37 @@ const App = () => {
             </ProtectedRoute>
           } />
 
-          {/*리뷰 페이지*/}
+          {/*리뷰 목록 페이지*/}
           <Route path='/community/review' element={
             <ProtectedRoute>
               <ReviewList />
             </ProtectedRoute>
           } />
 
-          {/*공지사항 페이지*/}
+          {/*리뷰 상세보기 페이지*/}
+          <Route path='/community/review/:id' element={
+            <ProtectedRoute>
+              <ReviewDetail />
+            </ProtectedRoute>
+          } />
+
+          {/*리뷰 글쓰기 페이지*/}
+          <Route path='/community/review/write' element={
+            <ProtectedRoute>
+              <ReviewWrite />
+            </ProtectedRoute>
+          } />
+
+
+
+          {/*공지사항 목록 페이지*/}
           <Route path='/community/notice' element={
             <ProtectedRoute>
               <NoticeList />
             </ProtectedRoute>
           } />
 
-          {/*QnA 페이지*/}
+          {/*QnA 목록 페이지*/}
           <Route path='/community/qna' element={
             <ProtectedRoute>
               <QnaList />
