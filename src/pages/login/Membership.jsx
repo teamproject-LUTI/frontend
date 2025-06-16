@@ -79,6 +79,11 @@ const Membership = () => {
             return;
         }
 
+        if (!isValidEmailFormat(formData.email)) {
+            Swal.fire({ icon: 'warning', text: '이메일 형식이 올바르지 않습니다.' });
+            return;
+        }
+
         fetch("http://localhost:8080/api/signup/email", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -96,6 +101,11 @@ const Membership = () => {
                 }
             })
             .catch(() => Swal.fire({ icon: 'error', text: '이메일 전송 실패' }));
+    };
+
+    const isValidEmailFormat = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     };
 
     const handleCodeChange = (e) => setVerificationCode(e.target.value);
