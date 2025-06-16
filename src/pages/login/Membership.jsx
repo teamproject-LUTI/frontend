@@ -83,14 +83,19 @@ const Membership = () => {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             credentials: 'include',
-            body: JSON.stringify({email: formData.email})
+            body: JSON.stringify({ email: formData.email })
         })
-            .then(res => res.text())
-            .then(msg => {
-                Swal.fire({icon: 'info', text: msg});
-                setShowVerification(true);
+            .then(async res => {
+                const msg = await res.text();
+
+                if (res.ok) {
+                    Swal.fire({ icon: 'info', text: msg });
+                    setShowVerification(true);
+                } else {
+                    Swal.fire({ icon: 'error', text: msg });
+                }
             })
-            .catch(() => Swal.fire({icon: 'error', text: '이메일 전송 실패'}));
+            .catch(() => Swal.fire({ icon: 'error', text: '이메일 전송 실패' }));
     };
 
     const handleCodeChange = (e) => setVerificationCode(e.target.value);
