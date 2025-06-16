@@ -7,10 +7,12 @@ import {
   HelpCircle,
   User,
   Star,
+  CreditCard,
   ChevronDown,
   ChevronUp, Menu
 } from 'lucide-react';
 import '../../styles/layout/Sidebar.css';
+import { Link } from 'react-router-dom';
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -24,6 +26,7 @@ const Sidebar = () => {
     { icon: HelpCircle, label: '문의내역', path: '/community/qna', parent: '커뮤니티' },
     { icon: User, label: '마이페이지', path: '/mypage' },
     { icon: Star, label: '즐겨찾기', path: '/favorites' },
+    { icon: CreditCard, label: '결제내역', path: '/payment' },
   ];
 
   return (
@@ -65,24 +68,25 @@ const Sidebar = () => {
                 );
               }
 
-              // 하위 메뉴인데 사이드바가 닫혀있거나, 토글이 닫혀있으면 숨김
+               // 하위 메뉴인데 사이드바가 닫혀있거나, 토글이 닫혀있으면 숨김
               if (item.parent === '커뮤니티') {
                 if (isCollapsed || !isCommunityOpen) return null;
               }
 
               // 기본 메뉴 출력
               return (
-                  <button
-                      key={index}
-                      className={`nav-item ${isCollapsed ? 'collapsed' : 'expanded'} ${
-                          item.parent ? 'sub-item' : ''
-                      }`}
-                  >
-                    <item.icon className="nav-icon" />
-                    <span className={`nav-label ${isCollapsed ? 'hidden' : ''}`}>
+                  <Link
+                to={item.path}
+                key={index}
+                className={`nav-item ${isCollapsed ? 'collapsed' : 'expanded'} ${
+                  item.parent ? 'sub-item' : ''
+                }`}
+              >
+                <item.icon className="nav-icon" />
+                <span className={`nav-label ${isCollapsed ? 'hidden' : ''}`}>
                   {item.label}
                 </span>
-                  </button>
+              </Link>
               );
             })}
           </nav>
