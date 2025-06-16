@@ -79,7 +79,7 @@ const Membership = () => {
             return;
         }
 
-        fetch("http://localhost:8080/api/auth/email", {
+        fetch("http://localhost:8080/api/signup/email", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             credentials: 'include',
@@ -96,7 +96,7 @@ const Membership = () => {
     const handleCodeChange = (e) => setVerificationCode(e.target.value);
 
     const handleCodeVerify = () => {
-        fetch(`http://localhost:8080/api/auth/verify-code?code=${verificationCode}`, {
+        fetch(`http://localhost:8080/api/signup/verify-code?code=${verificationCode}`, {
             method: "GET",
             credentials: 'include',
         })
@@ -149,17 +149,60 @@ const Membership = () => {
             return;
         }
 
-        Swal.fire({
-            icon: 'success',
-            title: '회원가입 완료!',
-            text: '회원가입이 성공적으로 완료되었습니다.',
-            confirmButtonText: '확인',
-            confirmButtonColor: '#28a745'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // 회원가입 완료 후 추가 처리 (예: 로그인 페이지로 이동)
-            }
-        });
+        const signupData = {
+            email: formData.email,
+            password: formData.password,
+            name: formData.name,
+            birthYear: formData.birthYear,
+            birthMonth: formData.birthMonth,
+            birthDay: formData.birthDay,
+            phonePrefix: formData.phonePrefix,
+            phoneNumber: formData.phoneNumber,
+            gender: formData.gender,
+            nickname: formData.nickname,
+            address: formData.address
+        };
+
+        fetch("http://localhost:8080/api/signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify(signupData)
+        })
+            .then(async res => {
+
+                if (res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '회원가입 완료!',
+                        text: '회원가입이 성공적으로 완료되었습니다.',
+                        confirmButtonText: '확인',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        window.location.href = "/login"; // 로그인 페이지로 이동
+                    });
+                } else {
+                    const text = await res.text();
+                    Swal.fire({
+                        icon: 'error',
+                        title: '회원가입 실패',
+                        text: text || '오류가 발생했습니다.',
+                        confirmButtonText: '확인',
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            })
+            .catch((error) => {
+                Swal.fire({
+                    icon: 'error',
+                    title: '서버 오류',
+                    text: '회원가입 요청 중 오류가 발생했습니다.',
+                    confirmButtonText: '확인',
+                    confirmButtonColor: '#d33'
+                });
+            });
     };
 
 
