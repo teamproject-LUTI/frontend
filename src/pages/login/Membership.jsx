@@ -244,7 +244,7 @@ const Membership = () => {
                         {/* 이메일 */}
                         <div className="formGroup">
                             <label className="formLabel">이메일</label>
-                            <div style={{display: 'flex', gap: '10px'}}>
+                            <div className="emailVerificationGroup">
                                 <input
                                     type="email"
                                     name="email"
@@ -255,7 +255,7 @@ const Membership = () => {
                                     required
                                 />
                                 <button onClick={handleEmailVerification}
-                                        className="btn"
+                                        className="btn btn-no-margin"
                                         disabled={isVerified}>
                                     {isVerified ? "인증완료" : "인증하기"}
                                 </button>
