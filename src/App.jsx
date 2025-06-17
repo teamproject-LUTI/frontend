@@ -13,6 +13,7 @@ import PasswordConfirmPage from "./pages/mypage/PasswordConfirmPage";
 import { AuthProvider } from "./util/AuthContext";
 import Review from './pages/community/Review';
 import Payment from './pages/Payment';
+import ChatForm from "./pages/travel/ChatForm";
 
 const App = () => {
   return (
@@ -35,6 +36,14 @@ const App = () => {
                 <Main />
               </ProtectedRoute>
             } />
+
+            {/*gpt 페이지*/}
+            <Route path='travel/chatform' element={
+              <ProtectedRoute>
+                <ChatForm />
+              </ProtectedRoute>
+            } />
+
             {/*멤버쉽 페이지*/}
             <Route path='/membership' element={
               <ProtectedRoute>
