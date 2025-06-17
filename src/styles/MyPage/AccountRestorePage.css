@@ -1,0 +1,413 @@
+.restore-page-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.restore-page-content {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    overflow: hidden;
+}
+
+/* 헤더 */
+.restore-header {
+    text-align: center;
+    padding: 3rem 2rem 2rem;
+    background: linear-gradient(135deg, #F76B59 0%, #e55a48 100%);
+    color: white;
+}
+
+.restore-icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    margin-bottom: 1rem;
+}
+
+.restore-main-icon {
+    width: 2rem;
+    height: 2rem;
+    color: white;
+}
+
+.restore-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.restore-subtitle {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1rem;
+}
+
+/* 상태 섹션 */
+.status-section {
+    padding: 2rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.status-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.status-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.status-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #F76B59;
+}
+
+.status-header h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.status-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-label {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.status-value {
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.status-value.highlight {
+    color: #F76B59;
+    font-weight: 600;
+}
+
+/* 정보 섹션 */
+.info-section {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.info-card {
+    display: flex;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: 10px;
+    border-left: 4px solid;
+}
+
+.info-card.success {
+    background-color: #f0fdf4;
+    border-left-color: #22c55e;
+}
+
+.info-card.warning {
+    background-color: #fefce8;
+    border-left-color: #eab308;
+}
+
+.info-card.danger {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+}
+
+.info-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.info-card.success .info-icon {
+    color: #22c55e;
+}
+
+.info-card.warning .info-icon {
+    color: #eab308;
+}
+
+.info-card.danger .info-icon {
+    color: #ef4444;
+}
+
+.info-content h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.info-card.success .info-content h4 {
+    color: #166534;
+}
+
+.info-card.warning .info-content h4 {
+    color: #a16207;
+}
+
+.info-card.danger .info-content h4 {
+    color: #991b1b;
+}
+
+.info-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.info-card.success .info-content p {
+    color: #15803d;
+}
+
+.info-card.warning .info-content p {
+    color: #a16207;
+}
+
+.info-card.danger .info-content p {
+    color: #b91c1c;
+}
+
+/* 복구 절차 섹션 */
+.process-section {
+    padding: 2rem;
+    border-top: 1px solid #f3f4f6;
+    background-color: #f9fafb;
+}
+
+.process-section h3 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    text-align: center;
+}
+
+.process-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.process-step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background-color: #F76B59;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.875rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.step-content h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.step-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+/* 액션 섹션 */
+.action-section {
+    padding: 2rem;
+    text-align: center;
+}
+
+.restore-button {
+    width: 100%;
+    padding: 1rem 2rem;
+    background-color: #F76B59;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 2rem;
+}
+
+.restore-button:hover:not(:disabled) {
+    background-color: #e55a48;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(247, 107, 89, 0.3);
+}
+
+.restore-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.alternative-actions {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1.5rem;
+}
+
+.alternative-actions p {
+    margin: 0 0 1rem 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.alternative-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.signup-button,
+.login-button {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: white;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.signup-button:hover:not(:disabled),
+.login-button:hover:not(:disabled) {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.signup-button:disabled,
+.login-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .restore-page-container {
+        padding: 1rem 0.5rem;
+    }
+
+    .restore-header {
+        padding: 2rem 1.5rem 1.5rem;
+    }
+
+    .restore-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .status-section,
+    .info-section,
+    .process-section,
+    .action-section {
+        padding: 1.5rem;
+    }
+
+    .status-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .alternative-buttons {
+        flex-direction: column;
+    }
+
+    .signup-button,
+    .login-button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .restore-page-container {
+        padding: 0.5rem;
+    }
+
+    .restore-page-content {
+        border-radius: 12px;
+    }
+
+    .restore-header {
+        padding: 1.5rem 1rem;
+    }
+
+    .restore-icon-wrapper {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    .restore-main-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .restore-header h1 {
+        font-size: 1.25rem;
+    }
+
+    .restore-subtitle {
+        font-size: 0.875rem;
+    }
+
+    .status-section,
+    .info-section,
+    .process-section,
+    .action-section {
+        padding: 1rem;
+    }
+
+    .process-steps {
+        gap: 1.5rem;
+    }
+
+    .info-card {
+        padding: 1rem;
+    }
+}
