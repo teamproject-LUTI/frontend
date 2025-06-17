@@ -138,6 +138,17 @@ const Membership = () => {
 
 
     const handleSubmit = () => {
+        if (!isVerified) {
+            Swal.fire({
+                icon: 'warning',
+                title: '이메일 인증 필요',
+                text: '이메일 인증을 완료해주세요.',
+                confirmButtonText: '확인',
+                confirmButtonColor: '#d33'
+            });
+            return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
             Swal.fire({
                 icon: 'error',
