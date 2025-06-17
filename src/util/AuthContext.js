@@ -1,3 +1,5 @@
+// AuthContext.js - 업데이트된 버전 (apiClient 연동)
+
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { authUtils } from './authUtils';
 
@@ -22,6 +24,44 @@ export const AuthProvider = ({ children }) => {
   // 중복 호출 방지를 위한 ref
   const isCheckingRef = useRef(false);
   const checkTimeoutRef = useRef(null);
+
+  // 인증 상태 리셋 함수 (먼저 정의)
+  const resetAuth = useCallback(() => {
+    console.log('AuthContext 상태 리셋 시작...');
+
+    isCheckingRef.current = false;
+    if (checkTimeoutRef.current) {
+      clearTimeout(checkTimeoutRef.current);
+    }
+
+    try {
+      authUtils.refreshCache();
+    } catch (error) {
+      console.warn('authUtils 캐시 정리 중 오류:', error);
+    }
+
+    setAuthState({
+      isAuthenticated: false,
+      isLoading: false,
+      user: null,
+      hasChecked: true
+    });
+
+    console.log('AuthContext 상태 리셋 완료');
+  }, []);
+
+  // AuthContext 리셋 함수를 전역에 등록 (apiClient에서 사용)
+  useEffect(() => {
+    window.authContextReset = () => {
+      console.log('전역 AuthContext 리셋 호출');
+      resetAuth();
+    };
+
+    // 컴포넌트 언마운트 시 전역 함수 제거
+    return () => {
+      delete window.authContextReset;
+    };
+  }, [resetAuth]);
 
   // 인증 상태 확인 함수
   const checkAuth = useCallback(async () => {
@@ -54,6 +94,7 @@ export const AuthProvider = ({ children }) => {
             userData = apiResponse.user;
           }
         } catch (userError) {
+          console.warn('사용자 정보 조회 실패:', userError);
           userData = null;
         }
 
@@ -78,12 +119,21 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('인증 확인 중 오류:', error);
-      setAuthState({
-        isAuthenticated: false,
-        isLoading: false,
-        user: null,
-        hasChecked: true
-      });
+
+      // 401 에러가 아닌 경우에만 인증 실패로 처리
+      // 401 에러는 apiClient 인터셉터에서 토큰 갱신 후 재시도됨
+      if (error.response?.status !== 401) {
+        setAuthState({
+          isAuthenticated: false,
+          isLoading: false,
+          user: null,
+          hasChecked: true
+        });
+      } else {
+        // 401 에러인 경우 로딩 상태 유지하고 인터셉터의 결과를 기다림
+        console.log('401 에러 - 인터셉터에서 토큰 갱신 처리 중...');
+        setAuthState(prev => ({ ...prev, isLoading: false }));
+      }
 
       return false;
     } finally {
@@ -107,12 +157,11 @@ export const AuthProvider = ({ children }) => {
     }, 100);
   }, [checkAuth]);
 
-  // 사용자 정보 업데이트 함수 추가
+  // 사용자 정보 업데이트 함수
   const updateUser = useCallback(async (updatedData) => {
     try {
       console.log('사용자 정보 업데이트 시작:', updatedData);
 
-      // 현재 user 정보와 업데이트된 정보를 병합
       const updatedUser = {
         ...authState.user,
         ...updatedData
@@ -131,16 +180,16 @@ export const AuthProvider = ({ children }) => {
     }
   }, [authState.user]);
 
-  // 사용자 정보 새로고침 함수 추가
+  // 사용자 정보 새로고침 함수
   const refreshUser = useCallback(async () => {
     try {
       console.log('사용자 정보 새로고침 시작...');
 
       const userData = await authUtils.getUserInfo();
-      if (userData) {
+      if (userData && userData.success && userData.user) {
         setAuthState(prev => ({
           ...prev,
-          user: userData
+          user: userData.user
         }));
         console.log('사용자 정보 새로고침 완료');
         return true;
@@ -152,45 +201,55 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // 로그아웃 함수 (기존 방식 유지)
+  // 로그아웃 함수
   const logout = async () => {
     try {
+      console.log('로그아웃 처리 시작...');
+
       await authUtils.logout();
+
       setAuthState({
         isAuthenticated: false,
         isLoading: false,
         user: null,
         hasChecked: true
       });
+
+      console.log('AuthContext 로그아웃 완료');
     } catch (error) {
       console.error('로그아웃 중 오류:', error);
+
+      // 오류가 있어도 로컬 상태는 정리
+      setAuthState({
+        isAuthenticated: false,
+        isLoading: false,
+        user: null,
+        hasChecked: true
+      });
     }
   };
 
-  // 인증 상태 리셋
-  const resetAuth = () => {
-    console.log('AuthContext 상태 리셋 시작...');
-
-    isCheckingRef.current = false;
-    if (checkTimeoutRef.current) {
-      clearTimeout(checkTimeoutRef.current);
-    }
+  // 토큰 갱신 성공 시 인증 상태 업데이트 함수
+  const onTokenRefresh = useCallback(async () => {
+    console.log('토큰 갱신 후 인증 상태 업데이트...');
 
     try {
-      authUtils.refreshCache();
+      const userData = await authUtils.getUserInfo();
+
+      if (userData && userData.success) {
+        setAuthState({
+          isAuthenticated: true,
+          isLoading: false,
+          user: userData.user || null,
+          hasChecked: true
+        });
+
+        console.log('토큰 갱신 후 인증 상태 업데이트 완료');
+      }
     } catch (error) {
-      console.warn('authUtils 캐시 정리 중 오류:', error);
+      console.error('토큰 갱신 후 사용자 정보 조회 실패:', error);
     }
-
-    setAuthState({
-      isAuthenticated: false,
-      isLoading: false,
-      user: null,
-      hasChecked: true
-    });
-
-    console.log('AuthContext 상태 리셋 완료');
-  };
+  }, []);
 
   // 컴포넌트 마운트 시 한 번만 인증 확인
   useEffect(() => {
@@ -203,19 +262,23 @@ export const AuthProvider = ({ children }) => {
     };
   }, [debouncedCheckAuth]);
 
-  // 페이지 포커스 시 인증 상태 재확인
+  // 페이지 포커스 시 인증 상태 재확인 (토큰이 만료되었을 가능성)
   useEffect(() => {
     const handleFocus = () => {
-      const lastCheck = Date.now();
-      if (!authState.hasChecked || (Date.now() - lastCheck) > 5 * 60 * 1000) {
+      // 5분마다 한 번씩만 재확인 (과도한 API 호출 방지)
+      const lastCheck = localStorage.getItem('lastAuthCheck');
+      const now = Date.now();
+
+      if (!lastCheck || (now - parseInt(lastCheck)) > 5 * 60 * 1000) {
         console.log('페이지 포커스 - 인증 상태 재확인');
+        localStorage.setItem('lastAuthCheck', now.toString());
         debouncedCheckAuth();
       }
     };
 
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, [debouncedCheckAuth, authState.hasChecked]);
+  }, [debouncedCheckAuth]);
 
   const value = {
     ...authState,
@@ -223,7 +286,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     resetAuth,
     updateUser,
-    refreshUser
+    refreshUser,
+    onTokenRefresh
   };
 
   return (
