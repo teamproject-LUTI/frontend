@@ -3,23 +3,6 @@ import { Plane, Bell, User, Search } from 'lucide-react';
 import '../../styles/layout/Topbar.css';
 
 const Topbar = () => {
-  const [keyword, setKeyword] = useState('');
-
-  const handleSearch = async (e) => {
-    e.preventDefault();
-
-    if (!keyword.trim()) return;
-
-    try {
-      const response = await fetch(`http://localhost:8080/luti/naver/search?keyword=${encodeURIComponent(keyword)}`);
-      const data = await response.text(); // 백엔드가 text 응답일 경우
-
-      console.log('검색 결과:', data);
-
-    } catch (error) {
-      console.error('API 요청 중 오류:', error);
-    }
-  };
   return (
       <header className="topbar">
         <div className="topbar-container">
@@ -34,14 +17,12 @@ const Topbar = () => {
 
             {/* Search Bar */}
             <div className="search-section">
-              <form onSubmit={handleSearch} className="search-container">
-                <Search className="search-icon" onClick={handleSearch} style={{ cursor: 'pointer' }} />
+              <form  className="search-container">
+                <Search className="search-icon"  style={{ cursor: 'pointer' }} />
                 <input
                     type="text"
                     placeholder="여행지, 숙소, 액티비티 검색..."
                     className="search-input"
-                    value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
                 />
               </form>
             </div>
