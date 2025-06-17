@@ -1,0 +1,431 @@
+.mypage-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.mypage-content {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.profile-image-section {
+    display: flex;
+    justify-content: center;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.profile-image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-avatar {
+    width: 100%;
+    height: 100%;
+    background-color: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-icon {
+    width: 60px;
+    height: 60px;
+    color: #9ca3af;
+}
+
+.info-sections {
+    padding: 30px;
+}
+
+.info-section {
+    margin-bottom: 30px;
+}
+
+.info-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #F76B59;
+}
+
+.section-header h2 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.section-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    display: flex;
+    align-items: center;
+    min-width: 120px;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.info-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    color: #F76B59;
+}
+
+.info-value {
+    flex: 1;
+    color: #2d3748;
+}
+
+/* 편집 가능한 입력 필드 스타일 */
+.edit-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #374151;
+    background-color: white;
+    transition: border-color 0.2s ease;
+}
+
+.edit-input:focus {
+    outline: none;
+    border-color: #F76B59;
+    box-shadow: 0 0 0 2px rgba(247, 107, 89, 0.1);
+}
+
+.edit-input:hover {
+    border-color: #9ca3af;
+}
+
+/* 버튼 스타일 */
+.edit-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.save-button, .cancel-button, .edit-button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.save-button {
+    background-color: #F76B59;
+    color: white;
+}
+
+.save-button:hover {
+    background-color: #e55a48;
+}
+
+.cancel-button {
+    background-color: #6c757d;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #5a6268;
+}
+
+.edit-button {
+    background-color: #007bff;
+    color: white;
+}
+
+.edit-button:hover {
+    background-color: #0056b3;
+}
+
+/* 프로필 이미지 업로드 버튼 */
+.image-upload {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+.upload-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background-color: #F76B59;
+    border: 2px solid white;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.upload-button:hover {
+    background-color: #e55a48;
+    transform: scale(1.05);
+}
+
+.upload-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* 휴대폰 번호 입력 그룹 */
+.phone-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.phone-select {
+    width: 80px;
+    padding: 8px 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+}
+
+.phone-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+    background-color: white;
+}
+
+.phone-dash {
+    color: #666;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.phone-input:focus, .phone-select:focus {
+    outline: none;
+    border-color: #F76B59;
+    box-shadow: 0 0 0 2px rgba(247, 107, 89, 0.1);
+}
+
+/* 이메일 입력 그룹 */
+.email-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.email-local-input {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+}
+
+.email-at {
+    color: #666;
+    font-weight: bold;
+    font-size: 16px;
+    margin: 0 4px;
+}
+
+.email-domain-select {
+    min-width: 140px;
+    padding: 8px 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+}
+
+.email-custom-input {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+    margin-left: 8px;
+}
+
+.email-local-input:focus,
+.email-domain-select:focus,
+.email-custom-input:focus {
+    outline: none;
+    border-color: #F76B59;
+    box-shadow: 0 0 0 2px rgba(247, 107, 89, 0.1);
+}
+
+/* 반응형 처리 */
+@media (max-width: 768px) {
+    .email-input-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .email-at {
+        display: none;
+    }
+
+    .email-local-input {
+        min-width: 100%;
+    }
+
+    .email-domain-select {
+        min-width: 100%;
+    }
+
+    .email-custom-input {
+        min-width: 100%;
+        margin-left: 0;
+    }
+
+    .phone-input-group {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+}
+
+/* 로딩 및 에러 스타일 */
+.loading-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #F76B59;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.error-section {
+    background-color: #fee;
+    border: 1px solid #fcc;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.error-message {
+    color: #c33;
+    margin-bottom: 10px;
+}
+
+.retry-button {
+    background-color: #F76B59;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.retry-button:hover {
+    background-color: #e55a48;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* MyPageProfile.css에 추가할 CSS */
+
+/* 이메일 읽기 전용 스타일 */
+.email-readonly-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.email-readonly-text {
+    color: #2d3748;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.email-readonly-notice {
+    color: #718096;
+    font-size: 0.75rem;
+    font-style: italic;
+    background-color: #f7fafc;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    border-left: 3px solid #F76B59;
+}
+
+@media (max-width: 768px) {
+    .email-readonly-notice {
+        font-size: 0.7rem;
+        padding: 0.375rem;
+    }
+}

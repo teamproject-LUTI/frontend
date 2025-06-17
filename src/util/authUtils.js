@@ -1,130 +1,113 @@
-import axios from 'axios';
+// authUtils.js - 쿠키 기반 JWT용 간소화 버전
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
-// axios 인스턴스 생성
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  withCredentials: true, // HttpOnly 쿠키 자동 포함
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+export const authUtils = {
+  /**
+   * 사용자 인증 상태 확인
+   * 쿠키의 accessToken을 자동으로 서버에 전송하여 검증
+   */
+  async isAuthenticated() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/validate`, {
+        method: 'GET',
+        credentials: 'include', // 쿠키 자동 전송
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-// 토큰 갱신 진행 중인지 확인하는 플래그
-let isRefreshing = false;
-let failedQueue = [];
-
-const processQueue = (error, token = null) => {
-  failedQueue.forEach(prom => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-
-  failedQueue = [];
-};
-
-// 응답 인터셉터 - 401 에러 시 토큰 갱신 시도
-apiClient.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-      const originalRequest = error.config;
-
-      // 401 에러이고, 재시도 플래그가 없으며, refresh 엔드포인트가 아닌 경우에만 처리
-      if (error.response?.status === 401 &&
-          !originalRequest._retry &&
-          !originalRequest.url?.includes('/api/auth/refresh') &&
-          !originalRequest.url?.includes('/api/auth/validate')) {
-
-        // 이미 토큰 갱신 중이면 대기열에 추가
-        if (isRefreshing) {
-          return new Promise((resolve, reject) => {
-            failedQueue.push({ resolve, reject });
-          }).then(token => {
-            return apiClient(originalRequest);
-          }).catch(err => {
-            return Promise.reject(err);
-          });
-        }
-
-        originalRequest._retry = true;
-        isRefreshing = true;
-
-        try {
-          // 토큰 갱신 시도
-          await apiClient.post('/api/auth/refresh');
-          processQueue(null, true);
-
-          // 갱신 성공 시 원래 요청 재시도
-          return apiClient(originalRequest);
-        } catch (refreshError) {
-          // 갱신 실패 시 로그인 페이지로 리다이렉트
-          processQueue(refreshError, null);
-          console.error('토큰 갱신 실패:', refreshError);
-          authUtils.redirectToLogin();
-          return Promise.reject(refreshError);
-        } finally {
-          isRefreshing = false;
-        }
+      if (response.status === 200) {
+        console.log('사용자 인증됨');
+        return true;
+      } else if (response.status === 401) {
+        console.log('사용자 미인증 상태');
+        return false;
       }
 
-      return Promise.reject(error);
-    }
-);
-
-/**
- * 인증 관련 유틸리티 (axios 기반)
- */
-export const authUtils = {
-  // 토큰 갱신 (서버의 HttpOnly 쿠키가 자동 처리)
-  refreshToken: async () => {
-    try {
-      const response = await apiClient.post('/api/auth/refresh');
-      return { success: response.status === 200 };
+      return false;
     } catch (error) {
-      console.error('토큰 갱신 중 오류:', error);
-      return { success: false, error: error.message };
+      console.error('인증 상태 확인 중 오류:', error);
+      return false;
     }
   },
 
-  // 로그아웃
-  logout: async () => {
+  /**
+   * 구글 OAuth2 로그인 시작
+   */
+  startGoogleLogin() {
     try {
-      await apiClient.post('/api/auth/logout');
+      const loginUrl = `${API_BASE_URL}/oauth2/authorization/google`;
+      console.log('구글 로그인 시작:', loginUrl);
+      window.location.href = loginUrl;
     } catch (error) {
-      console.error('로그아웃 중 오류:', error);
-    } finally {
-      // 로컬 사용자 정보 삭제 및 로그인 페이지로 이동
-      authUtils.clearUserInfo();
-      authUtils.redirectToLogin();
+      console.error('구글 로그인 시작 중 오류:', error);
+      throw error;
     }
   },
 
-  // 모든 디바이스에서 로그아웃
-  logoutFromAllDevices: async () => {
+  /**
+   * 로그아웃 처리
+   * 서버에서 쿠키를 자동으로 삭제함
+   */
+  async logout() {
     try {
-      await apiClient.post('/api/auth/logout-all');
+      console.log('로그아웃 요청 시작...');
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include', // 쿠키 자동 전송
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('서버 로그아웃 성공');
+
+        return {
+          success: true,
+          message: result.message || '로그아웃이 완료되었습니다.'
+        };
+      } else {
+        // 서버 에러가 있어도 프론트엔드에서는 성공으로 처리
+        console.log('서버 응답 에러이지만 로그아웃 처리');
+        return {
+          success: true,
+          message: '로그아웃이 완료되었습니다.'
+        };
+      }
+
     } catch (error) {
-      console.error('전체 로그아웃 중 오류:', error);
-    } finally {
-      authUtils.clearUserInfo();
-      authUtils.redirectToLogin();
+      console.error('로그아웃 요청 중 오류:', error);
+
+      return {
+        success: true,
+        message: '로그아웃이 완료되었습니다.'
+      };
     }
   },
 
-  // 현재 사용자 정보 조회
-  getCurrentUser: async () => {
+  /**
+   * 사용자 정보 조회
+   */
+  async getUserInfo() {
     try {
-      const response = await apiClient.get('/api/auth/me');
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        method: 'GET',
+        credentials: 'include', // 쿠키 자동 전송
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-      if (response.data.success) {
-        // 민감하지 않은 정보만 세션스토리지에 저장
-        authUtils.setUserInfo(response.data.user);
-        return response.data.user;
+      if (response.status === 200) {
+        const data = await response.json();
+        return data; // { success: true, user: {...} }
+      } else if (response.status === 401) {
+        console.log('사용자 정보 조회 - 미인증 상태');
+        return null;
       }
 
       return null;
@@ -134,110 +117,31 @@ export const authUtils = {
     }
   },
 
-  // 로그인 상태 확인 (서버에 검증 요청) - 인터셉터 제외
-  isAuthenticated: async () => {
+  /**
+   * 토큰 갱신 (필요한 경우)
+   * 보통 axios interceptor나 자동으로 처리되지만, 수동 호출용
+   */
+  async refreshToken() {
     try {
-      // 직접 fetch 사용하여 인터셉터 우회
-      const response = await fetch(`${API_BASE_URL}/api/auth/validate`, {
-        method: 'GET',
+      const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+        method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      return response.ok;
+      if (response.ok) {
+        const result = await response.json();
+        console.log('토큰 갱신 성공');
+        return { success: true, message: result.message };
+      } else {
+        console.log('토큰 갱신 실패');
+        return { success: false, error: '토큰 갱신에 실패했습니다.' };
+      }
     } catch (error) {
-      console.error('인증 확인 중 오류:', error);
-      return false;
+      console.error('토큰 갱신 중 오류:', error);
+      return { success: false, error: '토큰 갱신 중 오류가 발생했습니다.' };
     }
-  },
-
-  // 로그인 페이지로 리다이렉트
-  redirectToLogin: () => {
-    // 현재 페이지가 이미 로그인 페이지가 아닌 경우에만 리다이렉트
-    if (window.location.pathname !== '/' && window.location.pathname !== '/login') {
-      window.location.href = '/';
-    }
-  },
-
-  // 구글 로그인 시작
-  startGoogleLogin: () => {
-    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
-  },
-
-  // 사용자 정보 관리 (민감하지 않은 정보만)
-  setUserInfo: (userInfo) => {
-    const safeUserInfo = {
-      userId: userInfo.userId,
-      name: userInfo.name,
-      nickname: userInfo.nickname,
-      email: userInfo.email,
-      profileImageUrl: userInfo.profileImageUrl,
-      socialProvider: userInfo.socialProvider,
-      userTypeId: userInfo.userTypeId,
-      // 토큰이나 민감한 정보는 저장하지 않음
-    };
-    sessionStorage.setItem('userInfo', JSON.stringify(safeUserInfo));
-  },
-
-  getUserInfo: () => {
-    try {
-      const userString = sessionStorage.getItem('userInfo');
-      return userString ? JSON.parse(userString) : null;
-    } catch (error) {
-      console.error('사용자 정보 파싱 중 오류:', error);
-      return null;
-    }
-  },
-
-  clearUserInfo: () => {
-    sessionStorage.removeItem('userInfo');
   }
 };
-
-/**
- * API 호출용 axios 인스턴스 (다른 컴포넌트에서 사용)
- */
-export const api = apiClient;
-
-/**
- * 인증 상태 변화 이벤트 시스템
- */
-export const authEvents = {
-  emit: (eventType, data) => {
-    window.dispatchEvent(new CustomEvent(`auth:${eventType}`, { detail: data }));
-  },
-
-  on: (eventType, callback) => {
-    const handler = (event) => callback(event.detail);
-    window.addEventListener(`auth:${eventType}`, handler);
-    return () => window.removeEventListener(`auth:${eventType}`, handler);
-  },
-
-  emitLoginSuccess: (user) => {
-    authEvents.emit('loginSuccess', user);
-  },
-
-  emitLogout: () => {
-    authEvents.emit('logout');
-  }
-};
-
-export const tokenUtils = {
-  setAccessToken: () => {
-    console.warn('HttpOnly 쿠키 사용으로 인해 더 이상 토큰을 직접 저장하지 않습니다.');
-  },
-
-  getAccessToken: () => {
-    console.warn('HttpOnly 쿠키 사용으로 인해 토큰에 직접 접근할 수 없습니다.');
-    return null;
-  },
-
-  removeTokens: () => {
-    // 쿠키는 서버에서 만료시키므로 여기서는 사용자 정보만 삭제
-    authUtils.clearUserInfo();
-  }
-};
-
-export default apiClient;
