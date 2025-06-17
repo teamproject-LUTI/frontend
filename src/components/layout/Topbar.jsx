@@ -6,22 +6,8 @@ import Swal from 'sweetalert2';
 import '../../styles/layout/Topbar.css';
 
 const Topbar = () => {
-  const [keyword, setKeyword] = useState('');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { user, isLoading, resetAuth } = useAuth();
-
-  const handleSearch = async (e) => {
-    e.preventDefault();
-
-    if (!keyword.trim()) return;
-
-    try {
-      const response = await fetch(`http://localhost:8080/luti/naver/search?keyword=${encodeURIComponent(keyword)}`);
-      await response.text();
-    } catch (error) {
-      console.error('API 요청 중 오류:', error);
-    }
-  };
 
   const handleLogout = async () => {
     if (isLoggingOut) {
@@ -150,10 +136,8 @@ const Topbar = () => {
 
             {/* Search Bar */}
             <div className="search-section">
-              <form  className="search-container">
-                <Search className="search-icon"  style={{ cursor: 'pointer' }} />
-              <form onSubmit={handleSearch} className="search-container">
-                <Search className="search-icon" onClick={handleSearch} style={{ cursor: 'pointer' }}/>
+              <form className="search-container">
+                <Search className="search-icon" style={{ cursor: 'pointer' }}/>
                 <input
                     type="text"
                     placeholder="여행지, 숙소, 액티비티 검색..."
