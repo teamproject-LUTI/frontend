@@ -11,6 +11,8 @@ import WithdrawPage from "./pages/mypage/withdraw/WithdrawPage";
 import AccountRestorePage from "./pages/mypage/withdraw/AccountRestorePage";
 import PasswordConfirmPage from "./pages/mypage/PasswordConfirmPage";
 import { AuthProvider } from "./util/AuthContext";
+import Review from './pages/community/Review';
+import Payment from './pages/Payment';
 
 const App = () => {
   return (
@@ -46,6 +48,20 @@ const App = () => {
               <Route path='withdraw/confirm' element={<PasswordConfirmPage />} />
               <Route path='withdraw' element={<WithdrawPage />} />
             </Route>
+
+            {/*리뷰 페이지*/}
+            <Route path='/community/review' element={
+              <ProtectedRoute>
+                <Review />
+              </ProtectedRoute>
+            } />
+
+            {/*리뷰 페이지*/}
+            <Route path='/payment' element={
+              <ProtectedRoute>
+                <Payment />
+              </ProtectedRoute>
+            } />
           </Routes>
         </div>
       </AuthProvider>
