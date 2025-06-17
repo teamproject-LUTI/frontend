@@ -45,11 +45,7 @@ const App = () => {
             } />
 
             {/*멤버쉽 페이지*/}
-            <Route path='/membership' element={
-              <ProtectedRoute>
-                <Membership />
-              </ProtectedRoute>
-            } />
+            <Route path='/membership' element={<Membership />} />
             {/* 마이페이지*/}
             <Route path='/mypage' element={<ProtectedRoute />}>
               <Route index element={<MyPage />} />
