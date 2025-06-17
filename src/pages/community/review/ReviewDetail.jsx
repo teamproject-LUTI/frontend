@@ -1,35 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import Topbar from '../../../components/layout/Topbar';
 import Sidebar from '../../../components/layout/Sidebar';
 import Footer from '../../../components/layout/Footer';
-import '../../../styles/community/review/ReviewDetail.css'; // 스타일 분리
+import '../../../styles/community/review/ReviewDetail.css';
 
 const ReviewDetail = () => {
-    const { id } = useParams();
+    const { id } = useParams(); // 경로에서 reviewNo 받음
     const [review, setReview] = useState(null);
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
 
-    // 임시 더미 데이터
     useEffect(() => {
-        const dummy = {
-            id,
-            title: '2박 3일 제주도 여행 후기',
-            content: '<p>정말 최고의 힐링이었어요! 사진도 많이 찍고...</p>',
-            likeCount: 5,
+        const fetchReview = async () => {
+            try {
+                const res = await axios.get(`/api/reviews/${id}`);
+                setReview(res.data.data); // 리뷰 내용
+                setLikeCount(res.data.data.likeCount);
+                // ❗여기선 isLiked는 별도 API 요청이 필요함
+            } catch (err) {
+                console.error('리뷰 조회 실패', err);
+            }
         };
-        setReview(dummy);
-        setLikeCount(dummy.likeCount);
+
+        fetchReview();
     }, [id]);
 
     const handleLike = () => {
         const updated = isLiked ? likeCount - 1 : likeCount + 1;
         setLikeCount(updated);
         setIsLiked(!isLiked);
+        // TODO: 서버에 좋아요/취소 API 호출 추가
     };
 
-    if (!review) return <p>로딩 중...</p>;
+    if (!review) return null;
 
     return (
         <div className="main-layout">
