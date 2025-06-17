@@ -36,20 +36,22 @@ const ReviewList = () => {
           <h2>리뷰 목록</h2>
           <ul className="review-list">
             {reviews.map((r) => (
-                <li key={r.reviewNo} className="review-item" onClick={() => navigate(`/community/review/${r.reviewId}`)}>
+                <li key={r.reviewNo}
+                          className="review-item"
+                          onClick={() => navigate(`/community/review/${r.reviewId}`)}>
                   <h3>{r.title}</h3>
                   <p>{r.createdAt.substring(0, 10)}</p>
                   <p>{r.userName}</p>
                   {/* isLiked가 true면 채워진 하트, false면 빈 하트 보여주기 */}
                   <img
-                      src={
-                        r.isLiked
-                            ? "/images/community/heart-filled.png"
-                            : "/images/community/heart-empty.png"
+                      src={ r.liked
+                          ? "/images/community/heart-filled.png"
+                          : "/images/community/heart-empty.png"
                       }
-                      alt={r.isLiked ? "좋아요 눌림" : "좋아요 안눌림"}
+                      alt={ r.liked ? "좋아요 눌림" : "좋아요 안눌림" }
                       className="heart-img"
                   />
+
                 </li>
             ))}
           </ul>

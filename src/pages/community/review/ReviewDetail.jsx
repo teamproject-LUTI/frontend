@@ -12,26 +12,51 @@ const ReviewDetail = () => {
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
 
+    // 로컬스토리지에 저장된 JWT 가져오기
+    const token = localStorage.getItem('accessToken');
+
     useEffect(() => {
         const fetchReview = async () => {
             try {
-                const res = await axios.get(`/api/reviews/${id}`);
-                setReview(res.data.data); // 리뷰 내용
-                setLikeCount(res.data.data.likeCount);
-                // ❗여기선 isLiked는 별도 API 요청이 필요함
+                const res = await axios.get(`/api/reviews/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }   // ← 인증 헤더 추가
+                });
+                const dto = res.data.data;
+                setReview(dto);
+                setLikeCount(dto.likeCount);
+                setIsLiked(dto.liked);
             } catch (err) {
                 console.error('리뷰 조회 실패', err);
             }
         };
-
         fetchReview();
-    }, [id]);
+    }, [id, token]);
 
-    const handleLike = () => {
-        const updated = isLiked ? likeCount - 1 : likeCount + 1;
-        setLikeCount(updated);
-        setIsLiked(!isLiked);
-        // TODO: 서버에 좋아요/취소 API 호출 추가
+    const handleLike = async () => {
+        try {
+            let res;
+            if (!isLiked) {
+                // 좋아요 저장
+                res = await axios.post(
+                    '/api/likes',
+                    { reviewId: id },
+                    { headers: { Authorization: `Bearer ${token}` } }  // ← 인증 헤더
+                );
+            } else {
+                // 좋아요 취소
+                res = await axios.delete(
+                    '/api/likes',
+                    {
+                        data: { reviewId: id },
+                        headers: { Authorization: `Bearer ${token}` }    // ← 인증 헤더
+                    }
+                );
+            }
+            setLikeCount(res.data.likeCount);
+            setIsLiked(!isLiked);
+        } catch (err) {
+            console.error('좋아요 처리 실패', err);
+        }
     };
 
     if (!review) return null;
