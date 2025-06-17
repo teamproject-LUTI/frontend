@@ -8,18 +8,17 @@ import {
   HelpCircle,
   User,
   Star,
-  CreditCard,
   ChevronDown,
   ChevronUp,
   Menu,
   Settings,
   Heart,
   MapPin,
+  CreditCard,
   UserMinus
 } from 'lucide-react';
 import { useAuth } from '../../util/AuthContext';
 import '../../styles/layout/Sidebar.css';
-import { Link } from 'react-router-dom';
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -77,7 +76,6 @@ const Sidebar = () => {
     { icon: MapPin, label: '여행 기록', path: '/mypage/travel-history', parent: '마이페이지' },
     { icon: CreditCard, label: '결제 내역', path: '/mypage/payments', parent: '마이페이지' },
     { icon: Star, label: '즐겨찾기', path: '/favorites' },
-    { icon: CreditCard, label: '결제내역', path: '/payment' },
   ];
 
   const handleToggle = (toggleKey) => {
@@ -141,7 +139,6 @@ const Sidebar = () => {
               }
 
               // 하위 메뉴 처리
-               // 하위 메뉴인데 사이드바가 닫혀있거나, 토글이 닫혀있으면 숨김
               if (item.parent === '커뮤니티') {
                 if (isCollapsed || !isCommunityOpen) return null;
               }
@@ -151,19 +148,22 @@ const Sidebar = () => {
               }
 
               // 기본 메뉴 출력
+              const isActive = location.pathname === item.path ||
+                  (item.action === 'withdraw' && location.pathname.includes('/withdraw'));
+
               return (
-                  <Link
-                to={item.path}
-                key={index}
-                className={`nav-item ${isCollapsed ? 'collapsed' : 'expanded'} ${
-                  item.parent ? 'sub-item' : ''
-                }`}
-              >
-                <item.icon className="nav-icon" />
-                <span className={`nav-label ${isCollapsed ? 'hidden' : ''}`}>
+                  <button
+                      key={index}
+                      onClick={() => handleMenuClick(item)}
+                      className={`nav-item ${isCollapsed ? 'collapsed' : 'expanded'} ${
+                          item.parent ? 'sub-item' : ''
+                      } ${isActive ? 'active' : ''}`}
+                  >
+                    <item.icon className="nav-icon" />
+                    <span className={`nav-label ${isCollapsed ? 'hidden' : ''}`}>
                   {item.label}
                 </span>
-              </Link>
+                  </button>
               );
             })}
           </nav>
