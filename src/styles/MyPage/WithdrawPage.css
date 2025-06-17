@@ -1,0 +1,453 @@
+.withdraw-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #f9fafb;
+    min-height: 100vh;
+}
+
+.withdraw-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* 헤더 */
+.withdraw-header {
+    padding: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+.withdraw-back-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+    margin-bottom: 1rem;
+}
+
+.withdraw-back-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #374151;
+}
+
+.withdraw-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.withdraw-icon {
+    width: 2rem;
+    height: 2rem;
+    color: #ef4444;
+}
+
+.withdraw-title h1 {
+    margin: 0;
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+/* 경고 섹션 */
+.withdraw-warning-section {
+    padding: 2rem;
+    background-color: #fef2f2;
+    border-left: 4px solid #ef4444;
+    margin: 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    gap: 1rem;
+}
+
+.withdraw-warning-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #ef4444;
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+
+.withdraw-warning-content h3 {
+    margin: 0 0 1rem 0;
+    color: #991b1b;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.withdraw-warning-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: #7f1d1d;
+}
+
+.withdraw-warning-list li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+/* 탈퇴 사유 섹션 */
+.withdraw-reason-section {
+    padding: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.withdraw-reason-section h3 {
+    margin: 0 0 1.5rem 0;
+    color: #1f2937;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.withdraw-reason-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.withdraw-reason-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.withdraw-reason-option:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.withdraw-reason-option input[type="radio"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #F76B59;
+}
+
+.withdraw-reason-text {
+    flex: 1;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.withdraw-custom-reason {
+    margin-top: 1rem;
+}
+
+.withdraw-custom-reason-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #374151;
+    resize: vertical;
+    min-height: 80px;
+    box-sizing: border-box;
+}
+
+.withdraw-custom-reason-input:focus {
+    outline: none;
+    border-color: #F76B59;
+    box-shadow: 0 0 0 3px rgba(247, 107, 89, 0.1);
+}
+
+.withdraw-custom-reason-input:disabled {
+    background-color: #f9fafb;
+    cursor: not-allowed;
+}
+
+/* 복구 안내 섹션 */
+.withdraw-restore-info {
+    padding: 2rem;
+    background-color: #fef3cd;
+    border-left: 4px solid #fbbf24;
+    margin: 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    gap: 1rem;
+}
+
+.withdraw-restore-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #d97706;
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+
+.withdraw-restore-content h4 {
+    margin: 0 0 0.75rem 0;
+    color: #92400e;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.withdraw-restore-content p {
+    margin: 0;
+    line-height: 1.5;
+    color: #a16207;
+}
+
+/* 동의 체크박스 섹션 */
+.withdraw-agreement-section {
+    padding: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.withdraw-agreement-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    cursor: pointer;
+}
+
+.withdraw-agreement-checkbox input[type="checkbox"] {
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: #F76B59;
+    margin-top: 0.125rem;
+}
+
+.withdraw-checkmark {
+    position: relative;
+    display: inline-block;
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    background-color: white;
+    transition: all 0.2s;
+}
+
+.withdraw-agreement-checkbox input[type="checkbox"]:checked + .withdraw-checkmark {
+    background-color: #F76B59;
+    border-color: #F76B59;
+}
+
+.withdraw-agreement-checkbox input[type="checkbox"]:checked + .withdraw-checkmark:after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: bold;
+}
+
+.withdraw-agreement-text {
+    flex: 1;
+    color: #374151;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* 로그인 타입 안내 섹션 */
+.withdraw-login-type-info {
+    padding: 1.5rem 2rem;
+    background-color: #f0f9ff;
+    border-left: 4px solid #0ea5e9;
+    margin: 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.withdraw-login-type-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #0ea5e9;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.withdraw-login-type-info p {
+    margin: 0;
+    color: #075985;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.withdraw-login-type-info strong {
+    color: #0c4a6e;
+    font-weight: 600;
+}
+
+.withdraw-password-notice {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    color: #0284c7;
+    font-style: italic;
+}
+
+/* 탈퇴 액션 버튼 */
+.withdraw-actions {
+    padding: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    background-color: #fafafa;
+}
+
+.withdraw-cancel-button,
+.withdraw-button {
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    min-width: 120px;
+}
+
+.withdraw-cancel-button {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.withdraw-cancel-button:hover:not(:disabled) {
+    background-color: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+.withdraw-button {
+    background-color: #ef4444;
+    color: white;
+}
+
+.withdraw-button:hover:not(:disabled) {
+    background-color: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.withdraw-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.withdraw-cancel-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .withdraw-container {
+        padding: 1rem;
+    }
+
+    .withdraw-header {
+        padding: 1.5rem;
+    }
+
+    .withdraw-title h1 {
+        font-size: 1.5rem;
+    }
+
+    .withdraw-warning-section,
+    .withdraw-restore-info,
+    .withdraw-login-type-info {
+        margin: 1rem;
+        padding: 1.5rem;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .withdraw-reason-section,
+    .withdraw-agreement-section {
+        padding: 1.5rem;
+    }
+
+    .withdraw-actions {
+        padding: 1.5rem;
+        flex-direction: column;
+    }
+
+    .withdraw-cancel-button,
+    .withdraw-button {
+        width: 100%;
+        padding: 1rem;
+    }
+
+    .withdraw-reason-option {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .withdraw-container {
+        padding: 0.5rem;
+    }
+
+    .withdraw-content {
+        border-radius: 8px;
+    }
+
+    .withdraw-header {
+        padding: 1rem;
+    }
+
+    .withdraw-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .withdraw-title h1 {
+        font-size: 1.25rem;
+    }
+
+    .withdraw-warning-section,
+    .withdraw-restore-info,
+    .withdraw-login-type-info {
+        margin: 0.5rem;
+        padding: 1rem;
+    }
+
+    .withdraw-reason-section,
+    .withdraw-agreement-section,
+    .withdraw-actions {
+        padding: 1rem;
+    }
+
+    .withdraw-custom-reason-input {
+        min-height: 60px;
+    }
+
+    .withdraw-agreement-checkbox {
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .withdraw-agreement-text {
+        font-size: 0.8125rem;
+    }
+
+    .withdraw-login-type-info p {
+        font-size: 0.8125rem;
+    }
+
+    .withdraw-password-notice {
+        font-size: 0.75rem;
+    }
+}
