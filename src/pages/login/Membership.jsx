@@ -14,7 +14,8 @@ const Membership = () => {
         birthMonth: '',
         birthDay: '',
         phonePrefix: '010',
-        phoneNumber: '',
+        phoneNumber1: '',
+        phoneNumber2: '',
         gender: '',
         nickname: '',
         address: ''
@@ -161,7 +162,7 @@ const Membership = () => {
         }
 
         // 모든 필수 필드 검증
-        const requiredFields = ['email', 'password', 'name', 'birthYear', 'birthMonth', 'birthDay', 'phoneNumber', 'gender', 'nickname', 'address'];
+        const requiredFields = ['email', 'password', 'name', 'birthYear', 'birthMonth', 'birthDay', 'phoneNumber1', 'phoneNumber2', 'gender', 'nickname', 'address'];
         const emptyFields = requiredFields.filter(field => !formData[field]);
 
         if (emptyFields.length > 0) {
@@ -183,7 +184,7 @@ const Membership = () => {
             birthMonth: formData.birthMonth,
             birthDay: formData.birthDay,
             phonePrefix: formData.phonePrefix,
-            phoneNumber: formData.phoneNumber,
+            phoneNumber: formData.phoneNumber1 + formData.phoneNumber2,
             gender: formData.gender,
             nickname: formData.nickname,
             address: formData.address
@@ -372,12 +373,22 @@ const Membership = () => {
                                 </select>
                                 <input
                                     type="tel"
-                                    name="phoneNumber"
-                                    value={formData.phoneNumber}
+                                    name="phoneNumber1"
+                                    value={formData.phoneNumber1}
                                     onChange={handleInputChange}
                                     className="phoneInput"
-                                    placeholder="전화번호를 입력하세요"
-                                    pattern="[0-9]{8}"
+                                    placeholder="앞번호"
+                                    pattern="[0-9]{4}"
+                                    required
+                                />
+                                <input
+                                    type="tel"
+                                    name="phoneNumber2"
+                                    value={formData.phoneNumber2}
+                                    onChange={handleInputChange}
+                                    className="phoneInput"
+                                    placeholder="뒷번호"
+                                    pattern="[0-9]{4}"
                                     required
                                 />
                             </div>
