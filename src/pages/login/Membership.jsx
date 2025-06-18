@@ -17,8 +17,7 @@ const Membership = () => {
         phoneNumber1: '',
         phoneNumber2: '',
         gender: '',
-        nickname: '',
-        address: ''
+        nickname: ''
     });
 
     const [birthDays, setBirthDays] = useState([]);
@@ -232,7 +231,7 @@ const Membership = () => {
             Swal.fire({
                 icon: 'warning',
                 title: '주소 누락',
-                text: '우편번호, 주소, 참고항목을 모두 입력해주세요.',
+                text: '우편번호 찾기를 눌러 주소를 입력해주세요.',
                 confirmButtonText: '확인',
                 confirmButtonColor: '#3085d6'
             });
@@ -505,23 +504,6 @@ const Membership = () => {
                         </div>
 
                         {/* 주소 */}
-                        {/*<div className="formGroup">*/}
-                        {/*    <label className="formLabel">주소</label>*/}
-                        {/*    <div style={{ display: 'flex', gap: '10px' }}>*/}
-                        {/*    <input*/}
-                        {/*        type="text"*/}
-                        {/*        name="address"*/}
-                        {/*        value={formData.address}*/}
-                        {/*        onChange={handleInputChange}*/}
-                        {/*        className="formInput"*/}
-                        {/*        placeholder="주소를 검색하세요"*/}
-                        {/*        required*/}
-                        {/*    />*/}
-                        {/*        <button type="button" onClick={handleAddressSearch} className="btn btn-no-margin">*/}
-                        {/*            주소 찾기*/}
-                        {/*        </button>*/}
-                        {/*    </div>*/}
-                        {/*</div>*/}
                         <div className="formGroup">
                             <label className="formLabel">주소</label>
                             <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
@@ -568,7 +550,6 @@ const Membership = () => {
                                 />
                             </div>
                         </div>
-
 
                         {/* 가입 버튼 */}
                         <button
