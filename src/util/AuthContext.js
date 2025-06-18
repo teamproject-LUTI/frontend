@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { authUtils } from './authUtils';
+import { useLocation } from 'react-router-dom';
 
 const AuthContext = createContext();
 
@@ -12,6 +13,13 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
+  const location = useLocation();
+
+  // 로그인이 필요 없는 경로
+  const publicPaths = [
+    "/", "/login", "/membership", "/auth/error", "/account/restore"
+  ];
+
   const [authState, setAuthState] = useState({
     isAuthenticated: null,
     isLoading: true,
@@ -25,6 +33,17 @@ export const AuthProvider = ({ children }) => {
 
   // 인증 상태 확인 함수
   const checkAuth = useCallback(async () => {
+    if (publicPaths.includes(location.pathname)) {
+      console.log('공개 경로 - 인증 확인 생략');
+      setAuthState(prev => ({
+        ...prev,
+        isAuthenticated: false,
+        isLoading: false,
+        hasChecked: true
+      }));
+      return false;
+    }
+
     if (authState.hasChecked && authState.isAuthenticated !== null) {
       console.log('인증 상태 이미 확인됨 - 스킵');
       return authState.isAuthenticated;
