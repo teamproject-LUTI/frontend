@@ -80,7 +80,6 @@ const MenuManagement = () => {
                 : '';
             const endpoint = `${baseUrl}/api/menus/admin/all?_t=${timestamp}`;
 
-            console.log('API 호출 URL:', endpoint);
 
             const response = await apiRequest(endpoint);
 
@@ -104,7 +103,6 @@ const MenuManagement = () => {
             }
 
             const data = await response.json();
-            console.log('메뉴 데이터:', data);
 
             let menuData;
             if (data && Array.isArray(data)) {
@@ -116,7 +114,6 @@ const MenuManagement = () => {
                 menuData = [];
             }
 
-            console.log('처리된 메뉴 데이터:', menuData);
             setMenus(menuData);
 
             // 상위 메뉴들을 기본으로 펼쳐놓기
@@ -206,8 +203,6 @@ const MenuManagement = () => {
                 requiredRole: formData.requiredRole
             };
 
-            console.log('저장 요청:', method, url, menuData);
-
             const response = await apiRequest(url, {
                 method,
                 body: JSON.stringify(menuData),
@@ -287,8 +282,6 @@ const MenuManagement = () => {
                 ? 'http://localhost:8080'
                 : '';
             const deleteUrl = `${baseUrl}/api/menus/${menuId}?_t=${timestamp}`;
-
-            console.log('삭제 요청:', deleteUrl);
 
             const response = await apiRequest(deleteUrl, {
                 method: 'DELETE',
@@ -405,11 +398,8 @@ const MenuManagement = () => {
 
     // 🔥 수정된 buildMenuTree 함수
     const buildMenuTree = (menus) => {
-        console.log('=== buildMenuTree 디버깅 시작 ===');
-        console.log('입력 메뉴 데이터:', menus);
 
         if (!Array.isArray(menus) || menus.length === 0) {
-            console.log('메뉴 데이터가 비어있거나 배열이 아님');
             return [];
         }
 
@@ -418,11 +408,8 @@ const MenuManagement = () => {
 
         // 1단계: 메뉴 맵 생성
         menus.forEach(menu => {
-            console.log(`메뉴 맵 생성: ${menu.name}, ID: ${menu.navigationMenuId}, parentId: ${menu.parentId}`);
             menuMap[menu.navigationMenuId] = { ...menu, children: [] };
         });
-
-        console.log('생성된 메뉴 맵:', menuMap);
 
         // 2단계: 트리 구조 구성
         menus.forEach(menu => {
@@ -435,27 +422,19 @@ const MenuManagement = () => {
                 menu.parentId === 'null'
             );
 
-            console.log(`트리 구성: ${menu.name} (ID: ${menu.navigationMenuId}) - parentId: "${menu.parentId}" (타입: ${typeof menu.parentId}) - 최상위? ${isTopLevel}`);
-
             if (isTopLevel) {
-                console.log(`✅ 최상위 메뉴로 추가: ${menu.name}`);
                 tree.push(menuMap[menu.navigationMenuId]);
             } else {
-                console.log(`하위 메뉴 처리: ${menu.name} -> 부모ID: ${menu.parentId}`);
 
                 // 부모 메뉴가 존재하는지 확인
                 if (menuMap[menu.parentId]) {
-                    console.log(`✅ 부모 메뉴 찾음: ${menuMap[menu.parentId].name} -> 자식 추가: ${menu.name}`);
                     menuMap[menu.parentId].children.push(menuMap[menu.navigationMenuId]);
                 } else {
-                    console.log(`❌ 부모 메뉴를 찾을 수 없음 (parentId: ${menu.parentId}). 최상위로 처리: ${menu.name}`);
                     // 부모를 찾을 수 없으면 최상위 메뉴로 처리
                     tree.push(menuMap[menu.navigationMenuId]);
                 }
             }
         });
-
-        console.log('트리 구성 완료:', tree);
 
         // 3단계: 메뉴 순서로 정렬
         const sortByOrder = (items) => {
@@ -468,8 +447,6 @@ const MenuManagement = () => {
         };
 
         sortByOrder(tree);
-        console.log('=== 최종 정렬된 트리 ===:', tree);
-        console.log('최상위 메뉴 개수:', tree.length);
 
         return tree;
     };
