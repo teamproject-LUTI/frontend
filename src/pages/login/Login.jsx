@@ -1,38 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import GoogleLoginButton from '../login/GoogleLoginButton';
 import { authUtils } from '../../util/authUtils';
-import { useAuth } from '../../util/AuthContext';
 import '../../styles/login/Login.css';
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
-  // AuthContext에서 관리하는 인증 상태를 사용
-  useEffect(() => {
-    // AuthContext가 인증 확인을 완료한 후에만 처리
-    if (!authLoading && isAuthenticated) {
-      console.log('인증된 사용자 - 메인 페이지로 리다이렉트');
-      // 현재 경로가 루트가 아닌 경우에만 리다이렉트 (무한 리다이렉트 방지)
-      if (window.location.pathname === '/' || window.location.pathname === '/login') {
-        window.location.href = '/main';
-      }
-    }
-  }, [isAuthenticated, authLoading]);
-
-  // AuthContext의 로딩 상태를 사용
-  if (authLoading) {
-    return (
-        <div className="login-container">
-          <div className="login-form-wrapper">
-            <div className="loading-overlay">
-              <div className="loading-spinner"></div>
-              <p>인증 상태 확인 중...</p>
-            </div>
-          </div>
-        </div>
-    );
-  }
+  // 🚨 인증 상태 확인 useEffect 완전 제거!
+  // 로그인 페이지에서는 인증 체크를 하지 않습니다.
 
   // 구글 로그인 핸들러
   const handleGoogleLogin = () => {
@@ -56,7 +33,7 @@ const Login = () => {
 
   // 회원가입 페이지로 이동
   const handleSignup = () => {
-    window.location.href = '/membership';
+    navigate('/membership');
   };
 
   return (

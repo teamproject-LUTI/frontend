@@ -15,7 +15,10 @@ import {
   Heart,
   MapPin,
   CreditCard,
-  UserMinus
+  UserMinus,
+  MessageSquare,
+  HeartPlus,
+  MessageCircleQuestion
 } from 'lucide-react';
 import { useAuth } from '../../util/AuthContext';
 import '../../styles/layout/Sidebar.css';
@@ -75,6 +78,9 @@ const Sidebar = () => {
     { icon: Heart, label: '찜한 여행지', path: '/mypage/favorites', parent: '마이페이지' },
     { icon: MapPin, label: '여행 기록', path: '/mypage/travel-history', parent: '마이페이지' },
     { icon: CreditCard, label: '결제 내역', path: '/mypage/payments', parent: '마이페이지' },
+    { icon: MessageSquare, label: '내가 쓴 리뷰', path: '/mypage/myreview', parent: '마이페이지' },
+    { icon: MessageCircleQuestion, label: '내가 쓴 QnA', path: '/mypage/myask', parent: '마이페이지' },
+    { icon: HeartPlus, label: '찜한 리뷰 ', path: '/mypage/likereview', parent: '마이페이지' },
     { icon: Star, label: '즐겨찾기', path: '/favorites' },
   ];
 

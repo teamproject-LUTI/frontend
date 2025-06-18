@@ -9,25 +9,16 @@ export const authUtils = {
    */
   async isAuthenticated() {
     try {
-      console.log('인증 상태 확인 중...');
-
       const response = await apiClient.get('/api/auth/validate');
 
       if (response.status === 200) {
-        console.log('사용자 인증됨');
         return true;
       } else {
-        console.log('사용자 미인증 상태');
         return false;
       }
     } catch (error) {
-      console.error('인증 상태 확인 중 오류:', error);
-
-      // 401 에러는 인터셉터에서 처리되므로 여기서는 false만 반환
-      if (error.response?.status === 401) {
-        console.log('401 에러 - 인터셉터에서 처리됨');
-      }
-
+      // 401 에러든 다른 에러든 false 반환 (무한 루프 방지)
+      console.error('인증 확인 실패:', error.response?.status);
       return false;
     }
   },
