@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, ArrowLeft, Shield, AlertTriangle } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import { useAuth } from '../../util/AuthContext';
+import apiClient from '../../util/apiClient';
 import '../../styles/MyPage/PasswordConfirmPage.css';
 
 const PasswordConfirmPage = () => {
@@ -34,16 +35,45 @@ const PasswordConfirmPage = () => {
     setIsLoading(true);
 
     try {
-      // 비밀번호를 상태로 전달하면서 탈퇴 페이지로 이동
-      navigate('/mypage/withdraw', {
-        state: {
-          confirmedPassword: password,
-          isPasswordConfirmed: true
-        }
+      // 백엔드 API로 비밀번호 검증
+      console.log('비밀번호 검증 시작...');
+
+      const response = await apiClient.post('/api/mypage/verify-password', {
+        password: password
       });
+
+      if (response.status === 200) {
+        const data = response.data;
+
+        if (data.success && data.valid) {
+          // 비밀번호 검증 성공 - 탈퇴 페이지로 이동
+          console.log('비밀번호 검증 성공');
+          navigate('/mypage/withdraw', {
+            state: {
+              confirmedPassword: password,
+              isPasswordConfirmed: true
+            }
+          });
+        } else {
+          // 비밀번호가 틀림
+          console.log('비밀번호 검증 실패');
+          setError('비밀번호가 일치하지 않습니다.');
+        }
+      } else {
+        throw new Error('비밀번호 검증 중 오류가 발생했습니다.');
+      }
+
     } catch (error) {
-      console.error('페이지 이동 오류:', error);
-      setError('페이지 이동 중 오류가 발생했습니다.');
+      console.error('비밀번호 검증 오류:', error);
+
+      if (error.response?.status === 401) {
+        setError('인증이 만료되었습니다. 다시 로그인해주세요.');
+        setTimeout(() => navigate('/', { replace: true }), 2000);
+      } else if (error.response?.data?.error) {
+        setError(error.response.data.error);
+      } else {
+        setError('비밀번호 검증 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
     } finally {
       setIsLoading(false);
     }

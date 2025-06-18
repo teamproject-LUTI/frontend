@@ -217,24 +217,6 @@ const AccountRestorePage = () => {
             <p className="restore-subtitle">탈퇴한 계정을 복구할 수 있습니다</p>
           </div>
 
-          {/* 복구 시간 표시 */}
-          {timeRemaining && (
-              <div className="status-section">
-                <div className="status-card">
-                  <div className="status-header">
-                    <Clock className="status-icon" />
-                    <h3>복구 가능 시간</h3>
-                  </div>
-                  <div className="status-content">
-                    <div className="status-item">
-                      <span className="status-label">남은 시간</span>
-                      <span className="status-value highlight">{timeRemaining}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-          )}
-
           {/* 복구 안내 */}
           <div className="info-section">
             <div className="info-card success">
