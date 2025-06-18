@@ -1,5 +1,5 @@
 import './App.css';
-import { Route, Routes, Outlet } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Main from "./pages/Main";
 import Login from "./pages/login/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -12,8 +12,12 @@ import AccountRestorePage from "./pages/mypage/withdraw/AccountRestorePage";
 import PasswordConfirmPage from "./pages/mypage/PasswordConfirmPage";
 import { AuthProvider } from "./util/AuthContext";
 import Review from './pages/community/Review';
-import Payment from './pages/Payment';
-import UserManagement from "./pages/admin/UserManagement";
+import ChatForm from "./pages/travel/ChatForm";
+import Payment from './pages/mypage/Payment';
+import MyReview from "./pages/mypage/myreview/MyReview";
+import MyAsk from "./pages/mypage/myask/MyAsk";
+import LikeReview from "./pages/likereview/LikeReview";
+
 
 const App = () => {
   return (
@@ -30,29 +34,41 @@ const App = () => {
             {/* 계정 복구 페이지 - 인증 필요하지만 탈퇴한 사용자도 접근 가능 */}
             <Route path='/account/restore' element={<AccountRestorePage />} />
 
-            {/* 보호된 라우트들 */}
-            <Route element={<ProtectedRoute />}>
-              {/*메인 페이지*/}
-              <Route path='/main' element={<Main />} />
+            {/*메인 페이지*/}
+            <Route path='/main' element={
+              <ProtectedRoute>
+                <Main />
+              </ProtectedRoute>
+            } />
 
-              {/*멤버쉽 페이지*/}
-              <Route path='/membership' element={<Membership />} />
+            {/*gpt 페이지*/}
+            <Route path='travel/chatform' element={
+              <ProtectedRoute>
+                <ChatForm />
+              </ProtectedRoute>
+            } />
 
-              {/* 마이페이지*/}
-              <Route path='/mypage' element={<MyPage />} />
-              <Route path='/mypage/profile' element={<MyPageProfile />} />
-              <Route path='/mypage/withdraw/confirm' element={<PasswordConfirmPage />} />
-              <Route path='/mypage/withdraw' element={<WithdrawPage />} />
-
-              {/*리뷰 페이지*/}
-              <Route path='/community/review' element={<Review />} />
-
-              {/*결제 페이지*/}
-              <Route path='/payment' element={<Payment />} />
-
-              {/* 회원관리 페이지 */}
-              <Route path="/admin/users" element={<UserManagement />} />
+            {/*멤버쉽 페이지*/}
+            <Route path='/membership' element={<Membership />} />
+            {/* 마이페이지*/}
+            <Route path='/mypage' element={<ProtectedRoute />}>
+              <Route index element={<MyPage />} />
+              <Route path='profile' element={<MyPageProfile />} />
+              <Route path='withdraw/confirm' element={<PasswordConfirmPage />} />
+              <Route path='withdraw' element={<WithdrawPage />} />
+              <Route path='myreview' element={<MyReview />} />
+              <Route path='myask' element={<MyAsk />} />
+              <Route path='likereview' element={<LikeReview />} />
+              <Route path='payments' element={<Payment />} />
             </Route>
+
+            {/*리뷰 페이지*/}
+            <Route path='/community/review' element={
+              <ProtectedRoute>
+                <Review />
+              </ProtectedRoute>
+            } />
+
           </Routes>
         </div>
       </AuthProvider>

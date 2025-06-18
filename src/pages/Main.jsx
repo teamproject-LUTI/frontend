@@ -4,8 +4,7 @@ import Sidebar from '../components/layout/Sidebar';
 import Footer from '../components/layout/Footer';
 import '../styles/Main.css';
 import Swal from 'sweetalert2';
-import ChatForm from '../components/chatgpt/ChatForm';
-
+import ChatForm from '../pages/travel/ChatForm';
 
 const Main = ({ children }) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -30,7 +29,7 @@ const Main = ({ children }) => {
             <div className="main-content-wrapper">
                 <Sidebar />
                 <main className="main-content">
-                    {/* ✅ 여기에 ChatForm 삽입 */}
+                    {/* GPT 여행 검색창 삽입 */}
                     <ChatForm />
                     {children}
                     <div>
