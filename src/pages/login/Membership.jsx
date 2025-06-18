@@ -296,7 +296,7 @@ const Membership = () => {
 
 
     return (
-        <Layout>
+        <Layout hideSidebar={true}>
             <div className="membershipContainer">
                 <div className="membershipFormWrapper">
                     <div className="membershipHeader">
