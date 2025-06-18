@@ -12,6 +12,7 @@ import AccountRestorePage from "./pages/mypage/withdraw/AccountRestorePage";
 import PasswordConfirmPage from "./pages/mypage/PasswordConfirmPage";
 import { AuthProvider } from "./util/AuthContext";
 import Review from './pages/community/Review';
+import ChatForm from "./pages/travel/ChatForm";
 import Payment from './pages/mypage/Payment';
 import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
@@ -39,12 +40,16 @@ const App = () => {
                 <Main />
               </ProtectedRoute>
             } />
-            {/*멤버쉽 페이지*/}
-            <Route path='/membership' element={
+
+            {/*gpt 페이지*/}
+            <Route path='travel/chatform' element={
               <ProtectedRoute>
-                <Membership />
+                <ChatForm />
               </ProtectedRoute>
             } />
+
+            {/*멤버쉽 페이지*/}
+            <Route path='/membership' element={<Membership />} />
             {/* 마이페이지*/}
             <Route path='/mypage' element={<ProtectedRoute />}>
               <Route index element={<MyPage />} />
