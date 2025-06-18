@@ -38,6 +38,8 @@ const MyPageProfile = () => {
   const [editForm, setEditForm] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
+  const [imageUploadLoading, setImageUploadLoading] = useState(false);
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
@@ -175,11 +177,155 @@ const MyPageProfile = () => {
     }
   }, [userInfo, loading]);
 
-  const handleSaveClick = async (section) => {
-    const sectionName = section === 'basic' ? '기본 정보' : '연락처 정보';
+
+
+  const handleInputChange = useCallback((field, value) => {
+    setEditForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  }, []);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // 파일 유효성 검사
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        Swal.fire({
+          title: '파일 형식 오류',
+          text: 'JPG, JPEG, PNG, GIF, WEBP 파일만 업로드 가능합니다.',
+          icon: 'error',
+          confirmButtonColor: '#F76B59'
+        });
+        return;
+      }
+
+      // 파일 크기 검사 (5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        Swal.fire({
+          title: '파일 크기 초과',
+          text: '파일 크기는 5MB를 초과할 수 없습니다.',
+          icon: 'error',
+          confirmButtonColor: '#F76B59'
+        });
+        return;
+      }
+
+      // 선택된 파일 저장
+      setSelectedImageFile(file);
+
+      // 미리보기 표시
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setEditForm(prev => ({
+          ...prev,
+          profileImage: event.target.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+// 3. 프로필 이미지 업로드 API 함수
+  const uploadProfileImage = async (imageFile) => {
+    const formData = new FormData();
+    formData.append('profileImage', imageFile);
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/api/mypage/profile-image`, formData, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.status === 200 && response.data.profileImageUrl) {
+        console.log('프로필 이미지 업로드 성공:', response.data);
+        return response.data.profileImageUrl;
+      } else {
+        throw new Error(response.data.message || '프로필 이미지 업로드에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('프로필 이미지 업로드 오류:', error);
+      throw error;
+    }
+  };
+
+// 4. 유효성 검사 함수
+  const validateForm = () => {
+    const errors = [];
+
+    // 닉네임 검사
+    if (!editForm.nickname || editForm.nickname.trim() === '') {
+      errors.push('닉네임을 입력해주세요.');
+    } else if (editForm.nickname.trim().length < 2) {
+      errors.push('닉네임은 2자 이상 입력해주세요.');
+    } else if (editForm.nickname.trim().length > 20) {
+      errors.push('닉네임은 20자 이하로 입력해주세요.');
+    }
+
+    // 생년월일 검사 (일반 로그인 사용자는 수정 불가이므로 소셜 로그인 사용자만 검사)
+    if (isSocialLogin()) {
+      if (!editForm.birthDate || editForm.birthDate === '') {
+        errors.push('생년월일을 입력해주세요.');
+      } else {
+        const birthDate = new Date(editForm.birthDate);
+        const today = new Date();
+        const age = today.getFullYear() - birthDate.getFullYear();
+
+        if (birthDate > today) {
+          errors.push('생년월일은 오늘 날짜보다 이전이어야 합니다.');
+        } else if (age > 120) {
+          errors.push('올바른 생년월일을 입력해주세요.');
+        }
+      }
+    }
+
+    // 성별 검사
+    if (!editForm.gender || editForm.gender === '') {
+      errors.push('성별을 선택해주세요.');
+    }
+
+    // 휴대폰 번호 검사
+    const phoneMiddle = editForm.phoneMiddle || '';
+    const phoneLast = editForm.phoneLast || '';
+
+    if (!phoneMiddle || phoneMiddle.length < 3) {
+      errors.push('휴대폰 번호 가운데 자리를 올바르게 입력해주세요.');
+    }
+
+    if (!phoneLast || phoneLast.length < 4) {
+      errors.push('휴대폰 번호 마지막 자리를 올바르게 입력해주세요.');
+    }
+
+    // 주소 검사
+    if (!editForm.address || editForm.address.trim() === '' || editForm.address.trim() === '주소를 입력하세요...') {
+      errors.push('주소를 입력해주세요.');
+    } else if (editForm.address.trim().length < 5) {
+      errors.push('주소를 5자 이상 입력해주세요.');
+    }
+
+    return errors;
+  };
+
+// 5. 저장 함수 - 통합된 저장 버튼용
+  const handleSaveClick = async () => {
+    // 유효성 검사
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      await Swal.fire({
+        title: '입력 오류',
+        html: validationErrors.map(error => `• ${error}`).join('<br>'),
+        icon: 'warning',
+        confirmButtonColor: '#F76B59'
+      });
+      return;
+    }
 
     const result = await Swal.fire({
-      title: `${sectionName}를 수정하시겠습니까?`,
+      title: '프로필을 수정하시겠습니까?',
       text: '변경된 정보로 업데이트됩니다.',
       icon: 'question',
       showCancelButton: true,
@@ -191,19 +337,40 @@ const MyPageProfile = () => {
 
     if (result.isConfirmed) {
       try {
-        // 전화번호 조합
+        setImageUploadLoading(true);
+
+        // 1. 프로필 이미지 업로드 처리 (선택된 파일이 있고, 일반 로그인 사용자인 경우)
+        let updatedImageUrl = userInfo.profileImage;
+        if (selectedImageFile && !isSocialLogin()) {
+          try {
+            console.log('프로필 이미지 업로드 시작...');
+            updatedImageUrl = await uploadProfileImage(selectedImageFile);
+            console.log('프로필 이미지 업로드 완료:', updatedImageUrl);
+          } catch (imageError) {
+            console.error('프로필 이미지 업로드 실패:', imageError);
+
+            await Swal.fire({
+              title: '이미지 업로드 실패',
+              text: imageError.response?.data?.message || '프로필 이미지 업로드에 실패했습니다.',
+              icon: 'error',
+              confirmButtonColor: '#F76B59'
+            });
+            return; // 이미지 업로드 실패 시 전체 수정 중단
+          }
+        }
+
+        // 2. 텍스트 정보 업데이트
         const phoneNumber = `${editForm.phonePrefix || '010'}-${editForm.phoneMiddle || ''}-${editForm.phoneLast || ''}`;
 
-        // 백엔드로 보낼 데이터 구성
         const updateData = {
-          nickname: editForm.nickname,
-          birthday: editForm.birthDate,
+          nickname: editForm.nickname.trim(),
+          birthday: isSocialLogin() ? editForm.birthDate : undefined, // 소셜 로그인만 생년월일 수정
           gender: editForm.gender,
           phoneNumber: phoneNumber,
-          address: editForm.address
+          address: editForm.address.trim()
         };
 
-        // 실제 API 호출
+        console.log('프로필 정보 업데이트 시작...');
         const updateResponse = await axios.put(`${API_BASE_URL}/api/mypage/update`, updateData, {
           withCredentials: true,
           headers: {
@@ -212,25 +379,31 @@ const MyPageProfile = () => {
         });
 
         if (updateResponse.status === 200 && updateResponse.data.success) {
-          // 로컬 상태 업데이트
+          // 3. 로컬 상태 업데이트
           const updatedUserInfo = {
             ...editForm,
-            phone: phoneNumber
+            phone: phoneNumber,
+            profileImage: updatedImageUrl
           };
 
           setUserInfo(updatedUserInfo);
 
+          // 4. AuthContext 업데이트
           await updateUser({
-            nickname: editForm.nickname,
-            birthday: editForm.birthDate,
+            nickname: editForm.nickname.trim(),
+            birthday: isSocialLogin() ? editForm.birthDate : undefined,
             gender: editForm.gender,
             phoneNumber: phoneNumber,
-            address: editForm.address
+            address: editForm.address.trim(),
+            profileImage: updatedImageUrl
           });
+
+          // 5. 선택된 파일 초기화
+          setSelectedImageFile(null);
 
           await Swal.fire({
             title: '수정 완료!',
-            text: `${sectionName}가 성공적으로 수정되었습니다.`,
+            text: '프로필이 성공적으로 수정되었습니다.',
             icon: 'success',
             confirmButtonColor: '#F76B59'
           });
@@ -259,35 +432,71 @@ const MyPageProfile = () => {
           icon: 'error',
           confirmButtonColor: '#F76B59'
         });
+      } finally {
+        setImageUploadLoading(false);
       }
     }
   };
 
-  const handleInputChange = useCallback((field, value) => {
-    setEditForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  }, []);
-  useCallback((domainType) => {
-    setEditForm(prev => ({
-      ...prev,
-      emailDomainType: domainType,
-      emailDomain: domainType === '직접입력' ? prev.customEmailDomain || '' : domainType
-    }));
-  }, []);
+// 6. 프로필 이미지 삭제 함수 추가
+  const handleDeleteProfileImage = async () => {
+    if (isSocialLogin()) {
+      Swal.fire({
+        title: '권한 없음',
+        text: '소셜 로그인 사용자는 프로필 이미지를 삭제할 수 없습니다.',
+        icon: 'warning',
+        confirmButtonColor: '#F76B59'
+      });
+      return;
+    }
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setEditForm(prev => ({
-          ...prev,
-          profileImage: event.target.result
-        }));
-      };
-      reader.readAsDataURL(file);
+    const result = await Swal.fire({
+      title: '프로필 이미지 삭제',
+      text: '프로필 이미지를 삭제하시겠습니까?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#d3d3d3',
+      confirmButtonText: '삭제',
+      cancelButtonText: '취소'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        setImageUploadLoading(true);
+
+        const response = await axios.delete(`${API_BASE_URL}/api/mypage/profile-image`, {
+          withCredentials: true
+        });
+
+        if (response.status === 200) {
+          // 로컬 상태 업데이트
+          setUserInfo(prev => ({ ...prev, profileImage: null }));
+          setEditForm(prev => ({ ...prev, profileImage: null }));
+          setSelectedImageFile(null);
+
+          // AuthContext 업데이트
+          await updateUser({ profileImage: null });
+
+          await Swal.fire({
+            title: '삭제 완료!',
+            text: '프로필 이미지가 삭제되었습니다.',
+            icon: 'success',
+            confirmButtonColor: '#F76B59'
+          });
+        }
+      } catch (error) {
+        console.error('프로필 이미지 삭제 오류:', error);
+
+        await Swal.fire({
+          title: '삭제 실패',
+          text: error.response?.data?.message || '프로필 이미지 삭제에 실패했습니다.',
+          icon: 'error',
+          confirmButtonColor: '#F76B59'
+        });
+      } finally {
+        setImageUploadLoading(false);
+      }
     }
   };
 
@@ -330,6 +539,7 @@ const MyPageProfile = () => {
                           src={editForm.profileImage || userInfo.profileImage}
                           alt="프로필"
                           onError={(e) => {
+                            console.log('프로필 이미지 로드 실패:', editForm.profileImage || userInfo.profileImage);
                             e.target.style.display = 'none';
                             e.target.nextSibling.style.display = 'flex';
                           }}
@@ -341,19 +551,42 @@ const MyPageProfile = () => {
                     <User className="avatar-icon"/>
                   </div>
                 </div>
+
                 {/* 일반 로그인 사용자만 프로필 이미지 편집 가능 */}
                 {!isSocialLogin() && (
-                    <div className="image-upload">
-                      <input
-                          type="file"
-                          id="profileImage"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          style={{ display: 'none' }}
-                      />
-                      <label htmlFor="profileImage" className="upload-button">
-                        <Edit2 className="upload-icon"/>
-                      </label>
+                    <div className="image-controls-horizontal">
+                      {/* 이미지 업로드 버튼 (왼쪽) */}
+                      <div className="image-upload-horizontal">
+                        <input
+                            type="file"
+                            id="profileImage"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            style={{ display: 'none' }}
+                            disabled={imageUploadLoading}
+                        />
+                        <label htmlFor="profileImage" className="upload-button-horizontal" title="이미지 업로드">
+                          {imageUploadLoading ? (
+                              <div className="loading-spinner" style={{ width: '16px', height: '16px' }}></div>
+                          ) : (
+                              <Edit2 className="upload-icon"/>
+                          )}
+                        </label>
+                      </div>
+
+                      {/* 이미지 삭제 버튼 (오른쪽) - 프로필 이미지가 있을 때만 */}
+                      {(userInfo.profileImage || editForm.profileImage) && !selectedImageFile && (
+                          <div className="image-delete-horizontal">
+                            <button
+                                onClick={handleDeleteProfileImage}
+                                className="delete-button-horizontal"
+                                disabled={imageUploadLoading}
+                                title="이미지 삭제"
+                            >
+                              ×
+                            </button>
+                          </div>
+                      )}
                     </div>
                 )}
               </div>
@@ -367,8 +600,12 @@ const MyPageProfile = () => {
                   <h2>기본 정보</h2>
                   <div className="section-actions">
                     <div className="edit-actions">
-                      <button onClick={() => handleSaveClick('basic')} className="save-button">
-                        저장
+                      <button
+                          onClick={handleSaveClick}
+                          className="save-button"
+                          disabled={imageUploadLoading}
+                      >
+                        {imageUploadLoading ? '저장 중...' : '저장'}
                       </button>
                     </div>
                   </div>
@@ -407,14 +644,14 @@ const MyPageProfile = () => {
                     </div>
                   </div>
 
-                  {/* 생년월일 - 수정 가능 */}
+                  {/* 생년월일 - 소셜 로그인만 수정 가능 */}
                   <div className="info-row">
                     <div className="info-label">
                       <Calendar className="info-icon"/>
                       <span>생년월일</span>
                     </div>
                     <div className="info-value">
-                      {isEditingBasic ? (
+                      {isEditingBasic && isSocialLogin() ? (
                           <input
                               type="date"
                               value={editForm.birthDate || ''}
@@ -457,13 +694,7 @@ const MyPageProfile = () => {
               <div className="info-section">
                 <div className="section-header">
                   <h2>연락처 정보</h2>
-                  <div className="section-actions">
-                    <div className="edit-actions">
-                      <button onClick={() => handleSaveClick('contact')} className="save-button">
-                        저장
-                      </button>
-                    </div>
-                  </div>
+                  {/* 연락처 정보 섹션에서 저장 버튼 제거 */}
                 </div>
 
                 <div className="info-content">
