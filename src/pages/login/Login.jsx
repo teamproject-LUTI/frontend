@@ -7,6 +7,10 @@ import '../../styles/login/Login.css';
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const [loginForm, setLoginForm] = useState({
+    email: '',
+    password: ''
+  });
 
   // AuthContext에서 관리하는 인증 상태를 사용
   useEffect(() => {
@@ -49,9 +53,33 @@ const Login = () => {
   };
 
   // 일반 로그인 (향후 구현)
-  const handleRegularLogin = () => {
-    console.log('일반 로그인 - 팀원이 구현할 예정');
-    // TODO: 일반 로그인 로직 구현
+  const handleRegularLogin = async () => {
+    console.log('일반 로그인');
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://localhost:8080/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include', // 쿠키 포함 필수
+        body: JSON.stringify(loginForm)
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        console.log('로그인 성공');
+        window.location.href = '/main';
+      } else {
+        alert(result.error || '로그인 실패');
+      }
+    } catch (error) {
+      console.error('로그인 중 오류:', error);
+      alert('로그인 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 회원가입 페이지로 이동
@@ -73,8 +101,10 @@ const Login = () => {
             <div className="form-group">
               <input
                   type="text"
-                  placeholder="Email or phone number"
+                  placeholder="Email"
                   className="form-input"
+                  value={loginForm.email}
+                  onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
               />
             </div>
 
@@ -83,6 +113,8 @@ const Login = () => {
                   type="password"
                   placeholder="Password"
                   className="form-input"
+                  value={loginForm.password}
+                  onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
               />
             </div>
 
