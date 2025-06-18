@@ -1,9 +1,27 @@
 import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {useNavigate, useLocation} from 'react-router-dom';
 import {
-    Home, MessageSquareMore, FileText, Volume2, HelpCircle,
-    User, Star, Settings, ChevronDown, ChevronUp, Menu, Shield
+  Home,
+  MessageSquareMore,
+  FileText,
+  Volume2,
+  HelpCircle,
+  User,
+  Star,
+  ChevronDown,
+  ChevronUp,
+  Menu,
+  Settings,
+  Heart,
+  MapPin,
+  CreditCard,
+  UserMinus,
+  MessageSquare,
+  HeartPlus,
+  MessageCircleQuestion,
+  Shield
 } from 'lucide-react';
+import { useAuth } from '../../util/AuthContext';
 import '../../styles/layout/Sidebar.css';
 
 const Sidebar = () => {
