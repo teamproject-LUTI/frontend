@@ -42,20 +42,11 @@ const Sidebar = () => {
     const iconMap = {
         'Home': Home, 'MessageSquareMore': MessageSquareMore, 'FileText': FileText,
         'Volume2': Volume2, 'HelpCircle': HelpCircle, 'User': User,
-        'Star': Star, 'Settings': Settings, 'Shield': Shield
+        'Star': Star, 'Settings': Settings, 'Shield': Shield, 'Heart':Heart, 'MapPin':MapPin,
+        'CreditCard':CreditCard,'UserMinus':UserMinus,'MessageSquare':MessageSquare,
+        'HeartPlus':HeartPlus,'MessageCircleQuestion':MessageCircleQuestion
     };
 
-    // 쿠키에서 토큰 가져오기
-    const getTokenFromCookie = () => {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            const [name, value] = cookie.trim().split('=');
-            if (name === 'accessToken') {
-                return value;
-            }
-        }
-        return null;
-    };
 
     // API 요청 헤더 생성 (쿠키 기반이므로 헤더에 토큰 불필요)
     const createRequestHeaders = () => {
@@ -194,16 +185,6 @@ const Sidebar = () => {
             setMenuItems([]);
 
             console.log('🚀 사이드바 초기화 시작');
-
-            // 0. 백엔드 연결 테스트
-            try {
-                const testResponse = await fetch(`${API_BASE_URL}/api/menus/test`, {
-                    credentials: 'include'
-                });
-                console.log('🧪 백엔드 테스트 응답:', testResponse.status, await testResponse.text());
-            } catch (testError) {
-                console.error('❌ 백엔드 연결 실패:', testError);
-            }
 
             // 1. 사용자 인증 상태 확인
             const authResult = await checkUserAuth();
@@ -369,12 +350,6 @@ const Sidebar = () => {
                     >
                         <Menu className="toggle-icon"/>
                     </button>
-                    {/*{!isCollapsed && (*/}
-                    {/*    <div className={`auth-badge ${isAdmin ? 'admin' : isAuthenticated ? 'user' : 'guest'}`}>*/}
-                    {/*        <Shield className="auth-icon"/>*/}
-                    {/*        <span>{isAdmin ? '관리자' : isAuthenticated ? '사용자' : '방문자'}</span>*/}
-                    {/*    </div>*/}
-                    {/*)}*/}
                 </div>
 
                 <nav className="sidebar-nav">
