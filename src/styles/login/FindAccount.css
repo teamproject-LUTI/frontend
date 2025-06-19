@@ -1,0 +1,57 @@
+.find-account-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+}
+
+.find-account-box {
+    width: 400px;
+    text-align: center;
+}
+
+.tab-header {
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 1rem;
+}
+
+.tab {
+    flex: 1;
+    padding: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaa;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.tab.active {
+    color: #ff6b5e;
+    border-bottom: 2px solid #ff6b5e;
+}
+
+.tab.disabled {
+    color: #ccc;
+    cursor: default;
+}
+
+.find-account-form input {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #ff6b5e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
