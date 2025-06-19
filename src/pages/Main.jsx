@@ -4,7 +4,7 @@ import Sidebar from '../components/layout/Sidebar';
 import Footer from '../components/layout/Footer';
 import '../styles/Main.css';
 import Swal from 'sweetalert2';
-
+import ChatForm from '../pages/travel/ChatForm';
 
 const Main = ({ children }) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -28,6 +28,8 @@ const Main = ({ children }) => {
             <div className="main-content-wrapper">
                 <Sidebar />
                 <main className="main-content">
+                    {/* GPT 여행 검색창 삽입 */}
+                    <ChatForm />
                     {children}
                     <div>
                         {/*<button onClick={() => setModalOpen()}>루티 모달 열기</button>*/}

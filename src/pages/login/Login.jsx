@@ -1,38 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import GoogleLoginButton from '../login/GoogleLoginButton';
 import { authUtils } from '../../util/authUtils';
-import { useAuth } from '../../util/AuthContext';
 import '../../styles/login/Login.css';
+import { useAuth } from "../../util/AuthContext";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const [loginForm, setLoginForm] = useState({
+    email: '',
+    password: ''
+  });
+  const navigate = useNavigate();
 
-  // AuthContext에서 관리하는 인증 상태를 사용
-  useEffect(() => {
-    // AuthContext가 인증 확인을 완료한 후에만 처리
-    if (!authLoading && isAuthenticated) {
-      console.log('인증된 사용자 - 메인 페이지로 리다이렉트');
-      // 현재 경로가 루트가 아닌 경우에만 리다이렉트 (무한 리다이렉트 방지)
-      if (window.location.pathname === '/' || window.location.pathname === '/login') {
-        window.location.href = '/main';
-      }
-    }
-  }, [isAuthenticated, authLoading]);
-
-  // AuthContext의 로딩 상태를 사용
-  if (authLoading) {
-    return (
-        <div className="login-container">
-          <div className="login-form-wrapper">
-            <div className="loading-overlay">
-              <div className="loading-spinner"></div>
-              <p>인증 상태 확인 중...</p>
-            </div>
-          </div>
-        </div>
-    );
-  }
+  // 🚨 인증 상태 확인 useEffect 완전 제거!
+  // 로그인 페이지에서는 인증 체크를 하지 않습니다.
 
   // 구글 로그인 핸들러
   const handleGoogleLogin = () => {
@@ -48,10 +31,50 @@ const Login = () => {
     }
   };
 
-  // 일반 로그인 (향후 구현)
-  const handleRegularLogin = () => {
-    console.log('일반 로그인 - 팀원이 구현할 예정');
-    // TODO: 일반 로그인 로직 구현
+  // 일반 로그인
+// Login.jsx의 handleRegularLogin 함수 수정
+  const handleRegularLogin = async () => {
+    console.log('일반 로그인');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:8080/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include', // 쿠키 포함 필수
+        body: JSON.stringify(loginForm)
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        console.log('로그인 성공:', result);
+
+        // 백엔드에서 tokenType으로 탈퇴 유무 구분
+        if (result.tokenType === 'TEMP') {
+          // 탈퇴한 계정 - 복구 페이지로 이동
+          console.log('탈퇴한 계정 - 복구 페이지로 이동');
+          window.location.href = result.redirectTo || '/account/restore';
+        } else if (result.tokenType === 'NORMAL') {
+          // 정상 로그인 - 메인 페이지로 이동
+          console.log('정상 로그인 - 메인 페이지로 이동');
+          window.location.href = '/main';
+        } else {
+          // tokenType이 없거나 예상치 못한 경우 기본 처리
+          console.log('기본 처리 - 메인 페이지로 이동');
+          window.location.href = '/main';
+        }
+      } else {
+        alert(result.error || '로그인 실패');
+      }
+    } catch (error) {
+      console.error('로그인 중 오류:', error);
+      alert('로그인 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 회원가입 페이지로 이동
@@ -73,8 +96,10 @@ const Login = () => {
             <div className="form-group">
               <input
                   type="text"
-                  placeholder="Email or phone number"
+                  placeholder="Email"
                   className="form-input"
+                  value={loginForm.email}
+                  onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
               />
             </div>
 
@@ -83,6 +108,8 @@ const Login = () => {
                   type="password"
                   placeholder="Password"
                   className="form-input"
+                  value={loginForm.password}
+                  onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
               />
             </div>
 

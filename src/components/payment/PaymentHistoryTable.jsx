@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchPaymentsByUser, cancelPayment } from "../../services/PaymentService";
 import axios from "axios";
+import { getPaymentMethodName } from "../../util/paymentMethodMap";
 import "../../styles/payment/PaymentHistoryTable.css";
 
 const PaymentHistoryTable = () => {
@@ -13,8 +14,7 @@ const PaymentHistoryTable = () => {
       const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
         withCredentials: true
       });
-      console.log(res.data); // 확인 필수
-      setUserId(res.data.user.userId); // 이처럼 정확하게 userId 접근
+      setUserId(res.data.user.userId);
     } catch (err) {
       console.error(" 사용자 정보 조회 실패:", err);
       alert("로그인이 필요합니다.");
@@ -33,16 +33,12 @@ const PaymentHistoryTable = () => {
   };
 
   useEffect(() => {
-    const init = async () => {
-      await fetchUser();
-    };
-    init();
+    fetchUser();
   }, []);
 
   useEffect(() => {
     if (userId !== null) {
       fetchData(userId);
-      // window에서 외부 호출 가능하게 등록
       window.addNewPayment = () => fetchData(userId);
     }
     return () => {
@@ -65,9 +61,9 @@ const PaymentHistoryTable = () => {
   if (loading) return <div className="loading-container">결제 내역을 불러오는 중...</div>;
 
   return (
-    <div>
-      <table className="payment-table">
-        <thead>
+      <div>
+        <table className="payment-table">
+          <thead>
           <tr>
             <th>No</th>
             <th>결제일</th>
@@ -76,39 +72,35 @@ const PaymentHistoryTable = () => {
             <th>상태</th>
             <th>환불</th>
           </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
           {payments.length === 0 ? (
-            <tr>
-              <td colSpan="6" className="empty-data">결제 내역이 없습니다.</td>
-            </tr>
-          ) : (
-            payments.map((payment, index) => (
-              <tr key={payment.paymentNo}>
-                <td>{index + 1}</td>
-                <td>{payment.paymentDate}</td>
-                <td className="amount">{payment.totalPrice.toLocaleString()}₩</td>
-                <td>
-                  <span className="payment-method">
-                    {payment.paymentCd === 1 ? "카드" : "기타"}
-                  </span>
-                </td>
-                <td className={payment.paymentState === 0 ? "status-completed" : "status-cancelled"}>
-                  {payment.paymentState === 0 ? "완료" : "취소됨"}
-                </td>
-                <td>
-                  {payment.paymentState === 0 ? (
-                    <button onClick={() => handleCancel(payment.paymentId)}>환불</button>
-                  ) : (
-                    "-"
-                  )}
-                </td>
+              <tr>
+                <td colSpan="6" className="empty-data">결제 내역이 없습니다.</td>
               </tr>
-            ))
+          ) : (
+              payments.map((payment, index) => (
+                  <tr key={payment.paymentNo}>
+                    <td>{index + 1}</td>
+                    <td>{payment.paymentDate}</td>
+                    <td className="amount">{payment.totalPrice.toLocaleString()}₩</td>
+                    <td>{getPaymentMethodName(payment.paymentMethodId)}</td>
+                    <td className={payment.paymentState === 0 ? "status-completed" : "status-cancelled"}>
+                      {payment.paymentState === 0 ? "완료" : "취소됨"}
+                    </td>
+                    <td>
+                      {payment.paymentState === 0 ? (
+                          <button onClick={() => handleCancel(payment.paymentId)}>환불</button>
+                      ) : (
+                          "-"
+                      )}
+                    </td>
+                  </tr>
+              ))
           )}
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
   );
 };
 

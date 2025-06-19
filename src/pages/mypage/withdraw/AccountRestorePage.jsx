@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RotateCcw, Clock, AlertTriangle, CheckCircle, User } from 'lucide-react';
 import { useAuth } from '../../../util/AuthContext';
@@ -8,23 +8,57 @@ import '../../../styles/MyPage/AccountRestorePage.css';
 
 const AccountRestorePage = () => {
   const navigate = useNavigate();
-  const { resetAuth } = useAuth();
+  const { resetAuth, checkAuth, onTokenRefresh } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
   const [withdrawInfo, setWithdrawInfo] = useState(null);
   const [timeRemaining, setTimeRemaining] = useState(null);
+  const [hasCheckedStatus, setHasCheckedStatus] = useState(false);
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
-  // 탈퇴 상태 정보 조회 함수 (먼저 정의)
-  const fetchWithdrawStatus = async () => {
+  // 탈퇴 상태 정보 조회 함수 (useCallback으로 감싸서 의존성 문제 해결)
+  const fetchWithdrawStatus = useCallback(async () => {
+    if (hasCheckedStatus) {
+      console.log('이미 상태 확인 완료 - 중복 호출 방지');
+      return;
+    }
+
     try {
+      console.log('탈퇴 상태 조회 시작...');
+
       const response = await axios.get(`${API_BASE_URL}/api/mypage/withdraw/status`, {
         withCredentials: true
       });
 
       if (response.status === 200 && response.data.success) {
-        setWithdrawInfo(response.data.withdrawInfo);
+        const data = response.data.withdrawInfo;
+        console.log('탈퇴 상태 조회 결과:', data);
+
+        // 이미 복구된 계정인 경우 (isWithdrawn=false)
+        if (data.isWithdrawn === false) {
+          console.log('계정이 이미 복구된 상태입니다. 메인 페이지로 리다이렉트');
+
+          await Swal.fire({
+            title: '이미 복구된 계정',
+            text: '계정이 이미 복구되어 있습니다. 메인 페이지로 이동합니다.',
+            icon: 'info',
+            confirmButtonColor: '#F76B59',
+            confirmButtonText: '확인'
+          });
+
+          // 이미 복구된 계정은 완전 새로고침으로 처리
+          console.log('이미 복구된 계정 - 페이지 완전 새로고침으로 메인 이동');
+          window.location.href = '/main';
+          return;
+        }
+
+        // 아직 탈퇴 상태인 경우
+        setWithdrawInfo(data);
+        setHasCheckedStatus(true);
+
+      } else {
+        throw new Error('탈퇴 상태 조회에 실패했습니다.');
       }
     } catch (error) {
       console.error('탈퇴 상태 조회 오류:', error);
@@ -32,26 +66,36 @@ const AccountRestorePage = () => {
       // 401 에러는 정상적인 상황 (탈퇴한 사용자이므로 토큰이 없음)
       if (error.response?.status === 401) {
         console.log('인증 토큰 없음 - 탈퇴한 사용자로 추정');
+
         // 기본 복구 정보 설정
-        setWithdrawInfo({
+        const defaultInfo = {
           isWithdrawn: true,
           withdrawDate: new Date().toISOString(),
           deleteDate: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(), // 3시간 후
           deleteDateFormatted: new Date(Date.now() + 3 * 60 * 60 * 1000).toLocaleString('ko-KR'),
           daysRemaining: 0
-        });
+        };
+
+        setWithdrawInfo(defaultInfo);
+        setHasCheckedStatus(true);
+      } else {
+        // 다른 에러의 경우 로그인 페이지로 이동
+        console.error('예상치 못한 오류, 로그인 페이지로 이동');
+        navigate('/', { replace: true });
       }
     }
-  };
+  }, [API_BASE_URL, hasCheckedStatus, navigate]);
 
-  // 탈퇴 상태 정보 조회
+  // 컴포넌트 마운트 시 한 번만 상태 조회
   useEffect(() => {
-    fetchWithdrawStatus();
-  }, []);
+    if (!hasCheckedStatus) {
+      fetchWithdrawStatus();
+    }
+  }, [fetchWithdrawStatus, hasCheckedStatus]);
 
   // 남은 시간 카운트다운
   useEffect(() => {
-    if (withdrawInfo?.deleteDate) {
+    if (withdrawInfo?.deleteDate && withdrawInfo?.isWithdrawn) {
       const timer = setInterval(() => {
         const now = new Date();
         const deleteDate = new Date(withdrawInfo.deleteDate);
@@ -76,6 +120,8 @@ const AccountRestorePage = () => {
     setIsLoading(true);
 
     try {
+      console.log('계정 복구 요청 시작...');
+
       const response = await axios.post(`${API_BASE_URL}/api/mypage/restore`, {}, {
         withCredentials: true,
         headers: {
@@ -84,6 +130,8 @@ const AccountRestorePage = () => {
       });
 
       if (response.status === 200 && response.data.success) {
+        console.log('계정 복구 성공');
+
         await Swal.fire({
           title: '계정 복구 완료!',
           text: response.data.message,
@@ -92,8 +140,18 @@ const AccountRestorePage = () => {
           confirmButtonText: '확인'
         });
 
-        // 메인 페이지로 이동
-        navigate('/main', { replace: true });
+        // 복구 성공 후 새로운 토큰으로 인해 완전 새로고침 필요
+        console.log('계정 복구 완료 - 새로운 토큰으로 페이지 완전 새로고침');
+
+        // AuthContext 상태 리셋 후 완전 새로고침
+        resetAuth();
+
+        // 잠시 대기 후 메인 페이지로 완전 새로고침
+        setTimeout(() => {
+          console.log('메인 페이지로 완전 새로고침 이동');
+          window.location.href = '/main';
+        }, 300);
+
       } else {
         throw new Error(response.data.error || '계정 복구 중 오류가 발생했습니다.');
       }
@@ -132,6 +190,20 @@ const AccountRestorePage = () => {
     resetAuth();
     navigate('/');
   };
+
+  // 아직 상태 확인 중이거나 이미 복구된 계정인 경우 로딩 표시
+  if (!hasCheckedStatus || (withdrawInfo && !withdrawInfo.isWithdrawn)) {
+    return (
+        <div className="restore-page-container">
+          <div className="restore-page-content">
+            <div className="loading-section">
+              <div className="loading-spinner"></div>
+              <p>계정 상태를 확인하는 중...</p>
+            </div>
+          </div>
+        </div>
+    );
+  }
 
   return (
       <div className="restore-page-container">
@@ -209,6 +281,26 @@ const AccountRestorePage = () => {
             >
               {isLoading ? '복구 중...' : '계정 복구'}
             </button>
+
+            <div className="alternative-actions">
+              <p>다른 방법으로 진행하시겠습니까?</p>
+              <div className="alternative-buttons">
+                <button
+                    onClick={handleNewSignup}
+                    className="signup-button"
+                    disabled={isLoading}
+                >
+                  새 계정 만들기
+                </button>
+                <button
+                    onClick={handleLoginPage}
+                    className="login-button"
+                    disabled={isLoading}
+                >
+                  로그인 페이지로
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

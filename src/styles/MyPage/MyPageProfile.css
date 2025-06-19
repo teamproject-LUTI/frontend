@@ -190,36 +190,142 @@
     background-color: #0056b3;
 }
 
-/* 프로필 이미지 업로드 버튼 */
-.image-upload {
+/* 프로필 이미지 컨트롤 영역 - 좌우 배치 */
+.image-controls-horizontal {
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: -15px; /* 프로필 이미지 아래로 살짝 내림 */
+    left: 50%;
+    transform: translateX(-50%); /* 중앙 정렬 */
+    display: flex;
+    gap: 1rem; /* 버튼 간 간격 */
+    z-index: 10;
 }
 
-.upload-button {
+/* 이미지 업로드 버튼 - 왼쪽 */
+.image-upload-horizontal {
+    position: relative;
+}
+
+.upload-button-horizontal {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     background-color: #F76B59;
-    border: 2px solid white;
+    border: 3px solid white;
     border-radius: 50%;
     color: white;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
-.upload-button:hover {
+.upload-button-horizontal:hover {
     background-color: #e55a48;
-    transform: scale(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.upload-button-horizontal:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .upload-icon {
-    width: 1rem;
-    height: 1rem;
+    width: 16px;
+    height: 16px;
+}
+
+/* 이미지 삭제 버튼 - 오른쪽 */
+.image-delete-horizontal {
+    position: relative;
+}
+
+.delete-button-horizontal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: #ef4444;
+    border: 3px solid white;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: all 0.2s;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.delete-button-horizontal:hover {
+    background-color: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.delete-button-horizontal:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 프로필 이미지 컨테이너 여백 조정 */
+.profile-image-container {
+    margin-bottom: 2rem; /* 버튼 공간 확보 */
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .image-controls-horizontal {
+        gap: 0.75rem;
+        bottom: -12px;
+    }
+
+    .upload-button-horizontal,
+    .delete-button-horizontal {
+        width: 32px;
+        height: 32px;
+        border-width: 2px;
+    }
+
+    .upload-icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    .delete-button-horizontal {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .image-controls-horizontal {
+        gap: 0.5rem;
+        bottom: -10px;
+    }
+
+    .upload-button-horizontal,
+    .delete-button-horizontal {
+        width: 28px;
+        height: 28px;
+        border-width: 2px;
+    }
+
+    .upload-icon {
+        width: 12px;
+        height: 12px;
+    }
+
+    .delete-button-horizontal {
+        font-size: 14px;
+    }
+
+    .profile-image-container {
+        margin-bottom: 1.5rem;
+    }
 }
 
 /* 휴대폰 번호 입력 그룹 */
