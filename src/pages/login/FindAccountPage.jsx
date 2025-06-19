@@ -8,8 +8,9 @@ const FindAccountPage = () => {
 
     const [idForm, setIdForm] = useState({ name: '', phoneNumber: '' });
     const [pwForm, setPwForm] = useState({ email: '', name: '' });
+    const [foundUser, setFoundUser] = useState(null);
 
-    const handleIdSubmit = (e) => {
+    const handleIdSubmit = async (e) => {
         e.preventDefault();
 
         const { name, phoneNumber } = idForm;
@@ -38,7 +39,35 @@ const FindAccountPage = () => {
             return;
         }
 
-        console.log('아이디 찾기 요청:', idForm);
+
+        try {
+            const response = await fetch('http://localhost:8080/api/account/find-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, phoneNumber }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // 서버에서 받은 사용자 정보 저장
+                setFoundUser({ loginEmail: result.email });
+
+                Swal.fire({
+                    icon: 'success',
+                    title: '아이디 찾기 완료',
+                    html: `
+                        <p><strong>회원님의 아이디:</strong></p>
+                        <p style="font-size: 1.2rem; margin-top: 8px; color: #333;"><strong>${result.email}</strong></p>
+                    `,
+                    confirmButtonText: '확인'
+                });
+            } else {
+                Swal.fire({ icon: 'error', text: result.message });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', text: '요청 중 오류가 발생했습니다.' });
+        }
     };
 
     const handlePwSubmit = (e) => {
