@@ -1,4 +1,5 @@
 import './App.css';
+import '@toast-ui/editor/dist/toastui-editor.css';
 import './styles/MyPage/MyPage.css';
 import './styles/MyPage/MyPageProfile.css';
 import './styles/MyPage/MyReview.css';
@@ -127,6 +128,48 @@ const App = () => {
               <Route path='likereview' element={<LikeReview/>}/>
               <Route path='payments' element={<Payment/>}/>
             </Route>
+
+              {/*리뷰 목록 페이지*/}
+              <Route path='/community/review' element={
+                  <ProtectedRoute>
+                      <ReviewList />
+                  </ProtectedRoute>
+              } />
+
+              {/*리뷰 상세보기 페이지*/}
+              <Route path='/community/review/:id' element={
+                  <ProtectedRoute>
+                      <ReviewDetail />
+                  </ProtectedRoute>
+              } />
+
+              {/*리뷰 글쓰기 페이지*/}
+              <Route path='/community/review/write' element={
+                  <ProtectedRoute>
+                      <ReviewWrite />
+                  </ProtectedRoute>
+              } />
+
+              {/*리뷰 내가 쓴 글 수정 페이지*/}
+              <Route path='/community/review/edit/:id' element={
+                  <ProtectedRoute>
+                      <ReviewEdit  />
+                  </ProtectedRoute>
+              } />
+
+              {/*공지사항 목록 페이지*/}
+              <Route path='/community/notice' element={
+                  <ProtectedRoute>
+                      <NoticeList />
+                  </ProtectedRoute>
+              } />
+
+              {/*QnA 목록 페이지*/}
+              <Route path='/community/qna' element={
+                  <ProtectedRoute>
+                      <QnaList />
+                  </ProtectedRoute>
+              } />
 
             {/*리뷰 페이지*/}
             <Route path='/community/review' element={
