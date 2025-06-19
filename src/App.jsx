@@ -41,6 +41,7 @@ import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
 import LikeReview from "./pages/mypage/likereview/LikeReview";
 import MenuManagement from "./pages/management/MenuManagement";
+import AuthMAnagement from "./pages/management/AuthManagement"
 
 const App = () => {
   return (
@@ -179,8 +180,9 @@ const App = () => {
             }/>
 
             {/* 관리자 페이지 */}
-            <Route path='/admin' element={<ProtectedRoute/>}>
-              <Route path='menus' element={<MenuManagement/>}/> {/* ✅ 상대 경로 */}
+            <Route path='/admin' element={<ProtectedRoute />}>
+              <Route path='menus' element={<MenuManagement />} />
+              <Route path='permissions' element={<AuthMAnagement />} />
             </Route>
           </Routes>
         </div>
