@@ -97,8 +97,8 @@ const Login = () => {
 
   // 회원가입 페이지로 이동
   const handleSignup = () => {
-    window.location.href = '/membership';
-  };
+    navigate('/membership');
+  }
 
   // 아이디 비밀번호 찾기 페이지로 이동
   const handleFindAccount = () => {
