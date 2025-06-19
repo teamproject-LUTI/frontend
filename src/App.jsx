@@ -1,4 +1,5 @@
 import './App.css';
+import '@toast-ui/editor/dist/toastui-editor.css';
 import { Route, Routes } from "react-router-dom";
 import Main from "./pages/Main";
 import Login from "./pages/login/Login";
@@ -8,6 +9,7 @@ import Membership from "./pages/login/Membership";
 import ReviewList from './pages/community/review/ReviewList';
 import ReviewDetail from './pages/community/review/ReviewDetail';
 import ReviewWrite from './pages/community/review/ReviewWrite';
+import ReviewEdit from './pages/community/review/ReviewEdit';
 import NoticeList from './pages/community/notice/NoticeList';
 import QnaList from './pages/community/qna/QnaList';
 import MyPage from "./pages/mypage/MyPage"
@@ -65,6 +67,13 @@ const App = () => {
               <Route path='/community/review/write' element={
                   <ProtectedRoute>
                       <ReviewWrite />
+                  </ProtectedRoute>
+              } />
+
+              {/*리뷰 내가 쓴 글 수정 페이지*/}
+              <Route path='/community/review/edit/:id' element={
+                  <ProtectedRoute>
+                      <ReviewEdit  />
                   </ProtectedRoute>
               } />
 

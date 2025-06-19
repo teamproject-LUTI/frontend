@@ -9,8 +9,9 @@ import '../../../styles/community/review/ReviewList.css';
 const ReviewList = () => {
   const [reviews, setReviews] = useState([]);
   const [page, setPage] = useState(1);
-  const size = 10;
+  const size = 9;
   const navigate = useNavigate();
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -20,6 +21,7 @@ const ReviewList = () => {
         });
         console.log("서버 응답 데이터:", response.data); // ✅ 여기에 확인 로그 추가
         setReviews(response.data.data || []);
+        setTotalPages(response.data.pageInfo?.totalPages || 1);
       } catch (error) {
         console.error('리뷰 목록 조회 실패:', error);
       }
@@ -33,26 +35,52 @@ const ReviewList = () => {
       <div className="main-content-wrapper">
         <Sidebar />
         <main className="main-content">
-          <h2>리뷰 목록</h2>
-          <ul className="review-list">
+          <div className="review-header">
+            <h1>여행 후기</h1>
+            <button
+                type="button"
+                className="write-button"
+                onClick={() => navigate('/community/review/write')}
+            >
+              글쓰기
+            </button>
+          </div>
+
+          <ul className="review-grid">
             {reviews.map((r) => (
-                <li key={r.reviewNo}
+                <div key={r.reviewId}
                           className="review-item"
                           onClick={() => navigate(`/community/review/${r.reviewId}`)}>
-                  <h3>{r.title}</h3>
-                  <p>{r.createdAt.substring(0, 10)}</p>
-                  <p>{r.userName}</p>
-                  {/* isLiked가 true면 채워진 하트, false면 빈 하트 보여주기 */}
-                  <img
-                      src={ r.liked
-                          ? "/images/community/heart-filled.png"
-                          : "/images/community/heart-empty.png"
-                      }
-                      alt={ r.liked ? "좋아요 눌림" : "좋아요 안눌림" }
-                      className="heart-img"
-                  />
+                  {/* 썸네일 이미지 */}
+                      <img
+                          src={r.thumbnailPath || "/images/no_Image.png"}
+                          alt={r.thumbnailPath ? "썸네일" : "기본 썸네일"}
+                          className="review-thumbnail"
+                      />
+                  <div className="review-content">
+                    <div className="review-title">
+                      <h3 className="title-text">{r.title}</h3>
+                      {/* isLiked가 true면 채워진 하트, false면 빈 하트 보여주기 */}
+                      <img
+                          src={ r.liked
+                              ? "/images/community/heart-filled.png"
+                              : "/images/community/heart-empty.png"
+                          }
+                          alt={ r.liked ? "좋아요 눌림" : "좋아요 안눌림" }
+                          className="heart-img"
+                      />
+                    </div>
+                    <div className="review-meta">
+                      <p className="author">{r.userName}</p>
+                      <p className="date">{r.createdAt.substring(0, 10)}</p>
+                    </div>
 
-                </li>
+                  </div>
+
+
+
+
+                </div>
             ))}
           </ul>
 
@@ -60,8 +88,21 @@ const ReviewList = () => {
             <button disabled={page === 1} onClick={() => setPage(page - 1)}>
               이전
             </button>
-            <span>{page}</span>
-            <button onClick={() => setPage(page + 1)}>다음</button>
+
+            {/* 페이지 번호 버튼들 */}
+            {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                    key={i + 1}
+                    className={page === i + 1 ? 'active' : ''}
+                    onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+            ))}
+
+            <button disabled={page === totalPages} onClick={() => setPage(page + 1)}>
+              다음
+            </button>
           </div>
         </main>
       </div>
