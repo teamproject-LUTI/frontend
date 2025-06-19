@@ -1,0 +1,15 @@
+.notice-list {
+    margin-top: 20px;
+    list-style: none;
+    padding: 0;
+}
+
+.notice-item {
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.notice-link {
+    text-decoration: none;
+    color: black;
+}

@@ -1,0 +1,29 @@
+.qna-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.qna-write-btn {
+    padding: 8px 16px;
+    background-color: #F76B59;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.qna-list {
+    margin-top: 20px;
+    list-style: none;
+    padding: 0;
+}
+
+.qna-item {
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.qna-link {
+    text-decoration: none;
+    color: black;
+}
