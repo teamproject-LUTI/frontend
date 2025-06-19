@@ -1,3 +1,4 @@
+/* eslint-disable no-console, no-unused-vars */
 import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '../../../components/layout/Layout';
 import { User, Phone, Mail, MapPin, Calendar, Edit2 } from 'lucide-react';
@@ -42,7 +43,72 @@ const MyPageProfile = () => {
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [imageUploadLoading, setImageUploadLoading] = useState(false);
 
+  // 주소 관련 상태 추가
+  const [postalCode, setPostalCode] = useState('');
+  const [address, setAddress] = useState('');
+  const [extraAddress, setExtraAddress] = useState('');
+  const [detailAddress, setDetailAddress] = useState('');
+
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
+  // Daum 우편번호 API 스크립트 로드
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // 컴포넌트 언마운트 시 스크립트 제거
+      const existingScript = document.querySelector('script[src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"]');
+      if (existingScript) {
+        document.body.removeChild(existingScript);
+      }
+    };
+  }, []);
+
+  // 우편번호 검색 핸들러
+  const handlePostcodeSearch = () => {
+    new window.daum.Postcode({
+      oncomplete: function (data) {
+        let addr = ''; // 주소
+        let extraAddr = ''; // 참고항목
+
+        //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+        if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+          addr = data.roadAddress;
+        } else { // 사용자가 지번 주소를 선택했을 경우(J)
+          addr = data.jibunAddress;
+        }
+
+        // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+        if (data.userSelectedType === 'R') {
+          // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+          // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+          if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+            extraAddr += data.bname;
+          }
+          // 건물명이 있고, 공동주택일 경우 추가한다.
+          if (data.buildingName !== '' && data.apartment === 'Y') {
+            extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+          }
+          // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+          if (extraAddr !== '') {
+            extraAddr = ' (' + extraAddr + ')';
+          }
+        }
+
+        setPostalCode(data.zonecode);
+        setAddress(addr);
+        setExtraAddress(extraAddr);
+
+        // 자동으로 상세주소 입력란에 포커스
+        setTimeout(() => {
+          document.getElementById("detailAddressInput")?.focus();
+        }, 100);
+      }
+    }).open();
+  };
 
   // 소셜 로그인 여부 체크 함수
   const isSocialLogin = () => {
@@ -90,6 +156,101 @@ const MyPageProfile = () => {
     }
   };
 
+  // 주소 분해 함수 (개선된 버전 - 한국 주소 체계 기반)
+  const parseAddress = (fullAddress) => {
+    if (!fullAddress || fullAddress === '주소를 입력하세요...' || fullAddress === '정보 없음') {
+      return {
+        postalCode: '',
+        address: '',
+        detailAddress: '',
+        extraAddress: ''
+      };
+    }
+
+    let result = {
+      postalCode: '',
+      address: '',
+      detailAddress: '',
+      extraAddress: ''
+    };
+
+    let workingAddress = fullAddress;
+
+    // 1. 우편번호 추출 (5자리 숫자)
+    const postalCodeRegex = /\b(\d{5})\b/;
+    const postalMatch = workingAddress.match(postalCodeRegex);
+    if (postalMatch) {
+      result.postalCode = postalMatch[1];
+      workingAddress = workingAddress.replace(postalCodeRegex, '').trim();
+    }
+
+    // 2. 참고항목 추출 (괄호 안의 내용)
+    const extraRegex = /\(([^)]+)\)/g;
+    const extraMatches = [];
+    let extraMatch;
+    while ((extraMatch = extraRegex.exec(workingAddress)) !== null) {
+      extraMatches.push(extraMatch[1]);
+    }
+    if (extraMatches.length > 0) {
+      result.extraAddress = `(${extraMatches.join(', ')})`;
+      workingAddress = workingAddress.replace(/\([^)]+\)/g, '').trim();
+    }
+
+    // 3. 주소 구분 패턴들
+    const patterns = [
+      // 도로명주소 패턴
+      {
+        regex: /^(.*?[시도])\s+(.*?[시군구])\s+(.*?[로길])\s+(\d+(?:-\d+)?)\s*(.*)$/,
+        type: 'road'
+      },
+      // 지번주소 패턴
+      {
+        regex: /^(.*?[시도])\s+(.*?[시군구])\s+(.*?[동면읍리])\s+(\d+(?:-\d+)?)\s*(.*)$/,
+        type: 'jibun'
+      },
+      // 간단한 패턴 (동까지만)
+      {
+        regex: /^(.*?[시도])\s+(.*?[시군구])\s+(.*?[동면읍])\s*(.*)$/,
+        type: 'simple'
+      }
+    ];
+
+    let matched = false;
+    for (const pattern of patterns) {
+      const match = workingAddress.match(pattern.regex);
+      if (match) {
+        if (pattern.type === 'road' || pattern.type === 'jibun') {
+          // 시도 + 시군구 + 도로명/동 + 번지까지 기본주소
+          result.address = `${match[1]} ${match[2]} ${match[3]} ${match[4]}`.trim();
+          result.detailAddress = match[5] ? match[5].trim() : '';
+        } else {
+          // 간단한 패턴의 경우
+          result.address = `${match[1]} ${match[2]} ${match[3]}`.trim();
+          result.detailAddress = match[4] ? match[4].trim() : '';
+        }
+        matched = true;
+        break;
+      }
+    }
+
+    // 4. 패턴 매칭 실패 시 fallback 로직
+    if (!matched) {
+      const words = workingAddress.split(/\s+/);
+
+      // 단어가 많은 경우 앞쪽을 기본주소로
+      if (words.length > 3) {
+        const splitPoint = Math.ceil(words.length * 0.6); // 60% 지점에서 분할
+        result.address = words.slice(0, splitPoint).join(' ');
+        result.detailAddress = words.slice(splitPoint).join(' ');
+      } else {
+        // 단어가 적은 경우 모두 상세주소로
+        result.detailAddress = workingAddress;
+      }
+    }
+
+    return result;
+  };
+
   // API에서 프로필 데이터 가져오기
   const fetchUserProfile = useCallback(async () => {
     try {
@@ -120,6 +281,13 @@ const MyPageProfile = () => {
         };
 
         setUserInfo(userData);
+
+        // 주소 파싱하여 상태 설정
+        const parsedAddress = parseAddress(userData.address);
+        setPostalCode(parsedAddress.postalCode);
+        setAddress(parsedAddress.address);
+        setDetailAddress(parsedAddress.detailAddress);
+        setExtraAddress(parsedAddress.extraAddress);
 
       } else if (response.status === 401) {
         console.log('인증 오류 - 로그인 페이지로 리다이렉트');
@@ -299,11 +467,9 @@ const MyPageProfile = () => {
       errors.push('휴대폰 번호 마지막 자리를 올바르게 입력해주세요.');
     }
 
-    // 주소 검사
-    if (!editForm.address || editForm.address.trim() === '' || editForm.address.trim() === '주소를 입력하세요...') {
+    // 주소 검사 - 우편번호와 기본주소가 있거나, 상세주소라도 있어야 함
+    if ((!postalCode || !address) && !detailAddress.trim()) {
       errors.push('주소를 입력해주세요.');
-    } else if (editForm.address.trim().length < 5) {
-      errors.push('주소를 5자 이상 입력해주세요.');
     }
 
     return errors;
@@ -362,12 +528,22 @@ const MyPageProfile = () => {
         //phoneNumber 변수 정의
         const phoneNumber = `${editForm.phonePrefix || '010'}-${editForm.phoneMiddle || ''}-${editForm.phoneLast || ''}`;
 
+        // 주소 합치기
+        let fullAddress = '';
+        if (postalCode && address) {
+          // 새로 검색한 주소가 있는 경우
+          fullAddress = `${address} ${detailAddress} ${extraAddress}`.trim();
+        } else if (detailAddress.trim()) {
+          // 기존 주소를 수정한 경우
+          fullAddress = detailAddress.trim();
+        }
+
         const updateData = {
           nickname: editForm.nickname.trim(),
           birthday: isSocialLogin() ? editForm.birthDate : undefined, // 소셜 로그인만 생년월일 수정
           gender: editForm.gender,
           phoneNumber: phoneNumber,
-          address: editForm.address.trim()
+          address: fullAddress
         };
 
         const updateResponse = await axios.put(`${API_BASE_URL}/api/mypage/update`, updateData, {
@@ -382,6 +558,7 @@ const MyPageProfile = () => {
           const updatedUserInfo = {
             ...editForm,
             phone: phoneNumber,
+            address: fullAddress,
             profileImage: updatedImageUrl
           };
 
@@ -393,7 +570,7 @@ const MyPageProfile = () => {
             birthday: isSocialLogin() ? editForm.birthDate : undefined,
             gender: editForm.gender,
             phoneNumber: phoneNumber,
-            address: editForm.address.trim(),
+            address: fullAddress,
             profileImageUrl: updatedImageUrl
           };
 
@@ -763,6 +940,7 @@ const MyPageProfile = () => {
                     </div>
                   </div>
 
+                  {/* 이메일 - 읽기 전용 */}
                   <div className="info-row">
                     <div className="info-label">
                       <Mail className="info-icon"/>
@@ -775,7 +953,7 @@ const MyPageProfile = () => {
                     </div>
                   </div>
 
-                  {/* 주소 - 수정 가능 */}
+                  {/* 주소 - Daum API 사용하여 수정 가능 */}
                   <div className="info-row">
                     <div className="info-label">
                       <MapPin className="info-icon"/>
@@ -783,13 +961,65 @@ const MyPageProfile = () => {
                     </div>
                     <div className="info-value">
                       {isEditingContact ? (
-                          <input
-                              type="text"
-                              value={editForm.address || ''}
-                              onChange={(e) => handleInputChange('address', e.target.value)}
-                              className="edit-input"
-                              placeholder="주소을(를) 입력하세요"
-                          />
+                          <div className="address-input-group">
+                            {/* 우편번호 + 검색 버튼 */}
+                            <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
+                              <input
+                                  type="text"
+                                  value={postalCode}
+                                  readOnly
+                                  placeholder="우편번호"
+                                  className="edit-input"
+                                  style={{ width: "120px" }}
+                              />
+                              <button
+                                  type="button"
+                                  onClick={handlePostcodeSearch}
+                                  className="btn"
+                                  style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#F76B59',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                              >
+                                우편번호 찾기
+                              </button>
+                            </div>
+
+                            {/* 기본 주소 */}
+                            <input
+                                type="text"
+                                value={address}
+                                readOnly
+                                placeholder="주소"
+                                className="edit-input"
+                                style={{ marginBottom: "8px" }}
+                            />
+
+                            {/* 상세주소 + 참고항목 */}
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                              <input
+                                  type="text"
+                                  id="detailAddressInput"
+                                  value={detailAddress}
+                                  onChange={(e) => setDetailAddress(e.target.value)}
+                                  placeholder="상세주소"
+                                  className="edit-input"
+                              />
+                              <input
+                                  type="text"
+                                  value={extraAddress}
+                                  readOnly
+                                  placeholder="참고항목"
+                                  className="edit-input"
+                              />
+                            </div>
+                          </div>
                       ) : (
                           <span>{userInfo.address}</span>
                       )}

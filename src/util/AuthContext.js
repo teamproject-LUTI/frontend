@@ -44,6 +44,7 @@ export const AuthProvider = ({ children }) => {
       return false;
     }
 
+    /* eslint-disable */
     if (authState.hasChecked && authState.isAuthenticated !== null) {
       console.log('인증 상태 이미 확인됨 - 스킵');
       return authState.isAuthenticated;
