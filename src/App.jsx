@@ -77,8 +77,6 @@ const App = () => {
                   </ProtectedRoute>
               } />
 
-
-
               {/*공지사항 목록 페이지*/}
               <Route path='/community/notice' element={
                   <ProtectedRoute>
@@ -102,18 +100,18 @@ const App = () => {
             </Route>
 
             {/*리뷰 페이지*/}
-            <Route path='/community/review' element={
-              <ProtectedRoute>
-                <Review />
-              </ProtectedRoute>
-            } />
+            {/*<Route path='/community/review' element={*/}
+            {/*  <ProtectedRoute>*/}
+            {/*    <Review />*/}
+            {/*  </ProtectedRoute>*/}
+            {/*} />*/}
 
             {/*리뷰 페이지*/}
-            <Route path='/payment' element={
-              <ProtectedRoute>
-                <Payment />
-              </ProtectedRoute>
-            } />
+            {/*<Route path='/payment' element={*/}
+            {/*  <ProtectedRoute>*/}
+            {/*    <Payment />*/}
+            {/*  </ProtectedRoute>*/}
+            {/*} />*/}
           </Routes>
         </div>
       </AuthProvider>
