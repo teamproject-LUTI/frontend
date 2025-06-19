@@ -15,6 +15,7 @@ import './styles/login/Membership.css';
 import './styles/login/GoogleLoginButton.css';
 import './styles/common/LutiModal.css';
 import './styles/common/theme-override.css';
+import '@toast-ui/editor/dist/toastui-editor.css';
 import { Route, Routes } from "react-router-dom";
 import Main from "./pages/Main";
 import Login from "./pages/login/Login";
@@ -41,9 +42,9 @@ import ChatForm from "./pages/travel/ChatForm";
 import Payment from './pages/mypage/Payment';
 import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
-import LikeReview from "./pages/likereview/LikeReview";
+import LikeReview from "./pages/mypage/likereview/LikeReview";
 import MenuManagement from "./pages/management/MenuManagement";
-
+import AuthMAnagement from "./pages/management/AuthManagement"
 
 const App = () => {
   return (
@@ -60,6 +61,8 @@ const App = () => {
             {/* 계정 복구 페이지 - 인증 필요하지만 탈퇴한 사용자도 접근 가능 */}
             <Route path='/account/restore' element={<AccountRestorePage/>}/>
 
+            <Route path='/membership' element={<Membership/>}/>
+
             {/*메인 페이지*/}
             <Route path='/main' element={
               <ProtectedRoute>
@@ -72,10 +75,51 @@ const App = () => {
               <ProtectedRoute>
                 <ChatForm/>
               </ProtectedRoute>
-            }/>
+            } />
 
-            {/*멤버쉽 페이지*/}
-            <Route path='/membership' element={<Membership/>}/>
+              {/*리뷰 목록 페이지*/}
+              <Route path='/community/review' element={
+                  <ProtectedRoute>
+                      <ReviewList />
+                  </ProtectedRoute>
+              } />
+
+              {/*리뷰 상세보기 페이지*/}
+              <Route path='/community/review/:id' element={
+                  <ProtectedRoute>
+                      <ReviewDetail />
+                  </ProtectedRoute>
+              } />
+
+              {/*리뷰 글쓰기 페이지*/}
+              <Route path='/community/review/write' element={
+                  <ProtectedRoute>
+                      <ReviewWrite />
+                  </ProtectedRoute>
+              } />
+
+              {/*리뷰 내가 쓴 글 수정 페이지*/}
+              <Route path='/community/review/edit/:id' element={
+                  <ProtectedRoute>
+                      <ReviewEdit  />
+                  </ProtectedRoute>
+              } />
+
+
+
+              {/*공지사항 목록 페이지*/}
+              <Route path='/community/notice' element={
+                  <ProtectedRoute>
+                      <NoticeList />
+                  </ProtectedRoute>
+              } />
+
+              {/*QnA 목록 페이지*/}
+              <Route path='/community/qna' element={
+                  <ProtectedRoute>
+                      <QnaList />
+                  </ProtectedRoute>
+              } />
 
             {/* 마이페이지*/}
             <Route path='/mypage' element={<ProtectedRoute/>}>
@@ -161,8 +205,9 @@ const App = () => {
             }/>
 
             {/* 관리자 페이지 */}
-            <Route path='/admin' element={<ProtectedRoute/>}>
-              <Route path='menus' element={<MenuManagement/>}/> {/* ✅ 상대 경로 */}
+            <Route path='/admin' element={<ProtectedRoute />}>
+              <Route path='menus' element={<MenuManagement />} />
+              <Route path='permissions' element={<AuthMAnagement />} />
             </Route>
           </Routes>
         </div>
