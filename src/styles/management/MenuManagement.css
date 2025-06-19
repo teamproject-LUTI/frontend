@@ -212,10 +212,10 @@
 }
 
 .loading {
-    color: #007bff;
+    color: #F76B59;
 }
 
-.search-container {
+.auth-search-container {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
@@ -224,19 +224,19 @@
     margin-bottom: 20px;
 }
 
-.search-inputs {
+.auth-search-inputs {
     display: flex;
     gap: 15px;
     margin-bottom: 15px;
     align-items: center;
 }
 
-.search-input-group {
+.auth-search-input-group {
     position: relative;
     flex: 1;
 }
 
-.search-input {
+.auth-search-input {
     width: 100%;
     padding: 12px 16px;
     border: 2px solid #e9ecef;
@@ -246,14 +246,14 @@
     background-color: #f8f9fa;
 }
 
-.search-input:focus {
+.auth-search-input:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: #F76B59;
     background-color: white;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-.clear-search {
+.auth-clear-search {
     position: absolute;
     right: 12px;
     top: 50%;
@@ -268,7 +268,7 @@
     transition: all 0.2s;
 }
 
-.clear-search:hover {
+.auth-clear-search:hover {
     background-color: #e9ecef;
     color: #495057;
 }
@@ -284,14 +284,14 @@
     transition: border-color 0.3s;
 }
 
-.role-filter:focus {
+.auth-role-filter:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: #F76B59;
     background-color: white;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-.search-results {
+.auth-search-results {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -299,7 +299,7 @@
     font-size: 14px;
 }
 
-.reset-filters {
+.auth-reset-filters {
     background-color: #6c757d;
     color: white;
     border: none;
@@ -310,7 +310,7 @@
     transition: background-color 0.3s;
 }
 
-.reset-filters:hover {
+.auth-reset-filters:hover {
     background-color: #5a6268;
 }
 

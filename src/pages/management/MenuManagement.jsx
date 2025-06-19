@@ -7,7 +7,7 @@ import {
     MessageSquare, HeartPlus, MessageCircleQuestion
 } from 'lucide-react';
 import Swal from 'sweetalert2';
-// import '올바른/경로/MenuManagement.css';
+import axios from 'axios';
 
 const MenuManagement = () => {
     // 아이콘 매핑
@@ -56,61 +56,88 @@ const MenuManagement = () => {
         requiredRole: 1
     });
 
-    // 쿠키 기반 API 호출 공통 설정
-    const apiRequest = async (url, options = {}) => {
-        const defaultOptions = {
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            },
-            ...options
-        };
+    // Axios 인스턴스 생성
+    const api = axios.create({
+        baseURL: process.env.NODE_ENV === 'development'
+            ? process.env.REACT_APP_API_URL || 'http://localhost:8080'
+            : '',
+        withCredentials: true,
+        timeout: 10000,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
 
-        return fetch(url, defaultOptions);
-    };
+    // 요청 인터셉터 - 타임스탬프 자동 추가
+    api.interceptors.request.use(
+        config => {
+            const separator = config.url.includes('?') ? '&' : '?';
+            config.url += `${separator}_t=${new Date().getTime()}`;
+            return config;
+        },
+        error => Promise.reject(error)
+    );
 
-    // DB에서 메뉴 데이터 로드
+    // 응답 인터셉터 - 공통 에러 처리
+    api.interceptors.response.use(
+        response => response,
+        error => {
+            if (error.response?.status === 401) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '인증 필요',
+                    text: '인증이 필요합니다. 다시 로그인해주세요.',
+                    confirmButtonText: '로그인 페이지로',
+                    allowOutsideClick: false
+                }).then(() => {
+                    window.location.href = '/login';
+                });
+                return Promise.reject(new Error('인증이 필요합니다.'));
+            }
+
+            if (error.response?.status === 403) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '권한 부족',
+                    text: '관리자 권한이 필요합니다.',
+                    confirmButtonColor: '#3085d6'
+                });
+                return Promise.reject(new Error('관리자 권한이 필요합니다.'));
+            }
+
+            if (error.code === 'NETWORK_ERROR' || !error.response) {
+                const networkError = new Error('서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.');
+                networkError.isNetworkError = true;
+                return Promise.reject(networkError);
+            }
+
+            const httpError = new Error(
+                error.response?.data?.message ||
+                error.response?.data?.error ||
+                `HTTP ${error.response?.status} 오류가 발생했습니다.`
+            );
+            httpError.status = error.response?.status;
+            httpError.data = error.response?.data;
+
+            return Promise.reject(httpError);
+        }
+    );
+
+    // 🚀 Axios로 간소화된 메뉴 데이터 로드
     const loadMenus = async () => {
         try {
             setLoading(true);
-            const timestamp = new Date().getTime();
-            const baseUrl = process.env.NODE_ENV === 'development'
-                ? 'http://localhost:8080'
-                : '';
-            const endpoint = `${baseUrl}/api/menus/admin/all?_t=${timestamp}`;
 
+            const response = await api.get('/api/menus/admin/all');
 
-            const response = await apiRequest(endpoint);
-
-            if (response.status === 401) {
-                throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
-            }
-
-            if (response.status === 403) {
-                throw new Error('관리자 권한이 필요합니다.');
-            }
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                console.error('받은 응답:', text.substring(0, 200));
-                throw new Error('서버에서 JSON이 아닌 응답을 반환했습니다.');
-            }
-
-            const data = await response.json();
-
+            // 응답 데이터 처리
             let menuData;
-            if (data && Array.isArray(data)) {
-                menuData = data;
-            } else if (data && data.data && Array.isArray(data.data)) {
-                menuData = data.data;
+            if (Array.isArray(response.data)) {
+                menuData = response.data;
+            } else if (response.data?.data && Array.isArray(response.data.data)) {
+                menuData = response.data.data;
             } else {
-                console.error('예상하지 못한 데이터 구조:', data);
+                console.error('예상하지 못한 데이터 구조:', response.data);
                 menuData = [];
             }
 
@@ -127,48 +154,31 @@ const MenuManagement = () => {
             console.error('메뉴 로드 실패:', error);
             setMenus([]);
 
-            if (error.message.includes('인증이 필요합니다')) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '인증 필요',
-                    text: error.message,
-                    confirmButtonText: '로그인 페이지로',
-                }).then(() => {
-                    window.location.href = '/login';
-                });
+            // 인터셉터에서 이미 처리된 인증/권한 에러는 추가 알림 없이 return
+            if (error.message.includes('인증이 필요합니다') || error.message.includes('관리자 권한')) {
                 return;
             }
 
-            if (error.message.includes('관리자 권한')) {
-                Swal.fire({
-                    icon: 'error',
-                    title: '권한 부족',
-                    text: error.message,
-                });
-                return;
-            }
-
+            // 기타 에러만 처리
             let errorMessage = '메뉴 데이터를 불러오는데 실패했습니다.';
-            if (error.message.includes('HTTP error')) {
-                errorMessage = `서버 오류: ${error.message}`;
-            } else if (error.message.includes('JSON')) {
-                errorMessage = '서버 응답 형식이 올바르지 않습니다.';
-            } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                errorMessage = '서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.';
+            if (error.status) {
+                errorMessage = `서버 오류: HTTP ${error.status}`;
+            } else if (error.isNetworkError) {
+                errorMessage = error.message;
             }
 
             Swal.fire({
                 icon: 'error',
                 title: '메뉴 로드 오류',
                 text: errorMessage,
-                footer: `API URL: /api/menus/admin/all`
+                footer: 'API URL: /api/menus/admin/all'
             });
         } finally {
             setLoading(false);
         }
     };
 
-    // 메뉴 추가/수정
+    // 🚀 Axios로 간소화된 메뉴 저장
     const handleSaveMenu = async () => {
         if (!formData.name.trim()) {
             Swal.fire({
@@ -180,17 +190,6 @@ const MenuManagement = () => {
         }
 
         try {
-            const timestamp = new Date().getTime();
-            const baseUrl = process.env.NODE_ENV === 'development'
-                ? 'http://localhost:8080'
-                : '';
-
-            const url = editingMenu
-                ? `${baseUrl}/api/menus/${editingMenu.navigationMenuId}?_t=${timestamp}`
-                : `${baseUrl}/api/menus?_t=${timestamp}`;
-
-            const method = editingMenu ? 'PUT' : 'POST';
-
             const menuData = {
                 name: formData.name,
                 description: formData.description,
@@ -203,45 +202,29 @@ const MenuManagement = () => {
                 requiredRole: formData.requiredRole
             };
 
-            const response = await apiRequest(url, {
-                method,
-                body: JSON.stringify(menuData),
-            });
-
-            if (response.status === 401) {
-                throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
-            }
-
-            if (response.status === 403) {
-                throw new Error('관리자 권한이 필요합니다.');
-            }
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('서버 응답 오류:', response.status, errorText);
-                throw new Error(`HTTP error! status: ${response.status}`);
+            // 수정 또는 생성
+            if (editingMenu) {
+                await api.put(`/api/menus/${editingMenu.navigationMenuId}`, menuData);
+            } else {
+                await api.post('/api/menus', menuData);
             }
 
             await loadMenus();
             closeModal();
+
             Swal.fire({
                 icon: 'success',
                 title: '성공',
-                text: editingMenu ? '메뉴가 수정되었습니다.' : '메뉴가 추가되었습니다.'
+                text: editingMenu ? '메뉴가 수정되었습니다.' : '메뉴가 추가되었습니다.',
+                timer: 2000,
+                timerProgressBar: true
             });
 
         } catch (error) {
             console.error('저장 오류:', error);
 
-            if (error.message.includes('인증이 필요합니다')) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '인증 필요',
-                    text: error.message,
-                    confirmButtonText: '로그인 페이지로',
-                }).then(() => {
-                    window.location.href = '/login';
-                });
+            // 인터셉터에서 이미 처리된 에러는 return
+            if (error.message.includes('인증이 필요합니다') || error.message.includes('관리자 권한')) {
                 return;
             }
 
@@ -253,7 +236,7 @@ const MenuManagement = () => {
         }
     };
 
-    // 메뉴 삭제
+    // 🚀 Axios로 간소화된 메뉴 삭제
     const handleDeleteMenu = async (menuId) => {
         const menuToDelete = menus.find(m => m.navigationMenuId === menuId);
         const hasChildren = menus.some(m => m.parentId === menuId);
@@ -277,49 +260,22 @@ const MenuManagement = () => {
         if (!result.isConfirmed) return;
 
         try {
-            const timestamp = new Date().getTime();
-            const baseUrl = process.env.NODE_ENV === 'development'
-                ? 'http://localhost:8080'
-                : '';
-            const deleteUrl = `${baseUrl}/api/menus/${menuId}?_t=${timestamp}`;
-
-            const response = await apiRequest(deleteUrl, {
-                method: 'DELETE',
-            });
-
-            if (response.status === 401) {
-                throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
-            }
-
-            if (response.status === 403) {
-                throw new Error('관리자 권한이 필요합니다.');
-            }
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('삭제 응답 오류:', response.status, errorText);
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            await api.delete(`/api/menus/${menuId}`);
 
             await loadMenus();
             Swal.fire({
                 icon: 'success',
                 title: '삭제 완료',
-                text: '메뉴가 삭제되었습니다.'
+                text: '메뉴가 삭제되었습니다.',
+                timer: 2000,
+                timerProgressBar: true
             });
 
         } catch (error) {
             console.error('삭제 오류:', error);
 
-            if (error.message.includes('인증이 필요합니다')) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '인증 필요',
-                    text: error.message,
-                    confirmButtonText: '로그인 페이지로',
-                }).then(() => {
-                    window.location.href = '/login';
-                });
+            // 인터셉터에서 이미 처리된 에러는 return
+            if (error.message.includes('인증이 필요합니다') || error.message.includes('관리자 권한')) {
                 return;
             }
 
@@ -396,9 +352,7 @@ const MenuManagement = () => {
         setIsModalOpen(true);
     };
 
-    // 🔥 수정된 buildMenuTree 함수
     const buildMenuTree = (menus) => {
-
         if (!Array.isArray(menus) || menus.length === 0) {
             return [];
         }
@@ -413,7 +367,6 @@ const MenuManagement = () => {
 
         // 2단계: 트리 구조 구성
         menus.forEach(menu => {
-            // 🔥 수정된 최상위 메뉴 판별 로직
             const isTopLevel = (
                 menu.parentId === null ||
                 menu.parentId === undefined ||
@@ -425,7 +378,6 @@ const MenuManagement = () => {
             if (isTopLevel) {
                 tree.push(menuMap[menu.navigationMenuId]);
             } else {
-
                 // 부모 메뉴가 존재하는지 확인
                 if (menuMap[menu.parentId]) {
                     menuMap[menu.parentId].children.push(menuMap[menu.navigationMenuId]);
@@ -447,7 +399,6 @@ const MenuManagement = () => {
         };
 
         sortByOrder(tree);
-
         return tree;
     };
 
@@ -646,9 +597,21 @@ const MenuManagement = () => {
 
     if (loading) {
         return (
-            <div style={{ padding: '20px', textAlign: 'center' }}>
-                <div>로딩 중...</div>
-            </div>
+            <Layout>
+                <div style={{
+                    padding: '20px',
+                    textAlign: 'center',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '400px'
+                }}>
+                    <div>
+                        <div style={{ fontSize: '18px', marginBottom: '10px' }}>로딩 중...</div>
+                        <div style={{ fontSize: '14px', color: '#666' }}>메뉴 데이터를 불러오고 있습니다.</div>
+                    </div>
+                </div>
+            </Layout>
         );
     }
 
@@ -667,7 +630,7 @@ const MenuManagement = () => {
                             onClick={() => openModal()}
                             style={{
                                 padding: '12px 16px',
-                                backgroundColor: '#007bff',
+                                backgroundColor: '#F76B59',
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '6px',
@@ -719,9 +682,9 @@ const MenuManagement = () => {
                                         onClick={() => openModal()}
                                         style={{
                                             padding: '12px 16px',
-                                            border: '2px dashed #007bff',
+                                            border: '2px dashed #F76B59',
                                             backgroundColor: 'transparent',
-                                            color: '#007bff',
+                                            color: '#F76B59',
                                             borderRadius: '6px',
                                             cursor: 'pointer',
                                             display: 'flex',
