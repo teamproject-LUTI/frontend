@@ -1,0 +1,141 @@
+/* src/styles/community/qna/QnaDetail.css */
+
+/* 1. 컨텐츠 가운데 정렬 & 최대 너비 지정 */
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* 2. 제목 스타일 */
+.detail-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+/* 3. 메타 정보 (작성자, 날짜, 상태) */
+.detail-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.detail-author,
+.detail-date {
+    font-size: 14px;
+    color: #666;
+}
+
+.status-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-badge.pending {
+    background-color: #e7f3ff;
+    color: #1e90ff;
+}
+
+.status-badge.answered {
+    background-color: #e8f7e4;
+    color: #28a745;
+}
+
+/* 4. 첨부파일 리스트 */
+.detail-attachments {
+    margin-bottom: 24px;
+}
+
+.detail-attachments h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.detail-attachments ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.detail-attachments li + li {
+    margin-top: 6px;
+}
+
+.detail-attachments a {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.detail-attachments a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* 5. 본문 */
+.detail-content {
+    border-top: 1px solid #ddd;
+    padding-top: 16px;
+    margin-top: 16px;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* 6. 수정/삭제/목록 버튼 영역 */
+.crud-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 24px;
+}
+
+.edit-btn,
+.delete-btn,
+.back-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.edit-btn {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.edit-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.delete-btn {
+    background-color: #ffecec;
+    color: #c00;
+}
+
+.delete-btn:hover {
+    background-color: #ffd6d6;
+}
+
+.back-btn {
+    background-color: #f0f0f0;
+    color: #333;
+    margin-left: auto;
+}
+
+.back-btn:hover {
+    background-color: #e0e0e0;
+}
+
+/* 7. clearfix for floats if needed */
+.main-content::after {
+    content: '';
+    display: table;
+    clear: both;
+}
