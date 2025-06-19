@@ -47,6 +47,7 @@ import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
 import LikeReview from "./pages/mypage/likereview/LikeReview";
 import MenuManagement from "./pages/management/MenuManagement";
+import FindAccountPage from './pages/login/FindAccountPage';
 import AuthMAnagement from "./pages/management/AuthManagement";
 
 import PasswordChangePage from "./pages/mypage/password/PasswordChangePage";
