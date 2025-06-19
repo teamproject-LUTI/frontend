@@ -38,9 +38,8 @@ import ChatForm from "./pages/travel/ChatForm";
 import Payment from './pages/mypage/Payment';
 import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
-import LikeReview from "./pages/likereview/LikeReview";
+import LikeReview from "./pages/mypage/likereview/LikeReview";
 import MenuManagement from "./pages/management/MenuManagement";
-
 
 const App = () => {
   return (
@@ -56,6 +55,8 @@ const App = () => {
 
             {/* 계정 복구 페이지 - 인증 필요하지만 탈퇴한 사용자도 접근 가능 */}
             <Route path='/account/restore' element={<AccountRestorePage/>}/>
+
+            <Route path='/membership' element={<Membership/>}/>
 
             {/*메인 페이지*/}
             <Route path='/main' element={
