@@ -44,6 +44,7 @@ export const AuthProvider = ({ children }) => {
       return false;
     }
 
+    /* eslint-disable */
     if (authState.hasChecked && authState.isAuthenticated !== null) {
       console.log('인증 상태 이미 확인됨 - 스킵');
       return authState.isAuthenticated;
@@ -108,7 +109,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       isCheckingRef.current = false;
     }
-  }, [authState.hasChecked, authState.isAuthenticated]);
+  }, [location.pathname]);
 
   // 디바운스된 인증 확인 함수
   const debouncedCheckAuth = useCallback(() => {
@@ -129,7 +130,6 @@ export const AuthProvider = ({ children }) => {
   // 사용자 정보 업데이트 함수 추가
   const updateUser = useCallback(async (updatedData) => {
     try {
-      console.log('사용자 정보 업데이트 시작:', updatedData);
 
       // 현재 user 정보와 업데이트된 정보를 병합
       const updatedUser = {
@@ -137,15 +137,16 @@ export const AuthProvider = ({ children }) => {
         ...updatedData
       };
 
-      setAuthState(prev => ({
-        ...prev,
-        user: updatedUser
-      }));
+      setAuthState(prev => {
+        const newState = {
+          ...prev,
+          user: updatedUser
+        };
+        return newState;
+      });
 
-      console.log('AuthContext 사용자 정보 업데이트 완료');
       return true;
     } catch (error) {
-      console.error('사용자 정보 업데이트 중 오류:', error);
       return false;
     }
   }, [authState.user]);

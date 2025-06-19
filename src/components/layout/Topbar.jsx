@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Search, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../util/AuthContext';
 import { authUtils } from '../../util/authUtils';
@@ -7,7 +7,13 @@ import '../../styles/layout/Topbar.css';
 
 const Topbar = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [imageLoadError, setImageLoadError] = useState(false); // 이미지 로드 에러 상태 추가
   const { user, isLoading, resetAuth } = useAuth();
+
+  // 사용자 정보 변경 시 이미지 에러 상태 리셋
+  useEffect(() => {
+    setImageLoadError(false);
+  }, [user?.profileImageUrl, user?.profileImage]);
 
   const handleLogout = async () => {
     if (isLoggingOut) {
@@ -118,9 +124,30 @@ const Topbar = () => {
 
   // 프로필 이미지 URL 가져오기
   const getProfileImageUrl = () => {
-    if (!user) return null;
 
-    return user.profileImageUrl || user.profileImage || null;
+    if (!user || imageLoadError) {
+      return null;
+    }
+
+    const imageUrl = user.profileImageUrl || user.profileImage || null;
+
+    if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim()) {
+      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+      const fullUrl = imageUrl.startsWith('http')
+          ? imageUrl
+          : `${baseURL}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+
+      const finalUrl = `${fullUrl}?t=${new Date().getTime()}`;
+      return finalUrl;
+    }
+
+    return null;
+  };
+
+  // 이미지 로드 에러 처리 함수
+  const handleImageError = () => {
+    console.log(' 프로필 이미지 로드 실패:', getProfileImageUrl());
+    setImageLoadError(true);
   };
 
   return (
@@ -163,11 +190,7 @@ const Topbar = () => {
                               src={getProfileImageUrl()}
                               alt="프로필"
                               className="user-profile-image"
-                              onError={(e) => {
-                                console.log('프로필 이미지 로드 실패:', getProfileImageUrl());
-                                e.target.style.display = 'none';
-                                e.target.nextSibling.style.display = 'block';
-                              }}
+                              onError={handleImageError}
                               onLoad={() => {
                                 console.log('프로필 이미지 로드 성공:', getProfileImageUrl());
                               }}

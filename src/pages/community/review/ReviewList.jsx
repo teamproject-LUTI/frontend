@@ -77,10 +77,6 @@ const ReviewList = () => {
                     </div>
 
                   </div>
-
-
-
-
                 </div>
             ))}
           </ul>
@@ -105,6 +101,7 @@ const ReviewList = () => {
               다음
             </button>
           </div>
+
         </main>
       </div>
       <Footer />

@@ -31,10 +31,12 @@ const Login = () => {
     }
   };
 
-  // 일반 로그인 (향후 구현)
+  // 일반 로그인
+// Login.jsx의 handleRegularLogin 함수 수정
   const handleRegularLogin = async () => {
     console.log('일반 로그인');
     setIsLoading(true);
+
     try {
       const response = await fetch('http://localhost:8080/api/auth/login', {
         method: 'POST',
@@ -48,8 +50,22 @@ const Login = () => {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        console.log('로그인 성공');
-        window.location.href = '/main';
+        console.log('로그인 성공:', result);
+
+        // 백엔드에서 tokenType으로 탈퇴 유무 구분
+        if (result.tokenType === 'TEMP') {
+          // 탈퇴한 계정 - 복구 페이지로 이동
+          console.log('탈퇴한 계정 - 복구 페이지로 이동');
+          window.location.href = result.redirectTo || '/account/restore';
+        } else if (result.tokenType === 'NORMAL') {
+          // 정상 로그인 - 메인 페이지로 이동
+          console.log('정상 로그인 - 메인 페이지로 이동');
+          window.location.href = '/main';
+        } else {
+          // tokenType이 없거나 예상치 못한 경우 기본 처리
+          console.log('기본 처리 - 메인 페이지로 이동');
+          window.location.href = '/main';
+        }
       } else {
         alert(result.error || '로그인 실패');
       }

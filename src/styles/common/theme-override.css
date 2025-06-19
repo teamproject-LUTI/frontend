@@ -1,0 +1,94 @@
+:root {
+    --primary-color: #F76B59;
+    --primary-hover: #e55a48;
+    --primary-light: #fef2f2;
+}
+
+/* 🔥 모든 마이페이지 관련 아이콘 색상 */
+.info-icon,
+.my-review-icon,
+.my-ask-icon,
+.like-review-icon,
+.password-confirm-icon,
+.restore-main-icon,
+.withdraw-icon {
+    color: var(--primary-color) !important;
+}
+
+/* 🔥 섹션 헤더 밑줄 */
+.section-header {
+    border-bottom: 2px solid var(--primary-color) !important;
+}
+
+/* 🔥 모든 저장/편집 버튼 */
+.save-button,
+.edit-button,
+.retry-button,
+.restore-button,
+.write-review-button,
+.write-ask-button,
+.explore-button,
+.upload-button {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.save-button:hover,
+.edit-button:hover,
+.retry-button:hover,
+.restore-button:hover,
+.write-review-button:hover,
+.write-ask-button:hover,
+.explore-button:hover,
+.upload-button:hover {
+    background-color: var(--primary-hover) !important;
+}
+
+/* 🔥 프로필 이미지 배경 */
+.profile-image-section {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%) !important;
+}
+
+/* 🔥 입력 필드 포커스 */
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(247, 107, 89, 0.1) !important;
+}
+
+/* 🔥 통계 숫자 */
+.stat-number {
+    color: var(--primary-color) !important;
+}
+
+/* 🔥 페이지네이션 활성 상태 */
+.pagination-button.active {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* 🔥 체크박스, 라디오 버튼 */
+input[type="radio"]:checked,
+input[type="checkbox"]:checked {
+    accent-color: var(--primary-color) !important;
+}
+
+/* 🔥 SweetAlert2 커스터마이징 */
+.swal2-confirm {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.swal2-confirm:hover {
+    background-color: var(--primary-hover) !important;
+}
+
+/* 🔥 링크 색상 */
+a {
+    color: var(--primary-color) !important;
+}
+
+a:hover {
+    color: var(--primary-hover) !important;
+}

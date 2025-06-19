@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import Topbar from '../../../components/layout/Topbar';
 import Sidebar from '../../../components/layout/Sidebar';
 import Footer from '../../../components/layout/Footer';
 import '../../../styles/community/review/ReviewDetail.css';
+import LikeButton from '../../../components/community/review/LikeButton';
 
 const ReviewDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [review, setReview] = useState(null);
     const [attachments, setAttachments] = useState([]);
-    const [isLiked, setIsLiked] = useState(false);
-    const [likeCount, setLikeCount] = useState(0);
-
     // 로컬스토리지에 저장된 JWT 가져오기
     const token = localStorage.getItem('accessToken');
 
@@ -21,46 +20,16 @@ const ReviewDetail = () => {
         const fetchReview = async () => {
             try {
                 const res = await axios.get(`/api/reviews/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }   // ← 인증 헤더 추가
+                    headers: { Authorization: `Bearer ${token}` }   // 인증 헤더 추가
                 });
                 const dto = res.data.data;
                 setReview(dto);
-                setLikeCount(dto.likeCount);
-                setIsLiked(dto.liked);
-
             } catch (err) {
                 console.error('리뷰 조회 실패', err);
             }
         };
         fetchReview();
     }, [id, token]);
-
-    const handleLike = async () => {
-        try {
-            let res;
-            if (!isLiked) {
-                // 좋아요 저장
-                res = await axios.post(
-                    '/api/likes',
-                    { reviewId: id },
-                    { headers: { Authorization: `Bearer ${token}` } }  // ← 인증 헤더
-                );
-            } else {
-                // 좋아요 취소
-                res = await axios.delete(
-                    '/api/likes',
-                    {
-                        data: { reviewId: id },
-                        headers: { Authorization: `Bearer ${token}` }    // ← 인증 헤더
-                    }
-                );
-            }
-            setLikeCount(res.data.likeCount);
-            setIsLiked(!isLiked);
-        } catch (err) {
-            console.error('좋아요 처리 실패', err);
-        }
-    };
 
     // 2) 첨부파일만 가져오는 useEffect 추가
     useEffect(() => {
@@ -77,6 +46,28 @@ const ReviewDetail = () => {
         fetchAttachments();
     }, [id, token]);
 
+    // 공유 버튼 핸들러
+    const handleShare = () => {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url)
+            .then(() => {
+                Swal.fire({
+                    title: 'URL 복사됨!',
+                    text: '현재 페이지 주소가 클립보드에 복사되었습니다.',
+                    icon: 'success',
+                    confirmButtonColor: '#F76B59',
+                });
+            })
+            .catch(() => {
+                Swal.fire({
+                    title: '복사 실패',
+                    text: 'URL 복사에 실패했어요. 직접 복사해주세요.',
+                    icon: 'error',
+                    confirmButtonColor: '#F76B59',
+                });
+            });
+    };
+
     // 수정 버튼 핸들러
     const handleEdit = () => {
         navigate(`/community/review/edit/${id}`);
@@ -84,16 +75,40 @@ const ReviewDetail = () => {
 
     // 삭제 버튼 핸들러
     const handleDelete = async () => {
-        if (!window.confirm('정말 삭제하시겠습니까?')) return;
-        try {
-            await axios.delete(`/api/reviews/${id}`, { headers: { Authorization: `Bearer ${token}` } });
-            navigate('/community/review');
-        } catch (err) {
-            console.error('삭제 실패', err);
+        const result = await Swal.fire({
+            title: '정말 삭제할까요?',
+            text: '삭제하면 되돌릴 수 없어요!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#F76B59',
+            cancelButtonColor: '#d3d3d3',
+            confirmButtonText: '삭제',
+            cancelButtonText: '취소',
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await axios.delete(`/api/reviews/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                await Swal.fire({
+                    title: '삭제 완료!',
+                    text: '글이 삭제되었어요.',
+                    icon: 'success',
+                    confirmButtonColor: '#F76B59',
+                });
+                navigate('/community/review');
+            } catch (err) {
+                console.error('삭제 실패', err);
+                Swal.fire({
+                    title: '삭제 실패',
+                    text: '문제가 발생했어요. 잠시 후 다시 시도해주세요.',
+                    icon: 'error',
+                    confirmButtonColor: '#F76B59',
+                });
+            }
         }
     };
-
-
     if (!review) return null;
 
     return (
@@ -103,25 +118,29 @@ const ReviewDetail = () => {
                 <Sidebar />
                 <main className="main-content">
                     <h1 className="detail-title">{review.title}</h1>
-                    <span className="detail-author">{review.userName}</span>
-                    <span className="detail-date">
 
+                    {/* 작성자+날짜 · 공유+좋아요 */}
+                    <div className="detail-meta">
+                        <span className="detail-author">{review.userName}</span>
+                        <span className="detail-date">
                         {new Date(review.createdAt).toLocaleDateString('ko-KR', {
                             year: 'numeric',
                             month: '2-digit',
                             day: '2-digit',
                         })}
                     </span>
-
-                    <div className="like-section">
-                        <img
-                            src={isLiked ? '/images/community/heart-filled.png' : '/images/community/heart-empty.png'}
-                            alt="좋아요"
-                            className="heart-img"
-                            onClick={handleLike}
-                        />
-                        <span className="like-count">{likeCount}</span>
+                        {/* 공유 + 좋아요 섹션 */}
+                        <div className="interaction-section">
+                            <button className="share-btn" onClick={handleShare}>
+                                공유하기
+                            </button>
+                            <LikeButton
+                                initialLiked={review.liked}
+                                initialCount={review.likeCount}
+                            />
+                        </div>
                     </div>
+
                     {/* 첨부 이미지 갤러리 */}
                     {attachments.length > 0 && (
                         <div className="detail-images">
