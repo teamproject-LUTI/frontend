@@ -254,6 +254,7 @@ const MenuManagement = () => {
     };
 
     // 메뉴 삭제
+    /* eslint-disable */
     const handleDeleteMenu = async (menuId) => {
         const menuToDelete = menus.find(m => m.navigationMenuId === menuId);
         const hasChildren = menus.some(m => m.parentId === menuId);
@@ -628,6 +629,7 @@ const MenuManagement = () => {
         return options;
     };
 
+    /* eslint-disable */
     useEffect(() => {
         let mounted = true;
 

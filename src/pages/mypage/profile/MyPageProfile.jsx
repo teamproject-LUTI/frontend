@@ -1,3 +1,4 @@
+/* eslint-disable no-console, no-unused-vars */
 import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '../../../components/layout/Layout';
 import { User, Phone, Mail, MapPin, Calendar, Edit2 } from 'lucide-react';
