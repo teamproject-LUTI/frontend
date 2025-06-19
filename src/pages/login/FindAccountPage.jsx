@@ -14,6 +14,18 @@ const FindAccountPage = () => {
 
         const { name, phoneNumber } = idForm;
 
+        // 이름 미입력 체크
+        if (!idForm.name) {
+            Swal.fire({icon: 'warning', text: '이름을 입력해주세요.'});
+            return;
+        }
+
+        // 휴대폰 번호 미입력 체크
+        if (!idForm.phoneNumber) {
+            Swal.fire({icon: 'warning', text: '휴대폰번호를 입력해주세요.'});
+            return;
+        }
+
         // '-' 문자 체크
         if (phoneNumber.includes('-')) {
             Swal.fire({icon: 'warning', text: "휴대폰 번호에서 '-'를 제외하고 입력해주세요."});
@@ -60,14 +72,12 @@ const FindAccountPage = () => {
                                 placeholder="이름"
                                 value={idForm.name}
                                 onChange={(e) => setIdForm({ ...idForm, name: e.target.value })}
-                                required
                             />
                             <input
                                 type="text"
                                 placeholder="휴대폰 번호('-'제외)"
                                 value={idForm.phoneNumber}
                                 onChange={(e) => setIdForm({ ...idForm, phoneNumber: e.target.value })}
-                                required
                             />
                             <button type="submit" className="submit-btn">확인</button>
                         </form>
