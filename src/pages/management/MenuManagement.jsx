@@ -123,7 +123,7 @@ const MenuManagement = () => {
         }
     );
 
-    // 🚀 Axios로 간소화된 메뉴 데이터 로드
+    // 메뉴 데이터 로드
     const loadMenus = async () => {
         try {
             setLoading(true);
@@ -178,7 +178,7 @@ const MenuManagement = () => {
         }
     };
 
-    // 🚀 Axios로 간소화된 메뉴 저장
+    // 메뉴 저장
     const handleSaveMenu = async () => {
         if (!formData.name.trim()) {
             Swal.fire({
@@ -236,7 +236,7 @@ const MenuManagement = () => {
         }
     };
 
-    // 🚀 Axios로 간소화된 메뉴 삭제
+    // 메뉴 삭제
     const handleDeleteMenu = async (menuId) => {
         const menuToDelete = menus.find(m => m.navigationMenuId === menuId);
         const hasChildren = menus.some(m => m.parentId === menuId);

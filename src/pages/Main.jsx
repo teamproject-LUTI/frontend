@@ -22,7 +22,6 @@ const Main = ({ children }) => {
         </div>
     );
 
-
     return (
         <div className="main-layout">
             <Topbar />
