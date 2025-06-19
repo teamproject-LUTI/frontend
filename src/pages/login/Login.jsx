@@ -100,6 +100,11 @@ const Login = () => {
     window.location.href = '/membership';
   };
 
+  // 아이디 비밀번호 찾기 페이지로 이동
+  const handleFindAccount = () => {
+    navigate('/account/find');
+  }
+
   return (
       <div className="login-container">
         <div className="login-form-wrapper">
@@ -155,6 +160,7 @@ const Login = () => {
           {/* Forgot Password Link */}
           <div className="forgot-password">
             <button className="forgot-link" disabled={isLoading}>
+            <button className="forgot-link" onClick={handleFindAccount}>
               아이디/패스워드 찾기
             </button>
           </div>
