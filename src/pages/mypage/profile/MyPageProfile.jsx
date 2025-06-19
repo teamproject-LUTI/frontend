@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 import '../../../styles/MyPage/MyPageProfile.css'
 import { useAuth } from '../../../util/AuthContext';
+import { authUtils } from '../../../util/authUtils'; // 🔥 authUtils import 추가
 
 
 const EMAIL_DOMAINS = [
@@ -177,8 +178,6 @@ const MyPageProfile = () => {
     }
   }, [userInfo, loading]);
 
-
-
   const handleInputChange = useCallback((field, value) => {
     setEditForm(prev => ({
       ...prev,
@@ -228,7 +227,7 @@ const MyPageProfile = () => {
     }
   };
 
-// 3. 프로필 이미지 업로드 API 함수
+  // 프로필 이미지 업로드 API 함수
   const uploadProfileImage = async (imageFile) => {
     const formData = new FormData();
     formData.append('profileImage', imageFile);
@@ -253,7 +252,7 @@ const MyPageProfile = () => {
     }
   };
 
-// 4. 유효성 검사 함수
+  // 유효성 검사 함수
   const validateForm = () => {
     const errors = [];
 
@@ -310,7 +309,7 @@ const MyPageProfile = () => {
     return errors;
   };
 
-// 5. 저장 함수 - 통합된 저장 버튼용
+  // 저장 함수 - 통합된 저장 버튼용
   const handleSaveClick = async () => {
     // 유효성 검사
     const validationErrors = validateForm();
@@ -360,6 +359,7 @@ const MyPageProfile = () => {
         }
 
         // 2. 텍스트 정보 업데이트
+        //phoneNumber 변수 정의
         const phoneNumber = `${editForm.phonePrefix || '010'}-${editForm.phoneMiddle || ''}-${editForm.phoneLast || ''}`;
 
         const updateData = {
@@ -370,7 +370,6 @@ const MyPageProfile = () => {
           address: editForm.address.trim()
         };
 
-        console.log('프로필 정보 업데이트 시작...');
         const updateResponse = await axios.put(`${API_BASE_URL}/api/mypage/update`, updateData, {
           withCredentials: true,
           headers: {
@@ -389,16 +388,30 @@ const MyPageProfile = () => {
           setUserInfo(updatedUserInfo);
 
           // 4. AuthContext 업데이트
-          await updateUser({
+          const authUpdateData = {
             nickname: editForm.nickname.trim(),
             birthday: isSocialLogin() ? editForm.birthDate : undefined,
             gender: editForm.gender,
             phoneNumber: phoneNumber,
             address: editForm.address.trim(),
-            profileImage: updatedImageUrl
-          });
+            profileImageUrl: updatedImageUrl
+          };
 
-          // 5. 선택된 파일 초기화
+          // 5. 🔥 강제로 최신 사용자 정보 다시 가져오기
+          setTimeout(async () => {
+            try {
+              console.log('최신 사용자 정보 재조회 시작...');
+              const freshData = await authUtils.getUserInfo();
+              if (freshData && freshData.success) {
+                console.log('최신 사용자 정보 조회 성공:', freshData.user);
+                await updateUser(freshData.user);
+              }
+            } catch (error) {
+              console.error('최신 사용자 정보 조회 실패:', error);
+            }
+          }, 500);
+
+          // 6. 선택된 파일 초기화
           setSelectedImageFile(null);
 
           await Swal.fire({
@@ -438,7 +451,7 @@ const MyPageProfile = () => {
     }
   };
 
-// 6. 프로필 이미지 삭제 함수 추가
+  // 프로필 이미지 삭제 함수
   const handleDeleteProfileImage = async () => {
     if (isSocialLogin()) {
       Swal.fire({
@@ -476,7 +489,10 @@ const MyPageProfile = () => {
           setSelectedImageFile(null);
 
           // AuthContext 업데이트
-          await updateUser({ profileImage: null });
+          await updateUser({
+            profileImage: null,
+            profileImageUrl: null
+          });
 
           await Swal.fire({
             title: '삭제 완료!',
@@ -694,7 +710,6 @@ const MyPageProfile = () => {
               <div className="info-section">
                 <div className="section-header">
                   <h2>연락처 정보</h2>
-                  {/* 연락처 정보 섹션에서 저장 버튼 제거 */}
                 </div>
 
                 <div className="info-content">
