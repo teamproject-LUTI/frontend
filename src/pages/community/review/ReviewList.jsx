@@ -74,7 +74,6 @@ const ReviewList = () => {
                       <p className="author">{r.userName}</p>
                       <p className="date">{r.createdAt.substring(0, 10)}</p>
                     </div>
-
                   </div>
                 </div>
             ))}

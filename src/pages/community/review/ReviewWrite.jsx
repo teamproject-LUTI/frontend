@@ -136,7 +136,7 @@ const ReviewWrite = () => {
             </div>
 
             <div className="form-group">
-              <label>내용</label>
+
               {/* Toast UI Editor로 대체 */}
               <Editor
                   previewStyle="vertical"   //미리보기 스타일 세로
