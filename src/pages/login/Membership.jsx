@@ -17,8 +17,7 @@ const Membership = () => {
         phoneNumber1: '',
         phoneNumber2: '',
         gender: '',
-        nickname: '',
-        address: ''
+        nickname: ''
     });
 
     const [birthDays, setBirthDays] = useState([]);
@@ -137,6 +136,58 @@ const Membership = () => {
             });
     };
 
+    //kakao 우편번호
+    const [postalCode, setPostalCode] = useState('');
+    const [address, setAddress] = useState('');
+    const [extraAddress, setExtraAddress] = useState('');
+    const [detailAddress, setDetailAddress] = useState('');
+
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+        script.async = true;
+        document.body.appendChild(script);
+    }, []);
+
+    const handlePostcodeSearch  = () => {
+        new window.daum.Postcode({
+            oncomplete: function (data) {
+                let addr = ''; // 주소
+                let extraAddr = ''; // 참고항목
+
+                //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                    addr = data.roadAddress;
+                } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                    addr = data.jibunAddress;
+                }
+
+                // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                if (data.userSelectedType === 'R') {
+                    // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                    // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                    if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                        extraAddr += data.bname;
+                    }
+                    // 건물명이 있고, 공동주택일 경우 추가한다.
+                    if (data.buildingName !== '' && data.apartment === 'Y') {
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                    if (extraAddr !== '') {
+                        extraAddr = ' (' + extraAddr + ')';
+                    }
+                }
+
+                setPostalCode(data.zonecode);
+                setAddress(addr);
+                setExtraAddress(extraAddr);
+                document.getElementById("detailAddressInput")?.focus();
+            }
+        }).open();
+    };
+
+
 
     const handleSubmit = () => {
         if (!isVerified) {
@@ -162,7 +213,7 @@ const Membership = () => {
         }
 
         // 모든 필수 필드 검증
-        const requiredFields = ['email', 'password', 'name', 'birthYear', 'birthMonth', 'birthDay', 'phoneNumber1', 'phoneNumber2', 'gender', 'nickname', 'address'];
+        const requiredFields = ['email', 'password', 'name', 'birthYear', 'birthMonth', 'birthDay', 'phoneNumber1', 'phoneNumber2', 'gender', 'nickname'];
         const emptyFields = requiredFields.filter(field => !formData[field]);
 
         if (emptyFields.length > 0) {
@@ -170,6 +221,17 @@ const Membership = () => {
                 icon: 'warning',
                 title: '필수 정보 누락',
                 text: '모든 필수 항목을 입력해주세요.',
+                confirmButtonText: '확인',
+                confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
+
+        if (!postalCode || !address) {
+            Swal.fire({
+                icon: 'warning',
+                title: '주소 누락',
+                text: '우편번호 찾기를 눌러 주소를 입력해주세요.',
                 confirmButtonText: '확인',
                 confirmButtonColor: '#3085d6'
             });
@@ -187,7 +249,7 @@ const Membership = () => {
             phoneNumber: formData.phoneNumber1 + formData.phoneNumber2,
             gender: formData.gender,
             nickname: formData.nickname,
-            address: formData.address
+            address: `${address} ${detailAddress} ${extraAddress}`.trim()
         };
 
         fetch("http://localhost:8080/api/signup", {
@@ -234,7 +296,7 @@ const Membership = () => {
 
 
     return (
-        <Layout>
+        <Layout hideSidebar={true}>
             <div className="membershipContainer">
                 <div className="membershipFormWrapper">
                     <div className="membershipHeader">
@@ -444,15 +506,49 @@ const Membership = () => {
                         {/* 주소 */}
                         <div className="formGroup">
                             <label className="formLabel">주소</label>
+                            <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
+                                <input
+                                    type="text"
+                                    name={postalCode}
+                                    value={postalCode}
+                                    readOnly
+                                    placeholder="우편번호"
+                                    className="formInput"
+                                    style={{ width: "120px" }}
+                                />
+                                <button type="button" onClick={handlePostcodeSearch} className="btn btn-no-margin">
+                                    우편번호 찾기
+                                </button>
+                            </div>
+
                             <input
                                 type="text"
-                                name="address"
-                                value={formData.address}
-                                onChange={handleInputChange}
+                                name={address}
+                                value={address}
+                                readOnly
+                                placeholder="주소"
                                 className="formInput"
-                                placeholder="주소를 입력하세요"
-                                required
+                                style={{ marginBottom: "8px" }}
                             />
+
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <input
+                                    type="text"
+                                    id="detailAddressInput"
+                                    value={detailAddress}
+                                    onChange={(e) => setDetailAddress(e.target.value)}
+                                    placeholder="상세주소"
+                                    className="formInput"
+                                />
+                                <input
+                                    type="text"
+                                    name={extraAddress}
+                                    value={extraAddress}
+                                    readOnly
+                                    placeholder="참고항목"
+                                    className="formInput"
+                                />
+                            </div>
                         </div>
 
                         {/* 가입 버튼 */}

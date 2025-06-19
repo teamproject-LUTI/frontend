@@ -5,18 +5,17 @@ import Sidebar from './Sidebar';
 import Footer from './Footer';
 import '../../styles/Main.css';
 
-const Layout = ({ children }) => {
+const Layout = ({ children, hideSidebar = false }) => {
     return (
         <div className="main-layout">
             <Topbar />
             <div className="main-content-wrapper">
-                <Sidebar />
+                {!hideSidebar && <Sidebar />}
                 <main className="main-content">
                     {children}
                 </main>
             </div>
             <Footer />
-
         </div>
     );
 };

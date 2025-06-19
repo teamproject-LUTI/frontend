@@ -32,6 +32,8 @@ import Payment from './pages/mypage/Payment';
 import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
 import LikeReview from "./pages/likereview/LikeReview";
+import MenuManagement from "./pages/management/MenuManagement";
+
 
 const App = () => {
   return (
@@ -64,6 +66,7 @@ const App = () => {
 
             {/*멤버쉽 페이지*/}
             <Route path='/membership' element={<Membership/>}/>
+
             {/* 마이페이지*/}
             <Route path='/mypage' element={<ProtectedRoute/>}>
               <Route index element={<MyPage/>}/>
@@ -83,6 +86,10 @@ const App = () => {
               </ProtectedRoute>
             }/>
 
+            {/* 관리자 페이지 */}
+            <Route path='/admin' element={<ProtectedRoute/>}>
+              <Route path='menus' element={<MenuManagement/>}/> {/* ✅ 상대 경로 */}
+            </Route>
           </Routes>
         </div>
       </AuthProvider>
