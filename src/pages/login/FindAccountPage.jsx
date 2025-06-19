@@ -27,18 +27,11 @@ const FindAccountPage = () => {
             return;
         }
 
-        // '-' 문자 체크
-        if (phoneNumber.includes('-')) {
-            Swal.fire({icon: 'warning', text: "휴대폰 번호에서 '-'를 제외하고 입력해주세요."});
-            return;
-        }
-
         // 자리수 체크
         if (!/^\d{11}$/.test(phoneNumber)) {
             Swal.fire({icon: 'warning', text: "휴대폰 번호는 숫자 11자리여야 합니다."});
             return;
         }
-
 
         try {
             const response = await fetch('http://localhost:8080/api/account/find-email', {
