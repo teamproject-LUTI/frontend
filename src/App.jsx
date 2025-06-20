@@ -28,6 +28,9 @@ import ReviewWrite from './pages/community/review/ReviewWrite';
 import ReviewEdit from './pages/community/review/ReviewEdit';
 import NoticeList from './pages/community/notice/NoticeList';
 import QnaList from './pages/community/qna/QnaList';
+import QnaWrite from './pages/community/qna/QnaWrite';
+import QnaDetail from './pages/community/qna/QnaDetail';
+import QnaEdit from './pages/community/qna/QnaEdit';
 import MyPage from "./pages/mypage/MyPage"
 import MyPageProfile from "./pages/mypage/profile/MyPageProfile"
 import WithdrawPage from "./pages/mypage/withdraw/WithdrawPage";
@@ -170,6 +173,28 @@ const App = () => {
                   <ProtectedRoute>
                       <QnaList />
                   </ProtectedRoute>
+              } />
+
+              {/*QnA 글쓰기 페이지*/}
+              <Route path='/community/qna/write' element={
+                  <ProtectedRoute>
+                    <QnaWrite />
+                  </ProtectedRoute>
+              } />
+
+
+              {/*QnA 상세보기 페이지*/}
+              <Route path='/community/qna/:id' element={
+                  <ProtectedRoute>
+                      <QnaDetail />
+                  </ProtectedRoute>
+              } />
+
+              {/*QnA 수정 페이지*/}
+              <Route path='/community/qna/edit/:id' element={
+                <ProtectedRoute>
+                    <QnaEdit />
+                </ProtectedRoute>
               } />
 
             {/*리뷰 페이지*/}
