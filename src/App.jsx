@@ -72,9 +72,7 @@ const App = () => {
             }/>
 
             {/*멤버쉽 페이지*/}
-<<<<<<< HEAD
-            <Route path='/membership' element={<Membership />} />
-=======
+
             <Route path='/membership' element={<Membership/>}/>
 
             {/* 마이페이지*/}
@@ -89,7 +87,6 @@ const App = () => {
               <Route path='payments' element={<Payment/>}/>
             </Route>
 
->>>>>>> 1297e41f7a25970dbca9fe242fdfeca3bf61a3ab
               {/*리뷰 목록 페이지*/}
               <Route path='/community/review' element={
                   <ProtectedRoute>
@@ -131,21 +128,6 @@ const App = () => {
                       <QnaList />
                   </ProtectedRoute>
               } />
-<<<<<<< HEAD
-
-            {/* 마이페이지*/}
-            <Route path='/mypage' element={<ProtectedRoute />}>
-              <Route index element={<MyPage />} />
-              <Route path='profile' element={<MyPageProfile />} />
-              <Route path='withdraw/confirm' element={<PasswordConfirmPage />} />
-              <Route path='withdraw' element={<WithdrawPage />} />
-              <Route path='myreview' element={<MyReview />} />
-              <Route path='myask' element={<MyAsk />} />
-              <Route path='likereview' element={<LikeReview />} />
-              <Route path='payments' element={<Payment />} />
-            </Route>
-=======
->>>>>>> 1297e41f7a25970dbca9fe242fdfeca3bf61a3ab
 
             {/*리뷰 페이지*/}
             <Route path='/community/review' element={
