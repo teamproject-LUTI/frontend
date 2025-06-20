@@ -19,7 +19,8 @@ import {
   MessageSquare,
   HeartPlus,
   MessageCircleQuestion,
-  Shield
+  Shield,
+  KeyRound
 } from 'lucide-react';
 import '../../styles/layout/Sidebar.css';
 /* eslint-disable */
@@ -43,7 +44,7 @@ const Sidebar = () => {
     'Volume2': Volume2, 'HelpCircle': HelpCircle, 'User': User,
     'Star': Star, 'Settings': Settings, 'Shield': Shield, 'Heart': Heart, 'MapPin': MapPin,
     'CreditCard': CreditCard, 'UserMinus': UserMinus, 'MessageSquare': MessageSquare,
-    'HeartPlus': HeartPlus, 'MessageCircleQuestion': MessageCircleQuestion
+    'HeartPlus': HeartPlus, 'MessageCircleQuestion': MessageCircleQuestion, "KeyRound" : KeyRound
   };
 
 
