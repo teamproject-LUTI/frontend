@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { fetchPaymentsByUser, cancelPayment } from "../../services/PaymentService";
+import { fetchPaymentsByUser, cancelPayment } from "../../../../luti/workspace/frontend/src/services/PaymentService";
 import axios from "axios";
-import { getPaymentMethodName } from "../../util/paymentMethodMap";
-import "../../styles/payment/PaymentHistoryTable.css";
+import { getPaymentMethodName } from "../../../../luti/workspace/frontend/src/util/paymentMethodMap";
+import "../../../../luti/workspace/frontend/src/styles/payment/PaymentHistoryTable.css";
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+
+dayjs.extend(localizedFormat);
+dayjs.locale("ko");
 
 const PaymentHistoryTable = () => {
   const [payments, setPayments] = useState([]);
@@ -46,10 +52,10 @@ const PaymentHistoryTable = () => {
     };
   }, [userId]);
 
-  const handleCancel = async (paymentNo) => {
+  const handleCancel = async (paymentId) => {
     if (!window.confirm("정말 이 결제를 환불 처리하시겠습니까?")) return;
     try {
-      await cancelPayment(paymentNo);
+      await cancelPayment(paymentId);
       alert("환불 처리가 완료되었습니다.");
       fetchData(userId);
     } catch (error) {
@@ -79,24 +85,27 @@ const PaymentHistoryTable = () => {
                 <td colSpan="6" className="empty-data">결제 내역이 없습니다.</td>
               </tr>
           ) : (
-              payments.map((payment, index) => (
-                  <tr key={payment.paymentNo}>
-                    <td>{index + 1}</td>
-                    <td>{payment.paymentDate}</td>
-                    <td className="amount">{payment.totalPrice.toLocaleString()}₩</td>
-                    <td>{getPaymentMethodName(payment.paymentMethodId)}</td>
-                    <td className={payment.paymentState === 0 ? "status-completed" : "status-cancelled"}>
-                      {payment.paymentState === 0 ? "완료" : "취소됨"}
-                    </td>
-                    <td>
-                      {payment.paymentState === 0 ? (
-                          <button onClick={() => handleCancel(payment.paymentId)}>환불</button>
-                      ) : (
-                          "-"
-                      )}
-                    </td>
-                  </tr>
-              ))
+              payments.map((payment, index) => {
+                console.log("✅ payment 전체 확인:", payment); // 전체 로그 출력
+                return (
+                    <tr key={payment.paymentId}>
+                      <td>{index + 1}</td>
+                      <td>{dayjs(payment.paymentDate).format("YYYY년 M월 D일 A h시 mm분")}</td>
+                      <td className="amount">{payment.totalPrice.toLocaleString()}₩</td>
+                      <td>{getPaymentMethodName(payment.paymentMethodId)}</td>
+                      <td className={payment.paymentState === 0 ? "status-completed" : "status-cancelled"}>
+                        {payment.paymentState === 0 ? "완료" : "취소됨"}
+                      </td>
+                      <td>
+                        {payment.paymentState === 0 ? (
+                            <button onClick={() => handleCancel(payment.paymentId)}>환불</button>
+                        ) : (
+                            "-"
+                        )}
+                      </td>
+                    </tr>
+                );
+              })
           )}
           </tbody>
         </table>
