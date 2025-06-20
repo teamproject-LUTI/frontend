@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import '../../styles/login/FindAccount.css';
 import Layout from '../../components/layout/Layout';
 import Swal from 'sweetalert2';
+import EmailVerification from '../../components/login/EmailVerification';
 
 const FindAccountPage = () => {
     const [activeTab, setActiveTab] = useState('findId'); // 'findId' 또는 'findPassword'
 
     const [idForm, setIdForm] = useState({ name: '', phoneNumber: '' });
-    const [pwForm, setPwForm] = useState({ email: '', name: '' });
+    const [pwForm, setPwForm] = useState({ name: '', email: ''});
     const [foundUser, setFoundUser] = useState(null);
+    const [isVerified, setIsVerified] = useState(false);
+    const [showVerification, setShowVerification] = useState(false);
+    const [verificationCode, setVerificationCode] = useState('');
+    const [verificationError, setVerificationError] = useState('');
+    const [resultMessage, setResultMessage] = useState('');
+
 
     const handleIdSubmit = async (e) => {
         e.preventDefault();
@@ -68,6 +75,89 @@ const FindAccountPage = () => {
         console.log('비밀번호 찾기 요청:', pwForm);
     };
 
+    const isValidEmailFormat = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const handleEmailVerification = () => {
+        if (!pwForm.email) {
+            Swal.fire({icon: 'warning', text: '이메일을 입력해주세요.'});
+            return;
+        }
+
+        if (!isValidEmailFormat(pwForm.email)) {
+            Swal.fire({ icon: 'warning', text: '이메일 형식이 올바르지 않습니다.' });
+            return;
+        }
+
+        fetch("http://localhost:8080/api/account/email/code", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            credentials: 'include',
+            body: JSON.stringify({
+                email: pwForm.email,
+                name: pwForm.name,
+                checkType: "MATCH_NAME"
+            })
+        })
+            .then(async res => {
+                const msg = await res.text();
+
+                if (res.ok) {
+                    Swal.fire({ icon: 'info', text: msg });
+                    setShowVerification(true); // 인증코드 입력 모달 열기
+                } else {
+                    Swal.fire({ icon: 'error', text: msg });
+                }
+            })
+            .catch(() => Swal.fire({ icon: 'error', text: '이메일 전송 실패' }));
+    };
+
+    useEffect(() => {
+        const token = new URLSearchParams(window.location.search).get("token");
+        if (token) {
+            fetch(`http://localhost:8080/api/auth/verify?token=${token}`, {
+                credentials: 'include' // 세션 공유 위해 필요
+            })
+                .then(res => res.text())
+                .then(result => {
+                    setResultMessage(result);
+                    if (result.includes("완료")) {
+                        setIsVerified(true);
+                    }
+                })
+                .catch(() => setResultMessage("인증 실패"));
+        }
+    }, []);
+
+    const handleCodeVerify = () => {
+        fetch(`http://localhost:8080/api/account/email/verify?code=${verificationCode}`, {
+            method: "GET",
+            credentials: 'include'
+        })
+            .then(async res => {
+                const msg = await res.text();
+
+                if (res.status === 200) {
+                    Swal.fire({
+                        icon: 'success',
+                        text: '이메일 인증이 완료되었습니다. 임시 비밀번호가 이메일로 전송되었습니다.' });
+                    setIsVerified(true); // 인증 완료 상태
+                    setShowVerification(false);
+                    setVerificationError('')
+                } else if (res.status === 401) {
+                    setVerificationError("인증번호가 일치하지 않습니다.");
+                } else if (res.status === 400) {
+                    setVerificationError("인증 시간이 만료되었습니다.");
+                } else {
+                    setVerificationError("오류가 발생했습니다. 관리자에게 문의 부탁드립니다.");
+                }
+            })
+            .catch(() => Swal.fire({ icon: 'error', text: '인증 실패' }));
+    };
+
+
     return (
         <Layout>
             <div className="find-account-container">
@@ -108,17 +198,32 @@ const FindAccountPage = () => {
                     {activeTab === 'findPassword' && (
                         <form onSubmit={handlePwSubmit} className="find-account-form">
                             <input
-                                type="email"
-                                placeholder="이메일"
-                                value={pwForm.email}
-                                onChange={(e) => setPwForm({ ...pwForm, email: e.target.value })}
-                                required
-                            />
-                            <input
                                 type="text"
                                 placeholder="이름"
                                 value={pwForm.name}
                                 onChange={(e) => setPwForm({ ...pwForm, name: e.target.value })}
+                                required
+                            />
+                            <input
+                                type="email"
+                                placeholder="가입 이메일"
+                                value={pwForm.email}
+                                onChange={(e) => setPwForm({ ...pwForm, email: e.target.value })}
+                                required
+                            />
+                            <button
+                                type="button"
+                                className="btn btn-no-margin"
+                                onClick={handleEmailVerification}
+                                disabled={isVerified}>
+                                {isVerified ? "인증완료" : "인증하기"}
+                            </button>
+
+                            <input
+                                type="text"
+                                placeholder="인증번호 입력"
+                                value={verificationCode}
+                                onChange={(e) => setVerificationCode(e.target.value)}
                                 required
                             />
                             <button type="submit" className="submit-btn">확인</button>
@@ -126,6 +231,14 @@ const FindAccountPage = () => {
                     )}
                 </div>
             </div>
+            <EmailVerification
+                isOpen={showVerification}
+                onClose={() => setShowVerification(false)}
+                onConfirm={handleCodeVerify}
+                code={verificationCode}
+                onCodeChange={(e) => setVerificationCode(e.target.value)}
+                errorMessage={verificationError}
+            />
         </Layout>
     );
 };
