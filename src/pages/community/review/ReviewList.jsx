@@ -17,7 +17,11 @@ const ReviewList = () => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get('/api/reviews', {
-          params: { page, size },
+          params: {
+            page,
+            size,
+            sort: 'createdAt,desc',
+          },
         });
         console.log("서버 응답 데이터:", response.data); // ✅ 여기에 확인 로그 추가
         setReviews(response.data.data || []);
@@ -58,8 +62,8 @@ const ReviewList = () => {
                           className="review-thumbnail"
                       />
                   <div className="review-content">
-                    <div className="review-title">
-                      <h3 className="title-text">{r.title}</h3>
+                    <div className="review-title-box">
+                      <h3 className="list-title-text">{r.title}</h3>
                       {/* isLiked가 true면 채워진 하트, false면 빈 하트 보여주기 */}
                       <img
                           src={ r.liked
@@ -70,11 +74,10 @@ const ReviewList = () => {
                           className="heart-img"
                       />
                     </div>
-                    <div className="review-meta">
+                    <div className="review-list-meta">
                       <p className="author">{r.userName}</p>
                       <p className="date">{r.createdAt.substring(0, 10)}</p>
                     </div>
-
                   </div>
                 </div>
             ))}

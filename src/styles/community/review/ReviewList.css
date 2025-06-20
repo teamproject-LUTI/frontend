@@ -54,9 +54,7 @@
 }
 
 
-
-
-.review-title {
+.review-title-box{
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -66,23 +64,24 @@
     margin-top: 13px;
 }
 
-.title-text {
+.list-title-text {
     font-size: 20px;
     font-weight: bold;
     margin: 0;
-    flex: 1;
+    flex-grow: 1;           /* ✅ 남는 공간을 다 차지하게 */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
 }
 
 .heart-img {
     width: 20px;
     height: 20px;
-    /*cursor: pointer;*/
+    flex-shrink: 0;
 }
 
-.review-meta {
+.review-list-meta {
     display: flex;
     justify-content: space-between;
     font-size: 14px;

@@ -121,17 +121,20 @@ const ReviewDetail = () => {
 
                     {/* 작성자+날짜 · 공유+좋아요 */}
                     <div className="detail-meta">
-                        <span className="detail-author">{review.userName}</span>
-                        <span className="detail-date">
-                        {new Date(review.createdAt).toLocaleDateString('ko-KR', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                        })}
-                    </span>
-                        {/* 공유 + 좋아요 섹션 */}
+                        <div className="meta-left">
+                            <span className="detail-author">{review.userName}</span>
+                            <span className="detail-date">
+                                {new Date(review.createdAt).toLocaleDateString('ko-KR', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                })}
+                        </span>
+                        </div>
+                        {/* 공유 + 좋아요 */}
                         <div className="interaction-section">
                             <button className="share-btn" onClick={handleShare}>
+                                <img src="/images/community/share-icon.png" alt="공유 아이콘" className="share-icon" />
                                 공유하기
                             </button>
                             <LikeButton
