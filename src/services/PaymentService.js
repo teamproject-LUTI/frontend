@@ -14,7 +14,6 @@ const apiClient = axios.create({
 
 /**
  * 결제 정보 저장 요청
- * @param {Object} paymentData - impUid, merchantUid, paymentMethodId, totalPrice 등
  */
 export const savePayment = async (paymentData) => {
   try {
@@ -35,7 +34,6 @@ const paymentCache = new Map();
 
 /**
  * 사용자별 결제 내역 조회 (중복 호출 방지 포함)
- * @param {number} userId
  */
 export const fetchPaymentsByUser = async (userId) => {
   if (paymentCache.has(userId)) {
@@ -46,23 +44,21 @@ export const fetchPaymentsByUser = async (userId) => {
   const request = apiClient
       .get(`/api/payments/user/${userId}`)
       .then((res) => {
-        paymentCache.delete(userId); // 완료 후 캐시 제거
+        paymentCache.delete(userId);
         return res.data;
       })
       .catch((err) => {
-        paymentCache.delete(userId); // 실패 시도도 제거
+        paymentCache.delete(userId);
         throw err;
       });
 
   paymentCache.set(userId, request);
   console.log(`[fetchPaymentsByUser] 호출 실행 (userId: ${userId})`);
-
   return request;
 };
 
 /**
  * 환불 처리 (DB 기준 상태 변경)
- * @param {number} paymentId
  */
 export const cancelPayment = async (paymentId) => {
   try {
@@ -74,9 +70,65 @@ export const cancelPayment = async (paymentId) => {
   }
 };
 
-// 추후 확장 대비 export default로 묶어도 가능
+// 총 결제금액 높은 순으로 조회
+export const fetchPaymentsByPriceDesc = async (userId) => {
+  const res = await apiClient.get(`/api/payments/user/${userId}/price-desc`);
+  return res.data;
+};
+
+// 총 결제금액 낮은 순으로 조회
+export const fetchPaymentsByPriceAsc = async (userId) => {
+  const res = await apiClient.get(`/api/payments/user/${userId}/price-asc`);
+  return res.data;
+};
+
+// 결제 상태별 조회 (0: 결제, 1: 환불)
+export const fetchPaymentsByState = async (userId, state) => {
+  const res = await apiClient.get(`/api/payments/user/${userId}/state/${state}`);
+  return res.data;
+};
+
+// 날짜 범위로 조회 (start, end는 ISO 문자열)
+export const fetchPaymentsByDateRange = async (userId, start, end) => {
+  const res = await apiClient.get(
+      `/api/payments/user/${userId}/range?start=${start}&end=${end}`
+  );
+  return res.data;
+};
+
+// 결제일 최신순으로 조회
+export const fetchPaymentsByDateDesc = async (userId) => {
+  const res = await apiClient.get(`/api/payments/user/${userId}/date-desc`);
+  return res.data;
+};
+
+// 전체 사용자 기준 결제 상태별 조회 (관리자용)
+export const fetchAllPaymentsByState = async (state) => {
+  const res = await apiClient.get(`/api/payments/state/${state}`);
+  return res.data;
+};
+
+// 전체 사용자 기준 결제 상태 + 날짜 범위로 조회 (관리자용)
+export const fetchAllPaymentsByDateRange = async (state, start, end) => {
+  const res = await apiClient.get(`/api/payments/state/${state}/range`, {
+    params: {
+      start,
+      end
+    }
+  });
+  return res.data;
+};
+
+// 모듈 전체 export (선택적)
 export default {
   savePayment,
   fetchPaymentsByUser,
-  cancelPayment
+  cancelPayment,
+  fetchPaymentsByPriceDesc,
+  fetchPaymentsByPriceAsc,
+  fetchPaymentsByState,
+  fetchPaymentsByDateRange,
+  fetchPaymentsByDateDesc,
+  fetchAllPaymentsByState,
+  fetchAllPaymentsByDateRange
 };

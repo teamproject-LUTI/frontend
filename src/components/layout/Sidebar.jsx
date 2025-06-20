@@ -19,7 +19,9 @@ import {
   MessageSquare,
   HeartPlus,
   MessageCircleQuestion,
-  Shield
+  Shield,
+  UserX,
+  KeyRound
 } from 'lucide-react';
 import '../../styles/layout/Sidebar.css';
 /* eslint-disable */
@@ -43,9 +45,8 @@ const Sidebar = () => {
     'Volume2': Volume2, 'HelpCircle': HelpCircle, 'User': User,
     'Star': Star, 'Settings': Settings, 'Shield': Shield, 'Heart': Heart, 'MapPin': MapPin,
     'CreditCard': CreditCard, 'UserMinus': UserMinus, 'MessageSquare': MessageSquare,
-    'HeartPlus': HeartPlus, 'MessageCircleQuestion': MessageCircleQuestion
+    'HeartPlus': HeartPlus, 'MessageCircleQuestion': MessageCircleQuestion,'UserX':UserX,'KeyRound':KeyRound
   };
-
 
   // API 요청 헤더 생성 (쿠키 기반이므로 헤더에 토큰 불필요)
   const createRequestHeaders = () => {
@@ -93,31 +94,24 @@ const Sidebar = () => {
   // 사용자 인증 상태 확인
   const checkUserAuth = async () => {
     try {
-      console.log('🔐 사용자 인증 상태 확인 시작');
-      console.log('🍪 현재 쿠키:', document.cookie);
 
       const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
         headers: createRequestHeaders(),
         credentials: 'include' // 쿠키 자동 포함
       });
 
-      console.log('🔐 인증 응답 상태:', response.status);
-
       if (response.ok) {
         const userData = await response.json();
-        console.log('✅ 인증 성공:', userData);
         setIsAuthenticated(true);
         const userIsAdmin = userData.userTypeId === 2;
         setIsAdmin(userIsAdmin);
         return { isAuthenticated: true, isAdmin: userIsAdmin };
       } else {
-        console.log('❌ 인증 실패 또는 토큰 만료');
         setIsAuthenticated(false);
         setIsAdmin(false);
         return { isAuthenticated: false, isAdmin: false };
       }
     } catch (error) {
-      console.error('❌ 사용자 인증 확인 실패:', error);
       setIsAuthenticated(false);
       setIsAdmin(false);
       return { isAuthenticated: false, isAdmin: false };
@@ -125,24 +119,16 @@ const Sidebar = () => {
   };
 
   // 메뉴 데이터 로드 (중복 호출 방지)
-  const loadMenuData = async () => {
+  const loadMenuData = useCallback(async () => {
     try {
       const timestamp = new Date().getTime();
       const endpoint = `${API_BASE_URL}/api/menus/hierarchy?_t=${timestamp}`;
-
-      console.log(`📡 메뉴 요청 시작`);
-      console.log(`📍 URL: ${endpoint}`);
-      console.log(`🍪 요청 쿠키:`, document.cookie);
-      console.log(`🔧 요청 헤더:`, createRequestHeaders());
 
       const response = await fetch(endpoint, {
         headers: createRequestHeaders(),
         credentials: 'include', // 쿠키 자동 포함
         cache: 'no-store'
       });
-
-      console.log(`📤 응답 상태: ${response.status} ${response.statusText}`);
-      console.log(`📤 응답 헤더:`, [...response.headers.entries()]);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -154,7 +140,6 @@ const Sidebar = () => {
 
       // SingleResponseDto 구조 처리
       const dbMenus = menuData.data || menuData || [];
-      console.log('📋 받은 메뉴 데이터:', dbMenus.length, '개');
 
       const convertedMenus = convertDbMenusToSidebarFormat(dbMenus);
       setMenuItems(convertedMenus);
@@ -165,7 +150,7 @@ const Sidebar = () => {
       console.error('❌ 메뉴 데이터 로드 실패:', error);
       throw error;
     }
-  };
+  }, [API_BASE_URL, convertDbMenusToSidebarFormat, menuItems.length]); // 의존성 추가
 
   // 사이드바 초기화 (useRef로 중복 호출 방지)
   const initializingRef = useRef(false);
@@ -173,7 +158,6 @@ const Sidebar = () => {
   const initializeSidebar = useCallback(async () => {
     // 이미 초기화 중이면 리턴
     if (initializingRef.current) {
-      console.log('이미 초기화 중입니다. 중복 호출 방지');
       return;
     }
 
@@ -183,21 +167,17 @@ const Sidebar = () => {
       setError(null);
       setMenuItems([]);
 
-      console.log('🚀 사이드바 초기화 시작');
 
       // 1. 사용자 인증 상태 확인
       const authResult = await checkUserAuth();
 
       // 2. 메뉴 데이터 로드 (인증 여부와 관계없이 시도)
-      console.log('📋 메뉴 데이터 로드 시도 (인증 상태:', authResult.isAuthenticated, ')');
       try {
         await loadMenuData();
       } catch (menuError) {
         console.error('❌ 메뉴 로드 실패, 인증 문제일 수 있음:', menuError);
         setError(`메뉴 로드 실패: ${menuError.message}`);
       }
-
-      console.log('✅ 사이드바 초기화 완료');
 
     } catch (err) {
       console.error('❌ 사이드바 초기화 실패:', err);
@@ -207,6 +187,40 @@ const Sidebar = () => {
       initializingRef.current = false;
     }
   }, [API_BASE_URL]);
+
+  // 메뉴 업데이트 이벤트 리스너 (MenuManagement에서 발생하는 이벤트 수신)
+  useEffect(() => {
+
+    const handleMenuUpdate = async (event) => {
+
+
+      try {
+
+        setTimeout(async () => {
+          try {
+            await loadMenuData();
+
+          } catch (error) {
+            console.error('❌ Sidebar: 지연된 메뉴 새로고침 실패:', error);
+          }
+        }, 100); // 100ms 지연
+
+      } catch (error) {
+        console.error('❌ Sidebar: 메뉴 새로고침 실패:', error);
+      }
+    };
+
+    // window와 document 모두에 이벤트 리스너 등록
+    window.addEventListener('menuUpdated', handleMenuUpdate);
+    document.addEventListener('menuUpdated', handleMenuUpdate);
+
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    return () => {
+      window.removeEventListener('menuUpdated', handleMenuUpdate);
+      document.removeEventListener('menuUpdated', handleMenuUpdate);
+    };
+  }, []); // loadMenuData를 의존성에서 제거하고 직접 호출
 
   // 컴포넌트 마운트 시 한 번만 초기화
   useEffect(() => {

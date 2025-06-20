@@ -1,6 +1,6 @@
 import './App.css';
 import '@toast-ui/editor/dist/toastui-editor.css';
-import './styles/MyPage/MyPage.css';
+import "./styles/MyPage/MyPage.css";
 import './styles/MyPage/MyPageProfile.css';
 import './styles/MyPage/MyReview.css';
 import './styles/MyPage/MyAsk.css';
@@ -15,6 +15,7 @@ import './styles/login/Membership.css';
 import './styles/login/GoogleLoginButton.css';
 import './styles/common/LutiModal.css';
 import './styles/common/theme-override.css';
+import './styles/MyPage/PasswordChangePage.css'
 import '@toast-ui/editor/dist/toastui-editor.css';
 import { Route, Routes } from "react-router-dom";
 import Main from "./pages/Main";
@@ -48,6 +49,8 @@ import AuthMAnagement from "./pages/management/AuthManagement";
 import NoticeWrite from './pages/community/notice/NoticeWrite';
 import NoticeDetail from './pages/community/notice/NoticeDetail';
 import NoticeEdit  from './pages/community/notice/NoticeEdit';
+import PasswordChangePage from "./pages/mypage/password/PasswordChangePage";
+import PaymentManagement from "./pages/management/PaymentManagement";
 
 const App = () => {
   return (
@@ -127,6 +130,7 @@ const App = () => {
               <Route path='myask' element={<MyAsk/>}/>
               <Route path='likereview' element={<LikeReview/>}/>
               <Route path='payments' element={<Payment/>}/>
+              <Route path='password' element={<PasswordChangePage/>}/>
             </Route>
 
               {/*리뷰 목록 페이지*/}
@@ -224,6 +228,7 @@ const App = () => {
             <Route path='/admin' element={<ProtectedRoute />}>
               <Route path='menus' element={<MenuManagement />} />
               <Route path='permissions' element={<AuthMAnagement />} />
+              <Route path='payments' element={<PaymentManagement />} />
             </Route>
           </Routes>
         </div>
