@@ -96,58 +96,383 @@ const TravelRouteCard = ({route, isSelected, onSelect, loading}) => {
                 </div>
             )}
 
-// ChatGPT API와 통신하기 위한 폼 컴포넌트
-const ChatForm = () => {
-    // 사용자가 입력한 프롬프트(검색어)를 저장하는 상태
-    const [prompt, setPrompt] = useState('');
-    // ChatGPT로부터 받은 응답을 저장하는 상태
-    const [response, setResponse] = useState('');
+            {/* 포함사항 */}
+            {route.included && route.included.length > 0 && (
+                <div className="route-included">
+                    <h4 className="included-title">✅ 포함사항</h4>
+                    <div className="included-items">
+                        {route.included.join(' • ')}
+                    </div>
+                </div>
+            )}
 
-    // 폼 제출 시 실행되는 함수
-    const sendPrompt = async (e) => {
-        e.preventDefault(); // 폼 기본 동작(페이지 새로고침) 방지
+            {/* 추천 대상 */}
+            {route.bestFor && (
+                <div className="route-best-for">
+                    👥 추천: {route.bestFor}
+                </div>
+            )}
+
+            {/* 선택 버튼 */}
+            <button
+                className={`select-route-btn ${isSelected ? 'selected' : ''}`}
+                disabled={loading}
+            >
+                {isSelected ? '✓ 선택됨' : '이 루트 선택하기'}
+            </button>
+        </div>
+    )
+};
+
+/* ────────── 메시지 컴포넌트 ────────── */
+const ChatMessage = ({type, content, searchInfo, routes, onSelectRoute, selectedRoute, loading}) => {
+    if (type === 'user') {
+        return (
+            <div className="chat-message user-message">
+                <div className="message-content">
+                    {content}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="chat-message bot-message">
+            <div className="bot-avatar">
+            </div>
+            <div className="message-content">
+                <div className="bot-response">
+                    <h3 className="response-title">여행 루트를 찾았어요! 냥❣️ </h3>
+                    <p className="response-subtitle">맞춤형 여행 루트를 확인해보세요 ️</p>
+
+                    {/* 검색 정보 */}
+                    {searchInfo && (
+                        <div className="search-info">
+                            <div className="search-info-item">
+                                <MapPin className="info-icon"/>
+                                <span>목적지: {searchInfo.cityCode}</span>
+                            </div>
+                            <div className="search-info-item">
+                                <Calendar className="info-icon"/>
+                                <span>{searchInfo.checkInDate} ~ {searchInfo.checkOutDate}</span>
+                            </div>
+                            <div className="search-info-item">
+                                <Users className="info-icon"/>
+                                <span>성인 {searchInfo.adults}명</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 추천 여행 루트 목록 */}
+                    {routes && routes.length > 0 && (
+                        <div className="routes-section">
+                            <h4 className="routes-title">
+                                🗺️ 추천 여행 루트 ({routes.length}개 옵션)
+                            </h4>
+                            <div className="routes-grid">
+                                {routes.map((route, index) => (
+                                    <TravelRouteCard
+                                        key={route.packageId || index}
+                                        route={route}
+                                        isSelected={selectedRoute?.packageId === route.packageId}
+                                        onSelect={onSelectRoute}
+                                        loading={loading}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 선택된 루트 다음 단계 */}
+                    {selectedRoute && (
+                        <div className="selected-route-section">
+                            <h4 className="selected-title">
+                                ✅ {selectedRoute.title} 루트가 선택되었습니다!
+                            </h4>
+                            <p className="selected-description">
+                                하단의 버튼으로 예약을 진행하면 돼요, 냥❣️.
+                            </p>
+                            {/* 기존 travel-start-btn 제거 */}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+/* ────────── 메인 컴포넌트 ────────── */
+const ChatForm = () => {
+    // 상태
+    const [prompt, setPrompt] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [messages, setMessages] = useState([]);
+    const [currentRoutes, setCurrentRoutes] = useState([]);
+    const [currentSearchInfo, setCurrentSearchInfo] = useState(null);
+    const [selectedRoute, setSelectedRoute] = useState(null);
+    const [hasSearched, setHasSearched] = useState(false);
+
+    // 추천 여행 루트 생성
+    const generateTravelRoutes = async () => {
+        if (!prompt.trim()) {
+            setError('여행 계획을 입력해주세요.');
+            return;
+        }
+
+        setLoading(true);
+        setError('');
+        setSelectedRoute(null);
+
+        // 사용자 메시지 추가
+        const userMessage = {
+            type: 'user',
+            content: prompt,
+            timestamp: new Date().toISOString()
+        };
+
+        setMessages(prev => [...prev, userMessage]);
+        setHasSearched(true);
 
         try {
-            // 서버의 /chat/ask 엔드포인트로 POST 요청 보내기
-            const res = await fetch('/chat/ask', {
+            const res = await fetch('http://localhost:8080/chat/travel-packages', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded', // 서버가 받을 수 있는 형식으로 전송
-                },
-                body: 'prompt=' + encodeURIComponent(prompt), // 사용자 입력을 전송
+                headers: {'Content-Type': 'text/plain; charset=utf-8'},
+                credentials: 'include',
+                body: prompt,
             });
 
-            // 서버 응답을 텍스트로 받아서 상태에 저장
-            const text = await res.text();
-            setResponse(text);
+            if (!res.ok) {
+                throw new Error(`서버 오류: ${res.status}`);
+            }
+
+            const data = await res.json();
+
+            if (data.success && data.packages) {
+                setCurrentRoutes(data.packages);
+                setCurrentSearchInfo(data.searchInfo);
+
+                // 봇 응답 메시지 추가
+                const botMessage = {
+                    type: 'bot',
+                    content: '여행 루트를 찾았습니다!',
+                    routes: data.packages,
+                    searchInfo: data.searchInfo,
+                    timestamp: new Date().toISOString()
+                };
+
+                setMessages(prev => [...prev, botMessage]);
+                console.log('생성된 여행 루트:', data.packages);
+            } else {
+                throw new Error('여행 루트 생성에 실패했습니다.');
+            }
+
         } catch (error) {
-            // 에러 발생 시 콘솔에 출력하고 사용자에게 메시지 표시
-            console.error('ChatGPT 요청 실패:', error);
-            setResponse('오류가 발생했습니다.');
+            console.error('여행 루트 생성 실패:', error);
+            setError('여행 루트 생성 중 오류가 발생했습니다: ' + error.message);
+        } finally {
+            setLoading(false);
+            setPrompt(''); // 입력창 초기화
         }
+    };
+
+    // 루트 선택 처리
+    const selectRoute = async (selectedRoute) => {
+        if (loading) return;
+
+        setLoading(true);
+        setError('');
+
+        try {
+            const res = await fetch('http://localhost:8080/chat/select-package', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
+                body: JSON.stringify({
+                    packageId: selectedRoute.packageId,
+                    searchInfo: currentSearchInfo,
+                    selectedPackage: selectedRoute,
+                    userNotes: null
+                }),
+            });
+
+            if (!res.ok) {
+                throw new Error(`서버 오류: ${res.status}`);
+            }
+
+            const data = await res.json();
+
+            if (data.success) {
+                setSelectedRoute(selectedRoute);
+                console.log('여행 루트 선택 완료:', data);
+            } else {
+                throw new Error('여행 루트 선택에 실패했습니다.');
+            }
+
+        } catch (error) {
+            console.error('여행 루트 선택 실패:', error);
+            setError('여행 루트 선택 중 오류가 발생했습니다: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 폼 제출 처리
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        await generateTravelRoutes();
+    };
+
+    // 새로운 검색 시작
+    const startNewSearch = () => {
+        setMessages([]);
+        setCurrentRoutes([]);
+        setCurrentSearchInfo(null);
+        setSelectedRoute(null);
+        setHasSearched(false);
+        setError('');
+        setPrompt('');
     };
 
     return (
         <div className="chat-form">
-            {/* 사용자 입력 폼 영역 */}
-            <form onSubmit={sendPrompt} className="main-search-container">
-                <Search className={"main-search-icon"} />
-                <input
-                    type="text"
-                    placeholder="여행지, 숙소, 액티비티 검색..." // 입력창 안내문구
-                    className="main-search-input" // 스타일링 클래스
-                    value={prompt} // 상태와 input 값 바인딩
-                    onChange={(e) => setPrompt(e.target.value)} // 입력 시 상태 변경
-                />
-            </form>
+            {!hasSearched ? (
+                /* ────────── 초기 화면 ────────── */
+                <div className="initial-screen">
+                    <div className="welcome-section">
+                        <h1 className="welcome-title">어디로 여행을 떠날까요?</h1>
+                        <p className="welcome-subtitle"><strong>LUTI</strong> 가 맞춤형 여행 루트를 추천해드릴게요🎵 <strong>냥❣️</strong>
+                        </p>
+                    </div>
 
-            {/* 응답 결과 출력 영역 */}
-            {response && (
-                <div className="chat-response">
-                    <h4>추천 결과</h4>
-                    <pre>{response}</pre> {/* 줄바꿈 포함해서 출력 */}
+                    <form onSubmit={handleSubmit} className="initial-search-form">
+                        <div className="initial-search-container">
+                            <Search className="search-icon"/>
+                            <input
+                                type="text"
+                                placeholder="예: 제주도 2박3일 힐링여행, 파리 1주일"
+                                className="initial-search-input"
+                                value={prompt}
+                                onChange={(e) => setPrompt(e.target.value)}
+                                disabled={loading}
+                            />
+                            <button
+                                type="submit"
+                                className="initial-search-btn"
+                                disabled={loading || !prompt.trim()}
+                            >
+                                {loading ? <Loader2 className="loading-icon"/> : '검색'}
+                            </button>
+                        </div>
+                    </form>
+
+                    {error && (
+                        <div className="error-message">
+                            {error}
+                        </div>
+                    )}
                 </div>
+            ) : (
+                /* ────────── 대화 화면 ────────── */
+                <div className="chat-screen">
+                    {/* 상단 헤더 */}
+                    <div className="chat-header">
+                        <div className="chat-title">
+                            <div className="bot-avatar">
+                                {/* span 태그 자체를 삭제 */}
+                            </div>
+                            <span>LUTI</span>
+                        </div>
+
+                        <button
+                            className="new-search-btn"
+                            onClick={startNewSearch}
+                        >
+                            새로운 검색하기
+                        </button>
+                    </div>
+
+
+                    {/* 메시지 목록 */}
+                    <div className="chat-messages">
+                        {messages.map((message, index) => (
+                            <ChatMessage
+                                key={index}
+                                type={message.type}
+                                content={message.content}
+                                searchInfo={message.searchInfo}
+                                routes={message.routes}
+                                onSelectRoute={selectRoute}
+                                selectedRoute={selectedRoute}
+                                loading={loading}
+                            />
+                        ))}
+
+                        {loading && (
+                            <div className="chat-message bot-message">
+                                <div className="bot-avatar">
+
+                                </div>
+                                <div className="message-content">
+                                    <div className="loading-container">
+                                        <Loader2 className="loading-spinner"/>
+                                        <div className="loading-text">
+                                            <strong>LUTI</strong>가 맞춤형 여행 루트를 생성하고 있습니다🎵 <strong>❣️냥냥❣️</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+
+                    {/* 하단 입력창 */}
+                    <div>
+                        {/* 👇 플로팅 예약 버튼 - selectedRoute가 있을 때만 표시 */}
+                        {selectedRoute && (
+                            <div className="floating-booking-btn">
+                                <button
+                                    className="floating-travel-btn"
+                                    onClick={() => {
+                                        alert('예약 페이지로 이동합니다 (구현 예정)');
+                                    }}
+                                >
+                                    🧳 {selectedRoute.title} 예약하기
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="chat-input-container">
+                            <form onSubmit={handleSubmit} className="chat-input-form">
+                                <input
+                                    type="text"
+                                    placeholder="추가 요청사항이 있으시면 입력해주세요..."
+                                    className="chat-input"
+                                    value={prompt}
+                                    onChange={(e) => setPrompt(e.target.value)}
+                                    disabled={loading}
+                                />
+                                <button
+                                    type="submit"
+                                    className="chat-send-btn"
+                                    disabled={loading || !prompt.trim()}
+                                >
+                                    {loading ? <Loader2 className="loading-icon"/> : <Send/>}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                        {error && (
+                            <div className="error-message">
+                                {error}
+                            </div>
+                        )}
+
+                    </div>
+
             )}
+
+
         </div>
     );
 };
