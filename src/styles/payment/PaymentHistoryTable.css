@@ -147,4 +147,31 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-} 
+}
+
+/* 결제 버튼 전용 스타일 */
+.payment-button {
+  background: linear-gradient(135deg, #F76B59 0%, #E75A4E 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 10px rgba(231, 90, 78, 0.25);
+}
+
+.payment-button:hover {
+  background: linear-gradient(135deg, #e75a4e 0%, #c9473e 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(231, 90, 78, 0.3);
+}
+
+.payment-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(231, 90, 78, 0.2);
+}
