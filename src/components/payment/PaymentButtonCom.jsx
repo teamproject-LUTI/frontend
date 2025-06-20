@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { savePayment } from "../../../../luti/workspace/frontend/src/services/PaymentService";
-import { paymentMethodMap } from "../../../../luti/workspace/frontend/src/util/paymentMethodMap";
+import { savePayment } from "../../services/PaymentService";
+import { paymentMethodMap } from "../../util/paymentMethodMap";
 
 const PaymentButtonCom = ({ paymentMethod, onPaymentComplete }) => {
   const navigate = useNavigate();

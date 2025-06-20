@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { fetchPaymentsByUser, cancelPayment } from "../../../../luti/workspace/frontend/src/services/PaymentService";
+import { fetchPaymentsByUser, cancelPayment } from "../../services/PaymentService";
 import axios from "axios";
-import { getPaymentMethodName } from "../../../../luti/workspace/frontend/src/util/paymentMethodMap";
-import "../../../../luti/workspace/frontend/src/styles/payment/PaymentHistoryTable.css";
+import { getPaymentMethodName } from "../../util/paymentMethodMap";
+import "../../styles/payment/PaymentHistoryTable.css";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import localizedFormat from "dayjs/plugin/localizedFormat";
