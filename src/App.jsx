@@ -1,6 +1,6 @@
 import './App.css';
 import '@toast-ui/editor/dist/toastui-editor.css';
-import './styles/MyPage/MyPage.css';
+import "./styles/MyPage/MyPage.css";
 import './styles/MyPage/MyPageProfile.css';
 import './styles/MyPage/MyReview.css';
 import './styles/MyPage/MyAsk.css';
@@ -15,6 +15,8 @@ import './styles/login/Membership.css';
 import './styles/login/GoogleLoginButton.css';
 import './styles/common/LutiModal.css';
 import './styles/common/theme-override.css';
+import './styles/MyPage/PasswordChangePage.css'
+import '@toast-ui/editor/dist/toastui-editor.css';
 import { Route, Routes } from "react-router-dom";
 import Main from "./pages/Main";
 import Login from "./pages/login/Login";
@@ -27,6 +29,9 @@ import ReviewWrite from './pages/community/review/ReviewWrite';
 import ReviewEdit from './pages/community/review/ReviewEdit';
 import NoticeList from './pages/community/notice/NoticeList';
 import QnaList from './pages/community/qna/QnaList';
+import QnaWrite from './pages/community/qna/QnaWrite';
+import QnaDetail from './pages/community/qna/QnaDetail';
+import QnaEdit from './pages/community/qna/QnaEdit';
 import MyPage from "./pages/mypage/MyPage"
 import MyPageProfile from "./pages/mypage/profile/MyPageProfile"
 import WithdrawPage from "./pages/mypage/withdraw/WithdrawPage";
@@ -38,9 +43,11 @@ import ChatForm from "./pages/travel/ChatForm";
 import Payment from './pages/mypage/Payment';
 import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
-import LikeReview from "./pages/likereview/LikeReview";
+import LikeReview from "./pages/mypage/likereview/LikeReview";
 import MenuManagement from "./pages/management/MenuManagement";
-
+import AuthMAnagement from "./pages/management/AuthManagement"
+import PasswordChangePage from "./pages/mypage/password/PasswordChangePage";
+import PaymentManagement from "./pages/management/PaymentManagement";
 
 const App = () => {
   return (
@@ -57,6 +64,8 @@ const App = () => {
             {/* 계정 복구 페이지 - 인증 필요하지만 탈퇴한 사용자도 접근 가능 */}
             <Route path='/account/restore' element={<AccountRestorePage/>}/>
 
+            <Route path='/membership' element={<Membership/>}/>
+
             {/*메인 페이지*/}
             <Route path='/main' element={
               <ProtectedRoute>
@@ -69,11 +78,57 @@ const App = () => {
               <ProtectedRoute>
                 <ChatForm/>
               </ProtectedRoute>
-            }/>
+            } />
 
+<<<<<<< HEAD
             {/*멤버쉽 페이지*/}
 
             <Route path='/membership' element={<Membership/>}/>
+=======
+              {/*리뷰 목록 페이지*/}
+              <Route path='/community/review' element={
+                  <ProtectedRoute>
+                      <ReviewList />
+                  </ProtectedRoute>
+              } />
+
+              {/*리뷰 상세보기 페이지*/}
+              <Route path='/community/review/:id' element={
+                  <ProtectedRoute>
+                      <ReviewDetail />
+                  </ProtectedRoute>
+              } />
+
+              {/*리뷰 글쓰기 페이지*/}
+              <Route path='/community/review/write' element={
+                  <ProtectedRoute>
+                      <ReviewWrite />
+                  </ProtectedRoute>
+              } />
+
+              {/*리뷰 내가 쓴 글 수정 페이지*/}
+              <Route path='/community/review/edit/:id' element={
+                  <ProtectedRoute>
+                      <ReviewEdit  />
+                  </ProtectedRoute>
+              } />
+
+
+
+              {/*공지사항 목록 페이지*/}
+              <Route path='/community/notice' element={
+                  <ProtectedRoute>
+                      <NoticeList />
+                  </ProtectedRoute>
+              } />
+
+              {/*QnA 목록 페이지*/}
+              <Route path='/community/qna' element={
+                  <ProtectedRoute>
+                      <QnaList />
+                  </ProtectedRoute>
+              } />
+>>>>>>> 4001d608e23141152a33501a3cbd714ca2a86beb
 
             {/* 마이페이지*/}
             <Route path='/mypage' element={<ProtectedRoute/>}>
@@ -85,6 +140,7 @@ const App = () => {
               <Route path='myask' element={<MyAsk/>}/>
               <Route path='likereview' element={<LikeReview/>}/>
               <Route path='payments' element={<Payment/>}/>
+              <Route path='password' element={<PasswordChangePage/>}/>
             </Route>
 
               {/*리뷰 목록 페이지*/}
@@ -129,6 +185,28 @@ const App = () => {
                   </ProtectedRoute>
               } />
 
+              {/*QnA 글쓰기 페이지*/}
+              <Route path='/community/qna/write' element={
+                  <ProtectedRoute>
+                    <QnaWrite />
+                  </ProtectedRoute>
+              } />
+
+
+              {/*QnA 상세보기 페이지*/}
+              <Route path='/community/qna/:id' element={
+                  <ProtectedRoute>
+                      <QnaDetail />
+                  </ProtectedRoute>
+              } />
+
+              {/*QnA 수정 페이지*/}
+              <Route path='/community/qna/edit/:id' element={
+                <ProtectedRoute>
+                    <QnaEdit />
+                </ProtectedRoute>
+              } />
+
             {/*리뷰 페이지*/}
             <Route path='/community/review' element={
               <ProtectedRoute>
@@ -137,8 +215,10 @@ const App = () => {
             }/>
 
             {/* 관리자 페이지 */}
-            <Route path='/admin' element={<ProtectedRoute/>}>
-              <Route path='menus' element={<MenuManagement/>}/> {/* ✅ 상대 경로 */}
+            <Route path='/admin' element={<ProtectedRoute />}>
+              <Route path='menus' element={<MenuManagement />} />
+              <Route path='permissions' element={<AuthMAnagement />} />
+              <Route path='payments' element={<PaymentManagement />} />
             </Route>
           </Routes>
         </div>

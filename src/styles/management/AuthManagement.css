@@ -1,0 +1,553 @@
+.user-management-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.header-section h2 {
+    color: #2c3e50;
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.refresh-button {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.refresh-button:hover:not(:disabled) {
+    background-color: #138496;
+}
+
+.refresh-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.user-stats {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #495057;
+}
+
+.stat-value.admin {
+    color: #F76B59;
+}
+
+/* 검색 컨테이너 */
+.auth-search-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid #e9ecef;
+    margin-bottom: 20px;
+}
+
+.auth-search-inputs {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.auth-search-input-group {
+    position: relative;
+    flex: 1;
+    display: flex;
+    gap: 10px;
+}
+
+.auth-search-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+    box-sizing: border-box;
+}
+
+.auth-search-input:focus {
+    outline: none;
+    border-color: #007bff;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* 검색 버튼 추가 */
+.auth-search-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.auth-search-button:hover:not(:disabled) {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.auth-search-button:disabled {
+    background-color: #6c757d;
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.auth-clear-search {
+    position: absolute;
+    right: 120px; /* 검색 버튼 공간 확보 */
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-clear-search:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+/* role-filter 개선된 스타일 */
+.auth-role-filter {
+    padding: 12px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #f8f9fa;
+    min-width: 150px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+    color: #495057;
+    font-weight: 500;
+}
+
+.auth-role-filter:focus {
+    outline: none;
+    border-color: #F76B59;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.auth-role-filter:hover {
+    border-color: #F76B59;
+    background-color: white;
+}
+
+/* 옵션 스타일링 (일부 브라우저에서만 적용) */
+.auth-role-filter option {
+    padding: 8px 12px;
+    background-color: white;
+    color: #495057;
+}
+
+.auth-role-filter option:hover {
+    background-color: #f8f9fa;
+}
+
+.auth-search-results {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #6c757d;
+    font-size: 14px;
+    padding-top: 10px;
+    margin-left: 10px;
+}
+
+.auth-reset-filters {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.auth-reset-filters:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.table-container {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid #e9ecef;
+    margin-bottom: 20px;
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.user-table thead {
+    background-color: #F76B59;
+    color: white;
+}
+
+.user-table th,
+.user-table td {
+    padding: 15px 12px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.user-table th {
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.user-table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.user-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.admin-row {
+    background-color: #fff3cd;
+}
+
+.admin-row:hover {
+    background-color: #ffeaa7;
+}
+
+.auth-role-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.auth-role-badge.admin {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.auth-role-badge.user {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #e9ecef;
+}
+
+/* 상태 배지 스타일 추가 */
+.status-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-badge.active {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.status-badge.inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.detail-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.3s;
+}
+
+.detail-button:hover {
+    background-color: #5a6268;
+}
+
+.auth-role-toggle-button {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.auth-role-toggle-button.grant {
+    background-color: #28a745;
+    color: white;
+}
+
+.auth-role-toggle-button.grant:hover:not(:disabled) {
+    background-color: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.auth-role-toggle-button.revoke {
+    background-color: #dc3545;
+    color: white;
+}
+
+.auth-role-toggle-button.revoke:hover:not(:disabled) {
+    background-color: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.auth-role-toggle-button:disabled {
+    background-color: #6c757d;
+    color: #fff;
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 페이징 스타일 - 다른 화면과 일치 */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin-top: 20px;
+}
+
+.pagination-info {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/** 게시판 페이지네이션 스타일 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+}
+
+/* pagination 버튼 기본 스타일 */
+.pagination button {
+    padding: 6px 12px;
+    background: transparent;
+    border: none;
+    color: #333;
+    cursor: pointer;
+}
+
+/* 비활성화된 버튼 스타일 */
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* 현재 페이지 버튼 강조 */
+.pagination button.active {
+    background: #F76B59;
+    border-color: #F76B59;
+    color: #fff;
+    border-radius: 5px;
+}
+
+.no-data,
+.loading {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 40px;
+}
+
+.loading {
+    color: #007bff;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .user-management-container {
+        padding: 15px;
+    }
+
+    .header-section {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .user-stats {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .auth-search-inputs {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .auth-search-input-group {
+        flex-direction: column;
+    }
+
+    .auth-clear-search {
+        position: static;
+        align-self: flex-end;
+        transform: none;
+        margin-top: -40px;
+        margin-right: 10px;
+    }
+
+    .auth-role-filter {
+        min-width: 100%;
+    }
+
+    .auth-search-results {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .pagination-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .user-table {
+        font-size: 12px;
+    }
+
+    .user-table th,
+    .user-table td {
+        padding: 10px 8px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 4px;
+    }
+}
+
+/* 다크 모드 지원 (선택사항) */
+@media (prefers-color-scheme: dark) {
+    .auth-search-input,
+    .auth-role-filter {
+        background-color: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+
+    .auth-search-input:focus,
+    .auth-role-filter:focus {
+        background-color: #2d3748;
+        border-color: #3182ce;
+    }
+
+    .pagination-container {
+        background-color: #2d3748;
+        border-color: #4a5568;
+    }
+
+    .pagination button {
+        color: #e2e8f0;
+    }
+
+    .pagination button.active {
+        background: #F76B59;
+        color: #fff;
+    }
+}

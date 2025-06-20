@@ -1,13 +1,13 @@
 import Layout from '../../components/layout/Layout';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Plus, Edit2, Trash2, ChevronRight, ChevronDown, Save, X,
     Home, MessageSquareMore, FileText, Volume2, HelpCircle, User,
     Star, Settings, Shield, Heart, MapPin, CreditCard, UserMinus,
-    MessageSquare, HeartPlus, MessageCircleQuestion
+    MessageSquare, HeartPlus, MessageCircleQuestion, GripVertical,UserX,KeyRound
 } from 'lucide-react';
 import Swal from 'sweetalert2';
-// import '올바른/경로/MenuManagement.css';
+import axios from 'axios';
 
 const MenuManagement = () => {
     // 아이콘 매핑
@@ -27,7 +27,9 @@ const MenuManagement = () => {
         'UserMinus': UserMinus,
         'MessageSquare': MessageSquare,
         'HeartPlus': HeartPlus,
-        'MessageCircleQuestion': MessageCircleQuestion
+        'MessageCircleQuestion': MessageCircleQuestion,
+        'UserX':UserX,
+        'KeyRound':KeyRound,
     };
 
     // 아이콘 렌더링 함수
@@ -44,6 +46,8 @@ const MenuManagement = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingMenu, setEditingMenu] = useState(null);
     const [expandedItems, setExpandedItems] = useState(new Set());
+    const [draggedItem, setDraggedItem] = useState(null);
+    const [dragOverItem, setDragOverItem] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -56,61 +60,92 @@ const MenuManagement = () => {
         requiredRole: 1
     });
 
-    // 쿠키 기반 API 호출 공통 설정
-    const apiRequest = async (url, options = {}) => {
-        const defaultOptions = {
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            },
-            ...options
-        };
+    // 드래그 관련 참조
+    const dragItemRef = useRef(null);
+    const dragOverItemRef = useRef(null);
 
-        return fetch(url, defaultOptions);
-    };
+    // Axios 인스턴스 생성
+    const api = axios.create({
+        baseURL: process.env.NODE_ENV === 'development'
+            ? process.env.REACT_APP_API_URL || 'http://localhost:8080'
+            : '',
+        withCredentials: true,
+        timeout: 10000,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
 
-    // DB에서 메뉴 데이터 로드
+    // 요청 인터셉터 - 타임스탬프 자동 추가
+    api.interceptors.request.use(
+        config => {
+            const separator = config.url.includes('?') ? '&' : '?';
+            config.url += `${separator}_t=${new Date().getTime()}`;
+            return config;
+        },
+        error => Promise.reject(error)
+    );
+
+    // 응답 인터셉터 - 공통 에러 처리
+    api.interceptors.response.use(
+        response => response,
+        error => {
+            if (error.response?.status === 401) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '인증 필요',
+                    text: '인증이 필요합니다. 다시 로그인해주세요.',
+                    confirmButtonText: '로그인 페이지로',
+                    allowOutsideClick: false
+                }).then(() => {
+                    window.location.href = '/login';
+                });
+                return Promise.reject(new Error('인증이 필요합니다.'));
+            }
+
+            if (error.response?.status === 403) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '권한 부족',
+                    text: '관리자 권한이 필요합니다.',
+                    confirmButtonColor: '#3085d6'
+                });
+                return Promise.reject(new Error('관리자 권한이 필요합니다.'));
+            }
+
+            if (error.code === 'NETWORK_ERROR' || !error.response) {
+                const networkError = new Error('서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.');
+                networkError.isNetworkError = true;
+                return Promise.reject(networkError);
+            }
+
+            const httpError = new Error(
+                error.response?.data?.message ||
+                error.response?.data?.error ||
+                `HTTP ${error.response?.status} 오류가 발생했습니다.`
+            );
+            httpError.status = error.response?.status;
+            httpError.data = error.response?.data;
+
+            return Promise.reject(httpError);
+        }
+    );
+
+    // 메뉴 데이터 로드
     const loadMenus = async () => {
         try {
             setLoading(true);
-            const timestamp = new Date().getTime();
-            const baseUrl = process.env.NODE_ENV === 'development'
-                ? 'http://localhost:8080'
-                : '';
-            const endpoint = `${baseUrl}/api/menus/admin/all?_t=${timestamp}`;
 
+            const response = await api.get('/api/menus/admin/all');
 
-            const response = await apiRequest(endpoint);
-
-            if (response.status === 401) {
-                throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
-            }
-
-            if (response.status === 403) {
-                throw new Error('관리자 권한이 필요합니다.');
-            }
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                console.error('받은 응답:', text.substring(0, 200));
-                throw new Error('서버에서 JSON이 아닌 응답을 반환했습니다.');
-            }
-
-            const data = await response.json();
-
+            // 응답 데이터 처리
             let menuData;
-            if (data && Array.isArray(data)) {
-                menuData = data;
-            } else if (data && data.data && Array.isArray(data.data)) {
-                menuData = data.data;
+            if (Array.isArray(response.data)) {
+                menuData = response.data;
+            } else if (response.data?.data && Array.isArray(response.data.data)) {
+                menuData = response.data.data;
             } else {
-                console.error('예상하지 못한 데이터 구조:', data);
+                console.error('예상하지 못한 데이터 구조:', response.data);
                 menuData = [];
             }
 
@@ -127,48 +162,51 @@ const MenuManagement = () => {
             console.error('메뉴 로드 실패:', error);
             setMenus([]);
 
-            if (error.message.includes('인증이 필요합니다')) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '인증 필요',
-                    text: error.message,
-                    confirmButtonText: '로그인 페이지로',
-                }).then(() => {
-                    window.location.href = '/login';
-                });
+            // 인터셉터에서 이미 처리된 인증/권한 에러는 추가 알림 없이 return
+            if (error.message.includes('인증이 필요합니다') || error.message.includes('관리자 권한')) {
                 return;
             }
 
-            if (error.message.includes('관리자 권한')) {
-                Swal.fire({
-                    icon: 'error',
-                    title: '권한 부족',
-                    text: error.message,
-                });
-                return;
-            }
-
+            // 기타 에러만 처리
             let errorMessage = '메뉴 데이터를 불러오는데 실패했습니다.';
-            if (error.message.includes('HTTP error')) {
-                errorMessage = `서버 오류: ${error.message}`;
-            } else if (error.message.includes('JSON')) {
-                errorMessage = '서버 응답 형식이 올바르지 않습니다.';
-            } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                errorMessage = '서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.';
+            if (error.status) {
+                errorMessage = `서버 오류: HTTP ${error.status}`;
+            } else if (error.isNetworkError) {
+                errorMessage = error.message;
             }
 
             Swal.fire({
                 icon: 'error',
                 title: '메뉴 로드 오류',
                 text: errorMessage,
-                footer: `API URL: /api/menus/admin/all`
+                footer: 'API URL: /api/menus/admin/all'
             });
         } finally {
             setLoading(false);
         }
     };
 
-    // 메뉴 추가/수정
+    // 사이드바 메뉴 새로고침 함수
+    const triggerSidebarRefresh = () => {
+
+        // 커스텀 이벤트 발생시켜 사이드바에 메뉴 변경 알림
+        const event = new CustomEvent('menuUpdated', {
+            detail: {
+                timestamp: new Date().getTime(),
+                action: 'refresh',
+                source: 'MenuManagement'
+            },
+            bubbles: true,
+            cancelable: true
+        });
+
+        const dispatched = window.dispatchEvent(event);
+
+        // 추가로 document에도 이벤트 발생 (혹시 모를 경우를 대비)
+        document.dispatchEvent(event);
+    };
+
+    // 메뉴 저장
     const handleSaveMenu = async () => {
         if (!formData.name.trim()) {
             Swal.fire({
@@ -180,17 +218,6 @@ const MenuManagement = () => {
         }
 
         try {
-            const timestamp = new Date().getTime();
-            const baseUrl = process.env.NODE_ENV === 'development'
-                ? 'http://localhost:8080'
-                : '';
-
-            const url = editingMenu
-                ? `${baseUrl}/api/menus/${editingMenu.navigationMenuId}?_t=${timestamp}`
-                : `${baseUrl}/api/menus?_t=${timestamp}`;
-
-            const method = editingMenu ? 'PUT' : 'POST';
-
             const menuData = {
                 name: formData.name,
                 description: formData.description,
@@ -203,45 +230,32 @@ const MenuManagement = () => {
                 requiredRole: formData.requiredRole
             };
 
-            const response = await apiRequest(url, {
-                method,
-                body: JSON.stringify(menuData),
-            });
-
-            if (response.status === 401) {
-                throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
-            }
-
-            if (response.status === 403) {
-                throw new Error('관리자 권한이 필요합니다.');
-            }
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('서버 응답 오류:', response.status, errorText);
-                throw new Error(`HTTP error! status: ${response.status}`);
+            // 수정 또는 생성
+            if (editingMenu) {
+                await api.put(`/api/menus/${editingMenu.navigationMenuId}`, menuData);
+            } else {
+                await api.post('/api/menus', menuData);
             }
 
             await loadMenus();
             closeModal();
+
+            // 사이드바 새로고침 트리거
+            triggerSidebarRefresh();
+
             Swal.fire({
                 icon: 'success',
                 title: '성공',
-                text: editingMenu ? '메뉴가 수정되었습니다.' : '메뉴가 추가되었습니다.'
+                text: editingMenu ? '메뉴가 수정되었습니다.' : '메뉴가 추가되었습니다.',
+                timer: 2000,
+                timerProgressBar: true
             });
 
         } catch (error) {
             console.error('저장 오류:', error);
 
-            if (error.message.includes('인증이 필요합니다')) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '인증 필요',
-                    text: error.message,
-                    confirmButtonText: '로그인 페이지로',
-                }).then(() => {
-                    window.location.href = '/login';
-                });
+            // 인터셉터에서 이미 처리된 에러는 return
+            if (error.message.includes('인증이 필요합니다') || error.message.includes('관리자 권한')) {
                 return;
             }
 
@@ -254,7 +268,6 @@ const MenuManagement = () => {
     };
 
     // 메뉴 삭제
-    /* eslint-disable */
     const handleDeleteMenu = async (menuId) => {
         const menuToDelete = menus.find(m => m.navigationMenuId === menuId);
         const hasChildren = menus.some(m => m.parentId === menuId);
@@ -278,49 +291,26 @@ const MenuManagement = () => {
         if (!result.isConfirmed) return;
 
         try {
-            const timestamp = new Date().getTime();
-            const baseUrl = process.env.NODE_ENV === 'development'
-                ? 'http://localhost:8080'
-                : '';
-            const deleteUrl = `${baseUrl}/api/menus/${menuId}?_t=${timestamp}`;
-
-            const response = await apiRequest(deleteUrl, {
-                method: 'DELETE',
-            });
-
-            if (response.status === 401) {
-                throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
-            }
-
-            if (response.status === 403) {
-                throw new Error('관리자 권한이 필요합니다.');
-            }
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('삭제 응답 오류:', response.status, errorText);
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            await api.delete(`/api/menus/${menuId}`);
 
             await loadMenus();
+
+            // 사이드바 새로고침 트리거
+            triggerSidebarRefresh();
+
             Swal.fire({
                 icon: 'success',
                 title: '삭제 완료',
-                text: '메뉴가 삭제되었습니다.'
+                text: '메뉴가 삭제되었습니다.',
+                timer: 2000,
+                timerProgressBar: true
             });
 
         } catch (error) {
             console.error('삭제 오류:', error);
 
-            if (error.message.includes('인증이 필요합니다')) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '인증 필요',
-                    text: error.message,
-                    confirmButtonText: '로그인 페이지로',
-                }).then(() => {
-                    window.location.href = '/login';
-                });
+            // 인터셉터에서 이미 처리된 에러는 return
+            if (error.message.includes('인증이 필요합니다') || error.message.includes('관리자 권한')) {
                 return;
             }
 
@@ -329,6 +319,121 @@ const MenuManagement = () => {
                 title: '삭제 오류',
                 text: `삭제 중 오류가 발생했습니다: ${error.message}`
             });
+        }
+    };
+
+    // 드래그 앤 드롭 시작
+    const handleDragStart = (e, menu) => {
+        e.stopPropagation(); // 이벤트 버블링 방지
+        setDraggedItem(menu);
+        dragItemRef.current = menu;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', e.target);
+
+        // 드래그 중 스타일 적용
+        e.target.style.opacity = '0.5';
+
+    };
+
+    // 드래그 종료
+    const handleDragEnd = (e) => {
+        e.stopPropagation();
+        e.target.style.opacity = '1';
+        setDraggedItem(null);
+        setDragOverItem(null);
+        dragItemRef.current = null;
+        dragOverItemRef.current = null;
+
+    };
+
+    // 드래그 오버
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    // 드래그 엔터
+    const handleDragEnter = (e, menu) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverItem(menu);
+        dragOverItemRef.current = menu;
+    };
+
+    // 드래그 리브
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // 자식 요소로 이동하는 경우가 아닐 때만 드래그오버 제거
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+            setDragOverItem(null);
+            dragOverItemRef.current = null;
+        }
+    };
+
+    // 드롭
+    const handleDrop = async (e, targetMenu) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const draggedMenu = dragItemRef.current;
+        const targetMenuData = targetMenu;
+
+        if (!draggedMenu || !targetMenuData || draggedMenu.navigationMenuId === targetMenuData.navigationMenuId) {
+            return;
+        }
+
+        // 부모 ID 비교 함수 (null, undefined, 0을 모두 같은 것으로 처리)
+        const normalizeParentId = (parentId) => {
+            return parentId === null || parentId === undefined || parentId === 0 ? null : parentId;
+        };
+
+        const draggedParentId = normalizeParentId(draggedMenu.parentId);
+        const targetParentId = normalizeParentId(targetMenuData.parentId);
+
+        // 같은 부모를 가진 메뉴들끼리만 순서 변경 허용
+        if (draggedParentId !== targetParentId) {
+
+            Swal.fire({
+                icon: 'warning',
+                title: '순서 변경 불가',
+                text: '같은 레벨의 메뉴끼리만 순서를 변경할 수 있습니다.',
+                timer: 2000
+            });
+            return;
+        }
+
+        try {
+            const response = await api.put(`/api/menus/${draggedMenu.navigationMenuId}/reorder`, {
+                newOrder: targetMenuData.menuOrder,
+                parentId: targetParentId
+            });
+
+            await loadMenus();
+
+            // 사이드바 새로고침 트리거
+            triggerSidebarRefresh();
+
+            Swal.fire({
+                icon: 'success',
+                title: '순서 변경 완료',
+                text: '메뉴 순서가 변경되었습니다.',
+                timer: 1500,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+
+        } catch (error) {
+            console.error('드롭 오류:', error);
+
+            if (!error.message.includes('인증이 필요합니다') && !error.message.includes('관리자 권한')) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '순서 변경 오류',
+                    text: `순서 변경 중 오류가 발생했습니다: ${error.message}`
+                });
+            }
         }
     };
 
@@ -397,9 +502,7 @@ const MenuManagement = () => {
         setIsModalOpen(true);
     };
 
-    // 🔥 수정된 buildMenuTree 함수
     const buildMenuTree = (menus) => {
-
         if (!Array.isArray(menus) || menus.length === 0) {
             return [];
         }
@@ -414,7 +517,6 @@ const MenuManagement = () => {
 
         // 2단계: 트리 구조 구성
         menus.forEach(menu => {
-            // 🔥 수정된 최상위 메뉴 판별 로직
             const isTopLevel = (
                 menu.parentId === null ||
                 menu.parentId === undefined ||
@@ -426,7 +528,6 @@ const MenuManagement = () => {
             if (isTopLevel) {
                 tree.push(menuMap[menu.navigationMenuId]);
             } else {
-
                 // 부모 메뉴가 존재하는지 확인
                 if (menuMap[menu.parentId]) {
                     menuMap[menu.parentId].children.push(menuMap[menu.navigationMenuId]);
@@ -448,24 +549,58 @@ const MenuManagement = () => {
         };
 
         sortByOrder(tree);
-
         return tree;
     };
 
     const renderMenuItem = (menu, level = 0) => {
         const hasChildren = menu.children && menu.children.length > 0;
         const isExpanded = expandedItems.has(menu.navigationMenuId);
+        const isDraggedOver = dragOverItem?.navigationMenuId === menu.navigationMenuId;
+        const isDragging = draggedItem?.navigationMenuId === menu.navigationMenuId;
 
         return (
-            <div key={menu.navigationMenuId} className="menu-item" style={{
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                marginBottom: '8px',
-                padding: '12px',
-                backgroundColor: level > 0 ? '#f8f9fa' : '#fff'
-            }}>
+            <div
+                key={menu.navigationMenuId}
+                className="menu-item"
+                style={{
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    marginBottom: '8px',
+                    padding: '12px',
+                    backgroundColor: level > 0 ? '#f8f9fa' : '#fff',
+                    opacity: isDragging ? 0.5 : 1,
+                    borderColor: isDraggedOver ? '#007bff' : '#e0e0e0',
+                    borderWidth: isDraggedOver ? '2px' : '1px',
+                    transition: 'all 0.2s ease',
+                    position: 'relative'
+                }}
+                draggable
+                onDragStart={(e) => handleDragStart(e, menu)}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDragEnter={(e) => handleDragEnter(e, menu)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, menu)}
+            >
                 <div className="menu-item-content" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div className="menu-item-left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {/* 드래그 핸들 */}
+                        <div
+                            style={{
+                                cursor: 'grab',
+                                color: '#666',
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: '4px',
+                                borderRadius: '4px',
+                                backgroundColor: 'rgba(0,0,0,0.05)'
+                            }}
+                            title="드래그하여 순서 변경"
+                            onMouseDown={(e) => e.stopPropagation()}
+                        >
+                            <GripVertical size={16} />
+                        </div>
+
                         {hasChildren && (
                             <button
                                 onClick={() => toggleExpand(menu.navigationMenuId)}
@@ -540,8 +675,8 @@ const MenuManagement = () => {
                                 style={{
                                     padding: '6px',
                                     border: 'none',
-                                    backgroundColor: '#28a745',
-                                    color: 'white',
+                                    backgroundColor: '#d4edda ',
+                                    color: 'black',
                                     borderRadius: '4px',
                                     cursor: 'pointer'
                                 }}
@@ -556,8 +691,8 @@ const MenuManagement = () => {
                             style={{
                                 padding: '6px',
                                 border: 'none',
-                                backgroundColor: '#007bff',
-                                color: 'white',
+                                backgroundColor: '#cce7ff',
+                                color: 'black',
                                 borderRadius: '4px',
                                 cursor: 'pointer'
                             }}
@@ -571,8 +706,8 @@ const MenuManagement = () => {
                             style={{
                                 padding: '6px',
                                 border: 'none',
-                                backgroundColor: '#dc3545',
-                                color: 'white',
+                                backgroundColor: '#f8d7da ',
+                                color: 'black',
                                 borderRadius: '4px',
                                 cursor: 'pointer'
                             }}
@@ -629,7 +764,6 @@ const MenuManagement = () => {
         return options;
     };
 
-    /* eslint-disable */
     useEffect(() => {
         let mounted = true;
 
@@ -648,9 +782,21 @@ const MenuManagement = () => {
 
     if (loading) {
         return (
-            <div style={{ padding: '20px', textAlign: 'center' }}>
-                <div>로딩 중...</div>
-            </div>
+            <Layout>
+                <div style={{
+                    padding: '20px',
+                    textAlign: 'center',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '400px'
+                }}>
+                    <div>
+                        <div style={{ fontSize: '18px', marginBottom: '10px' }}>로딩 중...</div>
+                        <div style={{ fontSize: '14px', color: '#666' }}>메뉴 데이터를 불러오고 있습니다.</div>
+                    </div>
+                </div>
+            </Layout>
         );
     }
 
@@ -664,12 +810,15 @@ const MenuManagement = () => {
                         <div>
                             <h1 style={{ margin: '0 0 8px 0', fontSize: '24px' }}>네비게이션 메뉴 관리</h1>
                             <p style={{ margin: 0, color: '#666' }}>총 {menus.length}개의 메뉴가 등록되어 있습니다</p>
+                            <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#999' }}>
+                                💡 드래그하여 메뉴 순서를 변경할 수 있습니다
+                            </p>
                         </div>
                         <button
                             onClick={() => openModal()}
                             style={{
                                 padding: '12px 16px',
-                                backgroundColor: '#007bff',
+                                backgroundColor: '#F76B59',
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '6px',
@@ -721,9 +870,9 @@ const MenuManagement = () => {
                                         onClick={() => openModal()}
                                         style={{
                                             padding: '12px 16px',
-                                            border: '2px dashed #007bff',
+                                            border: '2px dashed #F76B59',
                                             backgroundColor: 'transparent',
-                                            color: '#007bff',
+                                            color: '#F76B59',
                                             borderRadius: '6px',
                                             cursor: 'pointer',
                                             display: 'flex',
@@ -879,7 +1028,10 @@ const MenuManagement = () => {
 
                                     <div style={{ display: 'flex', gap: '16px' }}>
                                         <div style={{ flex: 1 }}>
-                                            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>메뉴 순서</label>
+                                            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
+                                                메뉴 순서
+                                                <span style={{ fontSize: '12px', color: '#666', fontWeight: 'normal' }}> (저장 후 변경 가능)</span>
+                                            </label>
                                             <input
                                                 type="number"
                                                 value={formData.menuOrder}
