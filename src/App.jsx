@@ -80,12 +80,12 @@ const App = () => {
               </ProtectedRoute>
             } />
 
-<<<<<<< HEAD
             {/*멤버쉽 페이지*/}
 
             <Route path='/membership' element={<Membership/>}/>
-=======
+
               {/*리뷰 목록 페이지*/}
+
               <Route path='/community/review' element={
                   <ProtectedRoute>
                       <ReviewList />
@@ -128,7 +128,6 @@ const App = () => {
                       <QnaList />
                   </ProtectedRoute>
               } />
->>>>>>> 4001d608e23141152a33501a3cbd714ca2a86beb
 
             {/* 마이페이지*/}
             <Route path='/mypage' element={<ProtectedRoute/>}>

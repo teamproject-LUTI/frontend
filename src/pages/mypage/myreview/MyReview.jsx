@@ -91,21 +91,13 @@ const ReviewList = () => {
                                         className="heart-img"
                                     />
                                 </div>
-                                {/*<div className="review-meta">*/}
-                                {/*    <p className="author">{r.userName}</p>*/}
-                                {/*    <p className="date">{r.createdAt.substring(0, 10)}</p>*/}
-                                {/*</div>*/}
-
+                                {/* 조회수 좋아요 정보 */}
+                                <div className="review-meta">
+                                    <span  className="view-count">{r.viewCount}</span>
+                                    <span className="like-count">{r.likeCount}</span>
+                                </div>
                                 {/* 🆕 메타 정보 */}
                                 <div className="review-meta">
-                                  <span className="view">
-                                      <img src="/images/community/eye.png" className="icon" alt="조회수"/>
-                                      {r.viewCount}
-                                  </span>
-                                    <span className="like">
-                                <img src="/images/community/heart-small.png" className="icon" alt="좋아요"/>
-                                        {r.likeCount}
-                                  </span>
                                     <span className="author">{r.userName}</span>
                                     <span className="date">{r.createdAt.substring(0, 10)}</span>
                                 </div>
