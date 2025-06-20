@@ -47,6 +47,7 @@ import LikeReview from "./pages/mypage/likereview/LikeReview";
 import MenuManagement from "./pages/management/MenuManagement";
 import AuthMAnagement from "./pages/management/AuthManagement"
 import PasswordChangePage from "./pages/mypage/password/PasswordChangePage";
+import PaymentManagement from "./pages/management/PaymentManagement";
 
 const App = () => {
   return (
@@ -211,6 +212,7 @@ const App = () => {
             <Route path='/admin' element={<ProtectedRoute />}>
               <Route path='menus' element={<MenuManagement />} />
               <Route path='permissions' element={<AuthMAnagement />} />
+              <Route path='payments' element={<PaymentManagement />} />
             </Route>
           </Routes>
         </div>
