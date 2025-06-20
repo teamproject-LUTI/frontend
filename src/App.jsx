@@ -1,6 +1,6 @@
 import './App.css';
 import '@toast-ui/editor/dist/toastui-editor.css';
-import './styles/MyPage/MyPage.css';
+import "./styles/MyPage/MyPage.css";
 import './styles/MyPage/MyPageProfile.css';
 import './styles/MyPage/MyReview.css';
 import './styles/MyPage/MyAsk.css';
