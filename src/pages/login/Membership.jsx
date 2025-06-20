@@ -84,11 +84,14 @@ const Membership = () => {
             return;
         }
 
-        fetch("http://localhost:8080/api/signup/email", {
+        fetch("http://localhost:8080/api/account/email/code", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             credentials: 'include',
-            body: JSON.stringify({ email: formData.email })
+            body: JSON.stringify({
+                email: formData.email,
+                checkType: "DUPLICATE"
+            })
         })
             .then(async res => {
                 const msg = await res.text();
@@ -111,7 +114,7 @@ const Membership = () => {
     const handleCodeChange = (e) => setVerificationCode(e.target.value);
 
     const handleCodeVerify = () => {
-        fetch(`http://localhost:8080/api/signup/verify-code?code=${verificationCode}`, {
+        fetch(`http://localhost:8080/api/account/email/verify?code=${verificationCode}`, {
             method: "GET",
             credentials: 'include',
         })
@@ -252,7 +255,7 @@ const Membership = () => {
             address: `${address} ${detailAddress} ${extraAddress}`.trim()
         };
 
-        fetch("http://localhost:8080/api/signup", {
+        fetch("http://localhost:8080/api/account/signup", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
