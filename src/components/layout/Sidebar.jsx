@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Home,
   MessageSquareMore,
@@ -15,158 +15,364 @@ import {
   Heart,
   MapPin,
   CreditCard,
-  UserMinus
+  UserMinus,
+  MessageSquare,
+  HeartPlus,
+  MessageCircleQuestion,
+  Shield,
+  UserX,
+  KeyRound
 } from 'lucide-react';
-import { useAuth } from '../../util/AuthContext';
 import '../../styles/layout/Sidebar.css';
-
+/* eslint-disable */
 const Sidebar = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isCommunityOpen, setIsCommunityOpen] = useState(true);
-  const [isMypageOpen, setIsMypageOpen] = useState(false);
-
-  const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const location = useLocation();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [expandedItems, setExpandedItems] = useState(new Set());
+  const [menuItems, setMenuItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeMenuId, setActiveMenuId] = useState(null);
+  const [error, setError] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // 현재 경로가 마이페이지 관련이면 자동으로 토글 열기
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
+  // 아이콘 매핑
+  const iconMap = {
+    'Home': Home, 'MessageSquareMore': MessageSquareMore, 'FileText': FileText,
+    'Volume2': Volume2, 'HelpCircle': HelpCircle, 'User': User,
+    'Star': Star, 'Settings': Settings, 'Shield': Shield, 'Heart': Heart, 'MapPin': MapPin,
+    'CreditCard': CreditCard, 'UserMinus': UserMinus, 'MessageSquare': MessageSquare,
+    'HeartPlus': HeartPlus, 'MessageCircleQuestion': MessageCircleQuestion,'UserX':UserX,'KeyRound':KeyRound
+  };
+
+  // API 요청 헤더 생성 (쿠키 기반이므로 헤더에 토큰 불필요)
+  const createRequestHeaders = () => {
+    return {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache'
+    };
+  };
+
+  // DB 메뉴를 사이드바 형식으로 변환
+  const convertDbMenusToSidebarFormat = useCallback((dbMenus) => {
+    if (!Array.isArray(dbMenus) || dbMenus.length === 0) return [];
+
+    const convertMenu = (menu, level = 0) => {
+      if (!menu) return null;
+
+      const hasChildren = menu.children && Array.isArray(menu.children) && menu.children.length > 0;
+
+      const converted = {
+        id: menu.navigationMenuId,
+        icon: menu.icon || 'FileText',
+        label: menu.name || '이름 없음',
+        path: menu.url || null,
+        level: level,
+        hasChildren: hasChildren,
+        isToggle: hasChildren,
+        isActive: menu.isActive !== false,
+        order: menu.menuOrder || 0,
+        description: menu.description,
+        parentId: menu.parentId
+      };
+
+      if (hasChildren) {
+        converted.children = menu.children
+            .map(child => convertMenu(child, level + 1))
+            .filter(Boolean);
+      }
+
+      return converted;
+    };
+
+    return dbMenus.map(menu => convertMenu(menu)).filter(Boolean);
+  }, []);
+
+  // 사용자 인증 상태 확인
+  const checkUserAuth = async () => {
+    try {
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        headers: createRequestHeaders(),
+        credentials: 'include' // 쿠키 자동 포함
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setIsAuthenticated(true);
+        const userIsAdmin = userData.userTypeId === 2;
+        setIsAdmin(userIsAdmin);
+        return { isAuthenticated: true, isAdmin: userIsAdmin };
+      } else {
+        setIsAuthenticated(false);
+        setIsAdmin(false);
+        return { isAuthenticated: false, isAdmin: false };
+      }
+    } catch (error) {
+      setIsAuthenticated(false);
+      setIsAdmin(false);
+      return { isAuthenticated: false, isAdmin: false };
+    }
+  };
+
+  // 메뉴 데이터 로드 (중복 호출 방지)
+  const loadMenuData = useCallback(async () => {
+    try {
+      const timestamp = new Date().getTime();
+      const endpoint = `${API_BASE_URL}/api/menus/hierarchy?_t=${timestamp}`;
+
+      const response = await fetch(endpoint, {
+        headers: createRequestHeaders(),
+        credentials: 'include', // 쿠키 자동 포함
+        cache: 'no-store'
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ 응답 에러 내용:`, errorText);
+        throw new Error(`메뉴 요청 실패: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const menuData = await response.json();
+
+      // SingleResponseDto 구조 처리
+      const dbMenus = menuData.data || menuData || [];
+
+      const convertedMenus = convertDbMenusToSidebarFormat(dbMenus);
+      setMenuItems(convertedMenus);
+
+      return convertedMenus;
+
+    } catch (error) {
+      console.error('❌ 메뉴 데이터 로드 실패:', error);
+      throw error;
+    }
+  }, [API_BASE_URL, convertDbMenusToSidebarFormat, menuItems.length]); // 의존성 추가
+
+  // 사이드바 초기화 (useRef로 중복 호출 방지)
+  const initializingRef = useRef(false);
+
+  const initializeSidebar = useCallback(async () => {
+    // 이미 초기화 중이면 리턴
+    if (initializingRef.current) {
+      return;
+    }
+
+    try {
+      initializingRef.current = true;
+      setLoading(true);
+      setError(null);
+      setMenuItems([]);
+
+
+      // 1. 사용자 인증 상태 확인
+      const authResult = await checkUserAuth();
+
+      // 2. 메뉴 데이터 로드 (인증 여부와 관계없이 시도)
+      try {
+        await loadMenuData();
+      } catch (menuError) {
+        console.error('❌ 메뉴 로드 실패, 인증 문제일 수 있음:', menuError);
+        setError(`메뉴 로드 실패: ${menuError.message}`);
+      }
+
+    } catch (err) {
+      console.error('❌ 사이드바 초기화 실패:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      initializingRef.current = false;
+    }
+  }, [API_BASE_URL]);
+
+  // 메뉴 업데이트 이벤트 리스너 (MenuManagement에서 발생하는 이벤트 수신)
   useEffect(() => {
-    if (location.pathname.startsWith('/mypage')) {
-      setIsMypageOpen(true);
-    }
-  }, [location.pathname]);
 
-  // 소셜 로그인 사용자인지 확인
-  const isSocialUser = () => {
-    return user?.provider && user.provider !== 'LOCAL';
+    const handleMenuUpdate = async (event) => {
+
+
+      try {
+
+        setTimeout(async () => {
+          try {
+            await loadMenuData();
+
+          } catch (error) {
+            console.error('❌ Sidebar: 지연된 메뉴 새로고침 실패:', error);
+          }
+        }, 100); // 100ms 지연
+
+      } catch (error) {
+        console.error('❌ Sidebar: 메뉴 새로고침 실패:', error);
+      }
+    };
+
+    // window와 document 모두에 이벤트 리스너 등록
+    window.addEventListener('menuUpdated', handleMenuUpdate);
+    document.addEventListener('menuUpdated', handleMenuUpdate);
+
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    return () => {
+      window.removeEventListener('menuUpdated', handleMenuUpdate);
+      document.removeEventListener('menuUpdated', handleMenuUpdate);
+    };
+  }, []); // loadMenuData를 의존성에서 제거하고 직접 호출
+
+  // 컴포넌트 마운트 시 한 번만 초기화
+  useEffect(() => {
+    initializeSidebar();
+  }, []); // 빈 의존성 배열로 한 번만 실행
+
+  // 현재 경로에 따른 활성 메뉴 설정
+  useEffect(() => {
+    const findActiveMenu = (items, currentPath) => {
+      for (const item of items) {
+        if (item.path === currentPath) return item.id;
+        if (item.children) {
+          const foundId = findActiveMenu(item.children, currentPath);
+          if (foundId) {
+            setExpandedItems(prev => new Set(prev).add(item.id));
+            return foundId;
+          }
+        }
+      }
+      return null;
+    };
+
+    if (menuItems.length > 0) {
+      const activeId = findActiveMenu(menuItems, location.pathname);
+      setActiveMenuId(activeId);
+    }
+  }, [menuItems, location.pathname]);
+
+  // 메뉴 토글
+  const toggleExpand = (menuId) => {
+    setExpandedItems(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(menuId)) {
+        newExpanded.delete(menuId);
+      } else {
+        newExpanded.add(menuId);
+      }
+      return newExpanded;
+    });
   };
 
-  // 회원탈퇴 클릭 처리
-  const handleWithdrawClick = () => {
-    if (isSocialUser()) {
-      // 소셜 로그인 사용자는 바로 탈퇴 페이지로
-      navigate('/mypage/withdraw');
-    } else {
-      // 일반 로그인 사용자는 비밀번호 확인 페이지로
-      navigate('/mypage/withdraw/confirm');
+  // 메뉴 클릭 처리
+  const handleNavClick = (path, menuId) => {
+    if (path) {
+      setActiveMenuId(menuId);
+      navigate(path);
     }
   };
 
-  const menuItems = [
-    { icon: Home, label: '홈', path: '/main' },
-    { icon: MessageSquareMore, label: '커뮤니티', isToggle: true, toggleKey: 'community' },
-    { icon: FileText, label: '후기', path: '/community/review', parent: '커뮤니티' },
-    { icon: Volume2, label: '공지사항', path: '/community/notice', parent: '커뮤니티' },
-    { icon: HelpCircle, label: '문의내역', path: '/community/qna', parent: '커뮤니티' },
-    {
-      icon: User,
-      label: '마이페이지',
-      isToggle: true,
-      toggleKey: 'mypage',
-      path: '/mypage'
-    },
-    { icon: Settings, label: '개인정보 수정', path: '/mypage/profile', parent: '마이페이지' },
-    {
-      icon: UserMinus,
-      label: '회원탈퇴',
-      action: 'withdraw',
-      parent: '마이페이지'
-    },
-    { icon: Heart, label: '찜한 여행지', path: '/mypage/favorites', parent: '마이페이지' },
-    { icon: MapPin, label: '여행 기록', path: '/mypage/travel-history', parent: '마이페이지' },
-    { icon: CreditCard, label: '결제 내역', path: '/mypage/payments', parent: '마이페이지' },
-    { icon: Star, label: '즐겨찾기', path: '/favorites' },
-  ];
-
-  const handleToggle = (toggleKey) => {
-    if (toggleKey === 'community') {
-      setIsCommunityOpen(!isCommunityOpen);
-    } else if (toggleKey === 'mypage') {
-      setIsMypageOpen(!isMypageOpen);
-      navigate('/mypage');
+  // 메뉴 아이템 렌더링
+  const renderMenuItem = (item) => {
+    if (!item || (!isAdmin && item.isActive === false)) {
+      return null;
     }
+
+    const IconComponent = iconMap[item.icon] || FileText;
+    const isExpanded = expandedItems.has(item.id);
+    const isActive = activeMenuId === item.id;
+
+    return (
+        <div key={item.id} className="menu-item-wrapper">
+          {item.isToggle ? (
+              <button
+                  onClick={() => toggleExpand(item.id)}
+                  className={`nav-item ${isCollapsed ? 'collapsed' : ''} ${isExpanded ? 'toggle-active' : ''} ${!item.isActive ? 'inactive' : ''}`}
+              >
+                <IconComponent className="nav-icon"/>
+                <span className={`nav-label ${isCollapsed ? 'hidden' : ''}`}>
+                            {item.label}
+                  {isAdmin && !item.isActive && <span className="inactive-badge">(비활성)</span>}
+                        </span>
+                {!isCollapsed && (isExpanded ? <ChevronUp className="nav-icon toggle-icon"/> :
+                    <ChevronDown className="nav-icon toggle-icon"/>)}
+              </button>
+          ) : (
+              <button
+                  onClick={() => handleNavClick(item.path, item.id)}
+                  className={`nav-item ${isCollapsed ? 'collapsed' : ''} ${item.level > 0 ? 'sub-item' : ''} ${isActive ? 'active' : ''} ${!item.isActive ? 'inactive' : ''}`}
+                  style={{ paddingLeft: isCollapsed ? undefined : `${1 + item.level * 1}rem` }}
+              >
+                <IconComponent className="nav-icon"/>
+                <span className={`nav-label ${isCollapsed ? 'hidden' : ''}`}>
+                            {item.label}
+                  {isAdmin && !item.isActive && <span className="inactive-badge">(비활성)</span>}
+                        </span>
+              </button>
+          )}
+          {item.hasChildren && isExpanded && !isCollapsed && (
+              <div className="sub-menu-container">
+                {item.children.map(renderMenuItem)}
+              </div>
+          )}
+        </div>
+    );
   };
 
-  const handleMenuClick = (item) => {
-    if (item.isToggle) {
-      handleToggle(item.toggleKey);
-    } else if (item.action === 'withdraw') {
-      handleWithdrawClick();
-    } else if (item.path) {
-      navigate(item.path);
-    }
-  };
+  // 로딩 상태
+  if (loading) {
+    return (
+        <aside className={`sidebar ${isCollapsed ? 'collapsed' : 'expanded'}`}>
+          <div className="sidebar-content">
+            <div className="sidebar-loading">
+              <div className="loading-spinner"></div>
+              {!isCollapsed && <span>메뉴 로딩 중...</span>}
+            </div>
+          </div>
+        </aside>
+    );
+  }
+
+  // 에러 상태
+  if (error) {
+    return (
+        <aside className={`sidebar ${isCollapsed ? 'collapsed' : 'expanded'}`}>
+          <div className="sidebar-content">
+            <div className="sidebar-error">
+              <p>메뉴 로드 오류</p>
+              {!isCollapsed && (
+                  <>
+                    <p className="error-detail">{error}</p>
+                    <button onClick={initializeSidebar} className="retry-btn">다시 시도</button>
+                  </>
+              )}
+            </div>
+          </div>
+        </aside>
+    );
+  }
+
+  const sortedMenuItems = [...menuItems].sort((a, b) => (a.order || 0) - (b.order || 0));
 
   return (
-      <aside className={`sidebar ${isCollapsed ? 'collapsed' : 'expanded'}`}>
+      <aside className={`sidebar ${isCollapsed ? 'collapsed' : 'expanded'} ${isAdmin ? 'admin-mode' : 'user-mode'}`}>
         <div className="sidebar-content">
-          {/* Toggle Button */}
           <div className="toggle-section">
             <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
                 className="toggle-btn"
+                title={isCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
             >
-              <Menu className="toggle-icon" />
+              <Menu className="toggle-icon"/>
             </button>
           </div>
 
-          {/* Menu Items */}
           <nav className="sidebar-nav">
-            {menuItems.map((item, index) => {
-              // 토글 버튼들
-              if (item.isToggle) {
-                const isOpen = item.toggleKey === 'community' ? isCommunityOpen : isMypageOpen;
-                const isActive = item.toggleKey === 'mypage' && location.pathname.startsWith('/mypage');
-
-                return (
-                    <button
-                        key={index}
-                        onClick={() => handleMenuClick(item)}
-                        className={`nav-item ${isCollapsed ? 'collapsed' : 'expanded'} ${isActive ? 'active' : ''}`}
-                    >
-                      <item.icon className="nav-icon" />
-                      <span className={`nav-label ${isCollapsed ? 'hidden' : ''}`}>
-                    {item.label}
-                  </span>
-                      {!isCollapsed &&
-                          (isOpen ? (
-                              <ChevronUp className="nav-icon" />
-                          ) : (
-                              <ChevronDown className="nav-icon" />
-                          ))}
-                    </button>
-                );
-              }
-
-              // 하위 메뉴 처리
-              if (item.parent === '커뮤니티') {
-                if (isCollapsed || !isCommunityOpen) return null;
-              }
-
-              if (item.parent === '마이페이지') {
-                if (isCollapsed || !isMypageOpen) return null;
-              }
-
-              // 기본 메뉴 출력
-              const isActive = location.pathname === item.path ||
-                  (item.action === 'withdraw' && location.pathname.includes('/withdraw'));
-
-              return (
-                  <button
-                      key={index}
-                      onClick={() => handleMenuClick(item)}
-                      className={`nav-item ${isCollapsed ? 'collapsed' : 'expanded'} ${
-                          item.parent ? 'sub-item' : ''
-                      } ${isActive ? 'active' : ''}`}
-                  >
-                    <item.icon className="nav-icon" />
-                    <span className={`nav-label ${isCollapsed ? 'hidden' : ''}`}>
-                  {item.label}
-                </span>
-                  </button>
-              );
-            })}
+            {sortedMenuItems.length > 0 ? sortedMenuItems.map(renderMenuItem) : (
+                <div className="no-menus">
+                  {!isCollapsed && <span>표시할 메뉴가 없습니다.</span>}
+                </div>
+            )}
           </nav>
+
         </div>
       </aside>
   );

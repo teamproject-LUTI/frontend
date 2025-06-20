@@ -1,0 +1,1129 @@
+import Layout from '../../components/layout/Layout';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+    Plus, Edit2, Trash2, ChevronRight, ChevronDown, Save, X,
+    Home, MessageSquareMore, FileText, Volume2, HelpCircle, User,
+    Star, Settings, Shield, Heart, MapPin, CreditCard, UserMinus,
+    MessageSquare, HeartPlus, MessageCircleQuestion, GripVertical,UserX,KeyRound
+} from 'lucide-react';
+import Swal from 'sweetalert2';
+import axios from 'axios';
+
+const MenuManagement = () => {
+    // 아이콘 매핑
+    const iconMap = {
+        'Home': Home,
+        'MessageSquareMore': MessageSquareMore,
+        'FileText': FileText,
+        'Volume2': Volume2,
+        'HelpCircle': HelpCircle,
+        'User': User,
+        'Star': Star,
+        'Settings': Settings,
+        'Shield': Shield,
+        'Heart': Heart,
+        'MapPin': MapPin,
+        'CreditCard': CreditCard,
+        'UserMinus': UserMinus,
+        'MessageSquare': MessageSquare,
+        'HeartPlus': HeartPlus,
+        'MessageCircleQuestion': MessageCircleQuestion,
+        'UserX':UserX,
+        'KeyRound':KeyRound,
+    };
+
+    // 아이콘 렌더링 함수
+    const renderIcon = (iconName, size = 16) => {
+        const IconComponent = iconMap[iconName];
+        if (IconComponent) {
+            return <IconComponent size={size} />;
+        }
+        return iconName ? <span>{iconName}</span> : null;
+    };
+
+    const [menus, setMenus] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingMenu, setEditingMenu] = useState(null);
+    const [expandedItems, setExpandedItems] = useState(new Set());
+    const [draggedItem, setDraggedItem] = useState(null);
+    const [dragOverItem, setDragOverItem] = useState(null);
+    const [formData, setFormData] = useState({
+        name: '',
+        description: '',
+        url: '',
+        icon: '',
+        parentId: null,
+        menuOrder: 1,
+        isActive: true,
+        level: 0,
+        requiredRole: 1
+    });
+
+    // 드래그 관련 참조
+    const dragItemRef = useRef(null);
+    const dragOverItemRef = useRef(null);
+
+    // Axios 인스턴스 생성
+    const api = axios.create({
+        baseURL: process.env.NODE_ENV === 'development'
+            ? process.env.REACT_APP_API_URL || 'http://localhost:8080'
+            : '',
+        withCredentials: true,
+        timeout: 10000,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    // 요청 인터셉터 - 타임스탬프 자동 추가
+    api.interceptors.request.use(
+        config => {
+            const separator = config.url.includes('?') ? '&' : '?';
+            config.url += `${separator}_t=${new Date().getTime()}`;
+            return config;
+        },
+        error => Promise.reject(error)
+    );
+
+    // 응답 인터셉터 - 공통 에러 처리
+    api.interceptors.response.use(
+        response => response,
+        error => {
+            if (error.response?.status === 401) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '인증 필요',
+                    text: '인증이 필요합니다. 다시 로그인해주세요.',
+                    confirmButtonText: '로그인 페이지로',
+                    allowOutsideClick: false
+                }).then(() => {
+                    window.location.href = '/login';
+                });
+                return Promise.reject(new Error('인증이 필요합니다.'));
+            }
+
+            if (error.response?.status === 403) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '권한 부족',
+                    text: '관리자 권한이 필요합니다.',
+                    confirmButtonColor: '#3085d6'
+                });
+                return Promise.reject(new Error('관리자 권한이 필요합니다.'));
+            }
+
+            if (error.code === 'NETWORK_ERROR' || !error.response) {
+                const networkError = new Error('서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.');
+                networkError.isNetworkError = true;
+                return Promise.reject(networkError);
+            }
+
+            const httpError = new Error(
+                error.response?.data?.message ||
+                error.response?.data?.error ||
+                `HTTP ${error.response?.status} 오류가 발생했습니다.`
+            );
+            httpError.status = error.response?.status;
+            httpError.data = error.response?.data;
+
+            return Promise.reject(httpError);
+        }
+    );
+
+    // 메뉴 데이터 로드
+    const loadMenus = async () => {
+        try {
+            setLoading(true);
+
+            const response = await api.get('/api/menus/admin/all');
+
+            // 응답 데이터 처리
+            let menuData;
+            if (Array.isArray(response.data)) {
+                menuData = response.data;
+            } else if (response.data?.data && Array.isArray(response.data.data)) {
+                menuData = response.data.data;
+            } else {
+                console.error('예상하지 못한 데이터 구조:', response.data);
+                menuData = [];
+            }
+
+            setMenus(menuData);
+
+            // 상위 메뉴들을 기본으로 펼쳐놓기
+            const topLevelMenus = menuData.filter(menu => {
+                const isTopLevel = menu.parentId === null || menu.parentId === undefined || menu.parentId === 0;
+                return isTopLevel && menu.hasChildren;
+            });
+            setExpandedItems(new Set(topLevelMenus.map(menu => menu.navigationMenuId)));
+
+        } catch (error) {
+            console.error('메뉴 로드 실패:', error);
+            setMenus([]);
+
+            // 인터셉터에서 이미 처리된 인증/권한 에러는 추가 알림 없이 return
+            if (error.message.includes('인증이 필요합니다') || error.message.includes('관리자 권한')) {
+                return;
+            }
+
+            // 기타 에러만 처리
+            let errorMessage = '메뉴 데이터를 불러오는데 실패했습니다.';
+            if (error.status) {
+                errorMessage = `서버 오류: HTTP ${error.status}`;
+            } else if (error.isNetworkError) {
+                errorMessage = error.message;
+            }
+
+            Swal.fire({
+                icon: 'error',
+                title: '메뉴 로드 오류',
+                text: errorMessage,
+                footer: 'API URL: /api/menus/admin/all'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 사이드바 메뉴 새로고침 함수
+    const triggerSidebarRefresh = () => {
+
+        // 커스텀 이벤트 발생시켜 사이드바에 메뉴 변경 알림
+        const event = new CustomEvent('menuUpdated', {
+            detail: {
+                timestamp: new Date().getTime(),
+                action: 'refresh',
+                source: 'MenuManagement'
+            },
+            bubbles: true,
+            cancelable: true
+        });
+
+        const dispatched = window.dispatchEvent(event);
+
+        // 추가로 document에도 이벤트 발생 (혹시 모를 경우를 대비)
+        document.dispatchEvent(event);
+    };
+
+    // 메뉴 저장
+    const handleSaveMenu = async () => {
+        if (!formData.name.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: '입력 오류',
+                text: '메뉴명을 입력해주세요.'
+            });
+            return;
+        }
+
+        try {
+            const menuData = {
+                name: formData.name,
+                description: formData.description,
+                url: formData.url,
+                icon: formData.icon,
+                parentId: formData.parentId,
+                level: formData.level,
+                menuOrder: formData.menuOrder,
+                isActive: formData.isActive,
+                requiredRole: formData.requiredRole
+            };
+
+            // 수정 또는 생성
+            if (editingMenu) {
+                await api.put(`/api/menus/${editingMenu.navigationMenuId}`, menuData);
+            } else {
+                await api.post('/api/menus', menuData);
+            }
+
+            await loadMenus();
+            closeModal();
+
+            // 사이드바 새로고침 트리거
+            triggerSidebarRefresh();
+
+            Swal.fire({
+                icon: 'success',
+                title: '성공',
+                text: editingMenu ? '메뉴가 수정되었습니다.' : '메뉴가 추가되었습니다.',
+                timer: 2000,
+                timerProgressBar: true
+            });
+
+        } catch (error) {
+            console.error('저장 오류:', error);
+
+            // 인터셉터에서 이미 처리된 에러는 return
+            if (error.message.includes('인증이 필요합니다') || error.message.includes('관리자 권한')) {
+                return;
+            }
+
+            Swal.fire({
+                icon: 'error',
+                title: '저장 오류',
+                text: `저장 중 오류가 발생했습니다: ${error.message}`
+            });
+        }
+    };
+
+    // 메뉴 삭제
+    const handleDeleteMenu = async (menuId) => {
+        const menuToDelete = menus.find(m => m.navigationMenuId === menuId);
+        const hasChildren = menus.some(m => m.parentId === menuId);
+
+        let confirmMessage = '정말로 삭제하시겠습니까?';
+        if (hasChildren) {
+            confirmMessage = '이 메뉴에는 하위 메뉴가 있습니다. 하위 메뉴도 함께 삭제됩니다. 계속하시겠습니까?';
+        }
+
+        const result = await Swal.fire({
+            title: '삭제 확인',
+            text: confirmMessage,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '삭제',
+            cancelButtonText: '취소'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            await api.delete(`/api/menus/${menuId}`);
+
+            await loadMenus();
+
+            // 사이드바 새로고침 트리거
+            triggerSidebarRefresh();
+
+            Swal.fire({
+                icon: 'success',
+                title: '삭제 완료',
+                text: '메뉴가 삭제되었습니다.',
+                timer: 2000,
+                timerProgressBar: true
+            });
+
+        } catch (error) {
+            console.error('삭제 오류:', error);
+
+            // 인터셉터에서 이미 처리된 에러는 return
+            if (error.message.includes('인증이 필요합니다') || error.message.includes('관리자 권한')) {
+                return;
+            }
+
+            Swal.fire({
+                icon: 'error',
+                title: '삭제 오류',
+                text: `삭제 중 오류가 발생했습니다: ${error.message}`
+            });
+        }
+    };
+
+    // 드래그 앤 드롭 시작
+    const handleDragStart = (e, menu) => {
+        e.stopPropagation(); // 이벤트 버블링 방지
+        setDraggedItem(menu);
+        dragItemRef.current = menu;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', e.target);
+
+        // 드래그 중 스타일 적용
+        e.target.style.opacity = '0.5';
+
+    };
+
+    // 드래그 종료
+    const handleDragEnd = (e) => {
+        e.stopPropagation();
+        e.target.style.opacity = '1';
+        setDraggedItem(null);
+        setDragOverItem(null);
+        dragItemRef.current = null;
+        dragOverItemRef.current = null;
+
+    };
+
+    // 드래그 오버
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    // 드래그 엔터
+    const handleDragEnter = (e, menu) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverItem(menu);
+        dragOverItemRef.current = menu;
+    };
+
+    // 드래그 리브
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // 자식 요소로 이동하는 경우가 아닐 때만 드래그오버 제거
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+            setDragOverItem(null);
+            dragOverItemRef.current = null;
+        }
+    };
+
+    // 드롭
+    const handleDrop = async (e, targetMenu) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const draggedMenu = dragItemRef.current;
+        const targetMenuData = targetMenu;
+
+        if (!draggedMenu || !targetMenuData || draggedMenu.navigationMenuId === targetMenuData.navigationMenuId) {
+            return;
+        }
+
+        // 부모 ID 비교 함수 (null, undefined, 0을 모두 같은 것으로 처리)
+        const normalizeParentId = (parentId) => {
+            return parentId === null || parentId === undefined || parentId === 0 ? null : parentId;
+        };
+
+        const draggedParentId = normalizeParentId(draggedMenu.parentId);
+        const targetParentId = normalizeParentId(targetMenuData.parentId);
+
+        // 같은 부모를 가진 메뉴들끼리만 순서 변경 허용
+        if (draggedParentId !== targetParentId) {
+
+            Swal.fire({
+                icon: 'warning',
+                title: '순서 변경 불가',
+                text: '같은 레벨의 메뉴끼리만 순서를 변경할 수 있습니다.',
+                timer: 2000
+            });
+            return;
+        }
+
+        try {
+            const response = await api.put(`/api/menus/${draggedMenu.navigationMenuId}/reorder`, {
+                newOrder: targetMenuData.menuOrder,
+                parentId: targetParentId
+            });
+
+            await loadMenus();
+
+            // 사이드바 새로고침 트리거
+            triggerSidebarRefresh();
+
+            Swal.fire({
+                icon: 'success',
+                title: '순서 변경 완료',
+                text: '메뉴 순서가 변경되었습니다.',
+                timer: 1500,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+
+        } catch (error) {
+            console.error('드롭 오류:', error);
+
+            if (!error.message.includes('인증이 필요합니다') && !error.message.includes('관리자 권한')) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '순서 변경 오류',
+                    text: `순서 변경 중 오류가 발생했습니다: ${error.message}`
+                });
+            }
+        }
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setEditingMenu(null);
+        setFormData({
+            name: '',
+            description: '',
+            url: '',
+            icon: '',
+            parentId: null,
+            menuOrder: 1,
+            isActive: true,
+            level: 0,
+            requiredRole: 1
+        });
+    };
+
+    const toggleExpand = (menuId) => {
+        const newExpanded = new Set(expandedItems);
+        if (newExpanded.has(menuId)) {
+            newExpanded.delete(menuId);
+        } else {
+            newExpanded.add(menuId);
+        }
+        setExpandedItems(newExpanded);
+    };
+
+    const addSubMenu = (parentMenu) => {
+        const nextOrder = parentMenu.children ? Math.max(...parentMenu.children.map(c => c.menuOrder), 0) + 1 : 1;
+        openModal(null, parentMenu.navigationMenuId, parentMenu.level + 1, nextOrder);
+    };
+
+    const openModal = (menu = null, parentId = null, level = 0, order = 1) => {
+        setEditingMenu(menu);
+        if (menu) {
+            setFormData({
+                name: menu.name || '',
+                description: menu.description || '',
+                url: menu.url || '',
+                icon: menu.icon || '',
+                parentId: menu.parentId,
+                level: menu.level || 0,
+                menuOrder: menu.menuOrder || 1,
+                requiredRole: menu.requiredRole || 1,
+                isActive: menu.isActive !== undefined ? menu.isActive : true
+            });
+        } else {
+            const nextOrder = parentId
+                ? order
+                : Math.max(...menus.filter(m => !m.parentId).map(m => m.menuOrder), 0) + 1;
+
+            setFormData({
+                name: '',
+                description: '',
+                url: '',
+                icon: '',
+                parentId: parentId,
+                level: level,
+                menuOrder: nextOrder,
+                requiredRole: 1,
+                isActive: true
+            });
+        }
+        setIsModalOpen(true);
+    };
+
+    const buildMenuTree = (menus) => {
+        if (!Array.isArray(menus) || menus.length === 0) {
+            return [];
+        }
+
+        const menuMap = {};
+        const tree = [];
+
+        // 1단계: 메뉴 맵 생성
+        menus.forEach(menu => {
+            menuMap[menu.navigationMenuId] = { ...menu, children: [] };
+        });
+
+        // 2단계: 트리 구조 구성
+        menus.forEach(menu => {
+            const isTopLevel = (
+                menu.parentId === null ||
+                menu.parentId === undefined ||
+                menu.parentId === 0 ||
+                menu.parentId === '' ||
+                menu.parentId === 'null'
+            );
+
+            if (isTopLevel) {
+                tree.push(menuMap[menu.navigationMenuId]);
+            } else {
+                // 부모 메뉴가 존재하는지 확인
+                if (menuMap[menu.parentId]) {
+                    menuMap[menu.parentId].children.push(menuMap[menu.navigationMenuId]);
+                } else {
+                    // 부모를 찾을 수 없으면 최상위 메뉴로 처리
+                    tree.push(menuMap[menu.navigationMenuId]);
+                }
+            }
+        });
+
+        // 3단계: 메뉴 순서로 정렬
+        const sortByOrder = (items) => {
+            items.sort((a, b) => (a.menuOrder || 0) - (b.menuOrder || 0));
+            items.forEach(item => {
+                if (item.children && item.children.length > 0) {
+                    sortByOrder(item.children);
+                }
+            });
+        };
+
+        sortByOrder(tree);
+        return tree;
+    };
+
+    const renderMenuItem = (menu, level = 0) => {
+        const hasChildren = menu.children && menu.children.length > 0;
+        const isExpanded = expandedItems.has(menu.navigationMenuId);
+        const isDraggedOver = dragOverItem?.navigationMenuId === menu.navigationMenuId;
+        const isDragging = draggedItem?.navigationMenuId === menu.navigationMenuId;
+
+        return (
+            <div
+                key={menu.navigationMenuId}
+                className="menu-item"
+                style={{
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    marginBottom: '8px',
+                    padding: '12px',
+                    backgroundColor: level > 0 ? '#f8f9fa' : '#fff',
+                    opacity: isDragging ? 0.5 : 1,
+                    borderColor: isDraggedOver ? '#007bff' : '#e0e0e0',
+                    borderWidth: isDraggedOver ? '2px' : '1px',
+                    transition: 'all 0.2s ease',
+                    position: 'relative'
+                }}
+                draggable
+                onDragStart={(e) => handleDragStart(e, menu)}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDragEnter={(e) => handleDragEnter(e, menu)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, menu)}
+            >
+                <div className="menu-item-content" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="menu-item-left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {/* 드래그 핸들 */}
+                        <div
+                            style={{
+                                cursor: 'grab',
+                                color: '#666',
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: '4px',
+                                borderRadius: '4px',
+                                backgroundColor: 'rgba(0,0,0,0.05)'
+                            }}
+                            title="드래그하여 순서 변경"
+                            onMouseDown={(e) => e.stopPropagation()}
+                        >
+                            <GripVertical size={16} />
+                        </div>
+
+                        {hasChildren && (
+                            <button
+                                onClick={() => toggleExpand(menu.navigationMenuId)}
+                                className="expand-btn"
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: '4px'
+                                }}
+                            >
+                                {isExpanded ?
+                                    <ChevronDown size={16} /> :
+                                    <ChevronRight size={16} />
+                                }
+                            </button>
+                        )}
+                        {!hasChildren && <div style={{ width: '24px' }}></div>}
+
+                        <div className="menu-info">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {menu.icon && (
+                                    <span className="menu-icon" style={{ display: 'flex', alignItems: 'center' }}>
+                                        {renderIcon(menu.icon, 18)}
+                                    </span>
+                                )}
+                                <div>
+                                    <span style={{ fontWeight: '600', fontSize: '14px' }}>{menu.name}</span>
+                                    {menu.description && (
+                                        <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
+                                            {menu.description}
+                                        </div>
+                                    )}
+                                </div>
+                                <div style={{ display: 'flex', gap: '4px' }}>
+                                    {!menu.isActive && (
+                                        <span style={{
+                                            fontSize: '10px',
+                                            padding: '2px 6px',
+                                            backgroundColor: '#ffc107',
+                                            color: '#000',
+                                            borderRadius: '4px'
+                                        }}>비활성</span>
+                                    )}
+                                    {menu.requiredRole === 2 && (
+                                        <span style={{
+                                            fontSize: '10px',
+                                            padding: '2px 6px',
+                                            backgroundColor: '#dc3545',
+                                            color: '#fff',
+                                            borderRadius: '4px'
+                                        }}>관리자</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="menu-item-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ fontSize: '12px', color: '#666', display: 'flex', gap: '8px' }}>
+                            <span>L{menu.level}</span>
+                            <span>#{menu.menuOrder}</span>
+                            {menu.url && (
+                                <span style={{ fontFamily: 'monospace' }}>{menu.url}</span>
+                            )}
+                        </div>
+
+                        {/* 하위 메뉴 추가 버튼: 최상위 메뉴이면서 하위 메뉴가 없는 경우에만 표시 */}
+                        {level === 0 && !hasChildren && (
+                            <button
+                                onClick={() => addSubMenu(menu)}
+                                style={{
+                                    padding: '6px',
+                                    border: 'none',
+                                    backgroundColor: '#d4edda ',
+                                    color: 'black',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                                title="하위 메뉴 추가"
+                            >
+                                <Plus size={14} />
+                            </button>
+                        )}
+
+                        <button
+                            onClick={() => openModal(menu)}
+                            style={{
+                                padding: '6px',
+                                border: 'none',
+                                backgroundColor: '#cce7ff',
+                                color: 'black',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
+                            title="수정"
+                        >
+                            <Edit2 size={14} />
+                        </button>
+
+                        <button
+                            onClick={() => handleDeleteMenu(menu.navigationMenuId)}
+                            style={{
+                                padding: '6px',
+                                border: 'none',
+                                backgroundColor: '#f8d7da ',
+                                color: 'black',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
+                            title="삭제"
+                        >
+                            <Trash2 size={14} />
+                        </button>
+                    </div>
+                </div>
+
+                {hasChildren && isExpanded && (
+                    <div style={{ marginTop: '12px', marginLeft: '20px' }}>
+                        {menu.children.map(child => renderMenuItem(child, level + 1))}
+                        <div style={{ marginTop: '8px' }}>
+                            <button
+                                onClick={() => addSubMenu(menu)}
+                                style={{
+                                    padding: '8px 12px',
+                                    border: '1px dashed #ccc',
+                                    backgroundColor: '#f8f9fa',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}
+                            >
+                                <Plus size={16} />
+                                <span>하위 메뉴 추가</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const getParentOptions = () => {
+        const options = [{ value: null, label: '최상위 메뉴' }];
+
+        const addMenuOptions = (menuList, prefix = '') => {
+            menuList.forEach(menu => {
+                options.push({
+                    value: menu.navigationMenuId,
+                    label: `${prefix}${menu.name}`
+                });
+                if (menu.children && menu.children.length > 0) {
+                    addMenuOptions(menu.children, `${prefix}${menu.name} > `);
+                }
+            });
+        };
+
+        addMenuOptions(buildMenuTree(menus));
+        return options;
+    };
+
+    useEffect(() => {
+        let mounted = true;
+
+        const loadData = async () => {
+            if (mounted) {
+                await loadMenus();
+            }
+        };
+
+        loadData();
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    if (loading) {
+        return (
+            <Layout>
+                <div style={{
+                    padding: '20px',
+                    textAlign: 'center',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '400px'
+                }}>
+                    <div>
+                        <div style={{ fontSize: '18px', marginBottom: '10px' }}>로딩 중...</div>
+                        <div style={{ fontSize: '14px', color: '#666' }}>메뉴 데이터를 불러오고 있습니다.</div>
+                    </div>
+                </div>
+            </Layout>
+        );
+    }
+
+    const menuTree = buildMenuTree(menus);
+
+    return (
+        <Layout>
+            <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+                <div style={{ marginBottom: '24px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                        <div>
+                            <h1 style={{ margin: '0 0 8px 0', fontSize: '24px' }}>네비게이션 메뉴 관리</h1>
+                            <p style={{ margin: 0, color: '#666' }}>총 {menus.length}개의 메뉴가 등록되어 있습니다</p>
+                            <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#999' }}>
+                                💡 드래그하여 메뉴 순서를 변경할 수 있습니다
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => openModal()}
+                            style={{
+                                padding: '12px 16px',
+                                backgroundColor: '#F76B59',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}
+                        >
+                            <Plus size={20} />
+                            <span>최상위 메뉴 추가</span>
+                        </button>
+                    </div>
+
+                    <div>
+                        {menuTree.length === 0 ? (
+                            <div style={{
+                                textAlign: 'center',
+                                padding: '40px',
+                                border: '2px dashed #ccc',
+                                borderRadius: '8px'
+                            }}>
+                                <div style={{ marginBottom: '16px', fontSize: '16px', color: '#666' }}>
+                                    등록된 메뉴가 없습니다.
+                                </div>
+                                <button
+                                    onClick={() => openModal()}
+                                    style={{
+                                        padding: '12px 16px',
+                                        backgroundColor: '#28a745',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px'
+                                    }}
+                                >
+                                    <Plus size={16} />
+                                    <span>첫 번째 메뉴 추가하기</span>
+                                </button>
+                            </div>
+                        ) : (
+                            <div>
+                                {menuTree.map(menu => renderMenuItem(menu))}
+                                <div style={{ marginTop: '16px' }}>
+                                    <button
+                                        onClick={() => openModal()}
+                                        style={{
+                                            padding: '12px 16px',
+                                            border: '2px dashed #F76B59',
+                                            backgroundColor: 'transparent',
+                                            color: '#F76B59',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            width: '100%',
+                                            justifyContent: 'center'
+                                        }}
+                                    >
+                                        <Plus size={16} />
+                                        <span>최상위 메뉴 추가</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {isModalOpen && (
+                        <div style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 1000
+                        }}>
+                            <div style={{
+                                backgroundColor: 'white',
+                                borderRadius: '8px',
+                                padding: '24px',
+                                width: '90%',
+                                maxWidth: '600px',
+                                maxHeight: '90vh',
+                                overflowY: 'auto'
+                            }}>
+                                <h2 style={{ margin: '0 0 20px 0', fontSize: '20px' }}>
+                                    {editingMenu ? '메뉴 수정' : '메뉴 추가'}
+                                </h2>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>메뉴명 *</label>
+                                        <input
+                                            type="text"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                            style={{
+                                                width: '100%',
+                                                padding: '8px',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '4px',
+                                                fontSize: '14px'
+                                            }}
+                                            placeholder="메뉴명을 입력하세요"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>설명</label>
+                                        <input
+                                            type="text"
+                                            value={formData.description}
+                                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                            style={{
+                                                width: '100%',
+                                                padding: '8px',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '4px',
+                                                fontSize: '14px'
+                                            }}
+                                            placeholder="메뉴 설명을 입력하세요"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>URL</label>
+                                        <input
+                                            type="text"
+                                            value={formData.url}
+                                            onChange={(e) => setFormData({...formData, url: e.target.value})}
+                                            style={{
+                                                width: '100%',
+                                                padding: '8px',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '4px',
+                                                fontSize: '14px'
+                                            }}
+                                            placeholder="/path/to/page"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>아이콘</label>
+                                        <select
+                                            value={formData.icon}
+                                            onChange={(e) => setFormData({...formData, icon: e.target.value})}
+                                            style={{
+                                                width: '100%',
+                                                padding: '8px',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '4px',
+                                                fontSize: '14px'
+                                            }}
+                                        >
+                                            <option value="">아이콘 선택</option>
+                                            {Object.keys(iconMap).map(iconName => (
+                                                <option key={iconName} value={iconName}>
+                                                    {iconName}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {formData.icon && (
+                                            <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <span>미리보기:</span>
+                                                {renderIcon(formData.icon, 20)}
+                                                <span>{formData.icon}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>상위 메뉴</label>
+                                        <select
+                                            value={formData.parentId || ''}
+                                            onChange={(e) => {
+                                                const parentId = e.target.value === '' ? null : parseInt(e.target.value);
+                                                const parentMenu = menus.find(m => m.navigationMenuId === parentId);
+                                                setFormData({
+                                                    ...formData,
+                                                    parentId: parentId,
+                                                    level: parentId ? (parentMenu?.level || 0) + 1 : 0
+                                                });
+                                            }}
+                                            style={{
+                                                width: '100%',
+                                                padding: '8px',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '4px',
+                                                fontSize: '14px'
+                                            }}
+                                        >
+                                            {getParentOptions().map(option => (
+                                                <option key={option.value || 'null'} value={option.value || ''}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '16px' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
+                                                메뉴 순서
+                                                <span style={{ fontSize: '12px', color: '#666', fontWeight: 'normal' }}> (저장 후 변경 가능)</span>
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={formData.menuOrder}
+                                                onChange={(e) => setFormData({...formData, menuOrder: parseInt(e.target.value) || 1})}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '8px',
+                                                    border: '1px solid #ccc',
+                                                    borderRadius: '4px',
+                                                    fontSize: '14px'
+                                                }}
+                                                min="1"
+                                            />
+                                        </div>
+
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>필요 권한</label>
+                                            <select
+                                                value={formData.requiredRole || 1}
+                                                onChange={(e) => setFormData({...formData, requiredRole: parseInt(e.target.value)})}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '8px',
+                                                    border: '1px solid #ccc',
+                                                    borderRadius: '4px',
+                                                    fontSize: '14px'
+                                                }}
+                                            >
+                                                <option value={1}>일반사용자</option>
+                                                <option value={2}>관리자</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.isActive}
+                                                onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                                            />
+                                            활성화
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                                    <button
+                                        onClick={closeModal}
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px',
+                                            border: '1px solid #ccc',
+                                            backgroundColor: '#f8f9fa',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '8px'
+                                        }}
+                                    >
+                                        <X size={16} />
+                                        <span>취소</span>
+                                    </button>
+                                    <button
+                                        onClick={handleSaveMenu}
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px',
+                                            border: 'none',
+                                            backgroundColor: '#007bff',
+                                            color: 'white',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '8px'
+                                        }}
+                                    >
+                                        <Save size={16} />
+                                        <span>저장</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </Layout>
+    );
+};
+
+export default MenuManagement;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { User, Search, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../util/AuthContext';
 import { authUtils } from '../../util/authUtils';
@@ -8,7 +8,18 @@ import '../../styles/layout/Topbar.css';
 const Topbar = () => {
   const [keyword, setKeyword] = useState('');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [imageLoadError, setImageLoadError] = useState(false);
+  const [imageTimestamp, setImageTimestamp] = useState(null); // 이미지 타임스탬프 상태 추가
   const { user, isLoading, resetAuth } = useAuth();
+
+  // 사용자 정보 변경 시 이미지 에러 상태 리셋 및 타임스탬프 업데이트
+  useEffect(() => {
+    setImageLoadError(false);
+    // 프로필 이미지가 실제로 변경된 경우에만 타임스탬프 업데이트
+    if (user?.profileImageUrl || user?.profileImage) {
+      setImageTimestamp(Date.now());
+    }
+  }, [user?.profileImageUrl, user?.profileImage]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -130,11 +141,37 @@ const Topbar = () => {
     return user.nickname || user.name || '사용자님';
   };
 
-  // 프로필 이미지 URL 가져오기
-  const getProfileImageUrl = () => {
-    if (!user) return null;
+  // 프로필 이미지 URL 가져오기 - useMemo로 최적화
+  const profileImageUrl = useMemo(() => {
+    if (!user || imageLoadError) {
+      return null;
+    }
 
-    return user.profileImageUrl || user.profileImage || null;
+    const imageUrl = user.profileImageUrl || user.profileImage || null;
+
+    if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim()) {
+      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+      const fullUrl = imageUrl.startsWith('http')
+          ? imageUrl
+          : `${baseURL}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+
+      // 타임스탬프가 있을 때만 추가 (이미지 변경 시에만)
+      return imageTimestamp ? `${fullUrl}?t=${imageTimestamp}` : fullUrl;
+    }
+
+    return null;
+  }, [user, imageLoadError, imageTimestamp]); // imageTimestamp 의존성 추가
+
+  // 이미지 로드 에러 처리 함수
+  const handleImageError = () => {
+    console.log('프로필 이미지 로드 실패:', profileImageUrl);
+    setImageLoadError(true);
+  };
+
+  // 이미지 로드 성공 처리 함수 (디버깅 로그 제거)
+  const handleImageLoad = () => {
+    // 불필요한 성공 로그 제거
+    // console.log('프로필 이미지 로드 성공:', profileImageUrl);
   };
 
   return (
@@ -174,25 +211,19 @@ const Topbar = () => {
               ) : (
                   <div className="user-info">
                     <div className="user-avatar">
-                      {getProfileImageUrl() ? (
+                      {profileImageUrl ? (
                           <img
-                              src={getProfileImageUrl()}
+                              src={profileImageUrl}
                               alt="프로필"
                               className="user-profile-image"
-                              onError={(e) => {
-                                console.log('프로필 이미지 로드 실패:', getProfileImageUrl());
-                                e.target.style.display = 'none';
-                                e.target.nextSibling.style.display = 'block';
-                              }}
-                              onLoad={() => {
-                                console.log('프로필 이미지 로드 성공:', getProfileImageUrl());
-                              }}
+                              onError={handleImageError}
+                              onLoad={handleImageLoad}
                           />
                       ) : null}
                       <User
                           className="user-icon"
                           style={{
-                            display: getProfileImageUrl() ? 'none' : 'block'
+                            display: profileImageUrl ? 'none' : 'block'
                           }}
                       />
                     </div>

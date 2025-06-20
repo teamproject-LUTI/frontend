@@ -1,0 +1,15 @@
+/* 썸네일 미리보기 컨테이너 */
+.thumbnail-preview {
+    margin-bottom: 16px;
+
+}
+
+/* 미리보기 이미지 크기 조절 */
+.thumbnail-preview .review-thumbnail {
+    width: 100%;           /* 부모 컨테이너 폭만큼 최대한 크게 */
+    max-width: 200px;      /* 최대 폭을 200px로 제한 */
+    aspect-ratio: 16/10;   /* 원래 비율 유지 */
+    object-fit: cover;     /* 잘라내기 모드 유지 */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}

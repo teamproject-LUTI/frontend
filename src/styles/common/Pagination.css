@@ -1,0 +1,267 @@
+/* components/common/Pagination.css */
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.pagination-info {
+    color: #6c757d;
+    font-size: 14px;
+    font-weight: 500;
+    order: 1;
+}
+
+.pagination-info strong {
+    color: #495057;
+    font-weight: 600;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    order: 2;
+}
+
+.pagination-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 6px 12px;
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    color: #495057;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+
+.pagination-btn:hover:not(:disabled):not(.active) {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+    color: #495057;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-btn.active {
+    background-color: #F76B59;
+    border-color: #F76B59;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: default;
+    box-shadow: 0 2px 4px rgba(247, 107, 89, 0.3);
+}
+
+.pagination-btn:disabled {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+    color: #adb5bd;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 네비게이션 버튼 (첫/이전/다음/마지막) */
+.pagination-first,
+.pagination-prev,
+.pagination-next,
+.pagination-last {
+    font-size: 16px;
+    font-weight: 600;
+    min-width: 40px;
+}
+
+.pagination-first:hover:not(:disabled),
+.pagination-last:hover:not(:disabled) {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #ffffff;
+}
+
+.pagination-prev:hover:not(:disabled),
+.pagination-next:hover:not(:disabled) {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: #ffffff;
+}
+
+/* 생략 표시 (...) */
+.pagination-ellipsis {
+    padding: 6px 4px;
+    color: #6c757d;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    user-select: none;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .pagination-container {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .pagination-info {
+        order: 2;
+        text-align: center;
+        font-size: 13px;
+    }
+
+    .pagination {
+        order: 1;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .pagination-btn {
+        min-width: 32px;
+        height: 32px;
+        font-size: 13px;
+        padding: 4px 8px;
+    }
+
+    .pagination-first,
+    .pagination-prev,
+    .pagination-next,
+    .pagination-last {
+        min-width: 36px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pagination-container {
+        padding: 12px;
+    }
+
+    .pagination {
+        gap: 3px;
+    }
+
+    .pagination-btn {
+        min-width: 28px;
+        height: 28px;
+        font-size: 12px;
+        padding: 3px 6px;
+    }
+
+    .pagination-first,
+    .pagination-prev,
+    .pagination-next,
+    .pagination-last {
+        min-width: 32px;
+        font-size: 13px;
+    }
+
+    .pagination-info {
+        font-size: 12px;
+    }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+    .pagination-container {
+        background-color: #2d3748;
+        border-color: #4a5568;
+    }
+
+    .pagination-btn {
+        background-color: #4a5568;
+        border-color: #718096;
+        color: #e2e8f0;
+    }
+
+    .pagination-btn:hover:not(:disabled):not(.active) {
+        background-color: #718096;
+        border-color: #a0aec0;
+        color: #f7fafc;
+    }
+
+    .pagination-btn.active {
+        background-color: #F76B59;
+        border-color: #F76B59;
+        color: #ffffff;
+    }
+
+    .pagination-btn:disabled {
+        background-color: #2d3748;
+        border-color: #4a5568;
+        color: #718096;
+    }
+
+    .pagination-info {
+        color: #a0aec0;
+    }
+
+    .pagination-info strong {
+        color: #e2e8f0;
+    }
+
+    .pagination-ellipsis {
+        color: #a0aec0;
+    }
+}
+
+/* 접근성 개선 */
+.pagination-btn:focus {
+    outline: 2px solid #F76B59;
+    outline-offset: 2px;
+}
+
+.pagination-btn:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* 애니메이션 효과 */
+@keyframes pageChange {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pagination-btn.active {
+    animation: pageChange 0.2s ease-in-out;
+}
+
+/* 로딩 상태 스타일 */
+.pagination-container.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.pagination-container.loading .pagination-btn {
+    cursor: wait;
+}

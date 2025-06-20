@@ -1,0 +1,141 @@
+
+/* 1. 컨텐츠 가운데 정렬 & 최대 너비 지정 */
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    box-sizing: border-box;
+    position: relative; /* 버튼 float 정리용 */
+}
+
+/* 2. 제목, 메타 정보, 좋아요 섹션 */
+.detail-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.detail-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;      /* 요소 사이 간격 */
+    margin-top: 12px; /* 제목과 메타 사이 간격 */
+}
+
+/* 작성자, 날짜는 왼쪽에 inline-block 처리 */
+.detail-author,
+.detail-date {
+    display: inline-block;
+    font-size: 14px;
+    color: #666;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* 좋아요 섹션은 오른쪽 끝으로 */
+.interaction-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto; /* 공유+좋아요를 오른쪽 끝으로 밀기 */
+}
+/* 하트 아이콘 크기, 호버 효과 */
+.heart-img {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.heart-img:hover {
+    transform: scale(1.1);
+}
+
+
+.like-count {
+    font-size: 16px;
+    color: #f76b59;
+}
+
+/* 3. 구분선 & 내용 */
+.detail-content {
+    border-top: 1px solid #ddd; /* 회색 선 */
+    padding-top: 16px;          /* 선과 내용 간격 */
+    margin-top: 16px;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* 첨부 이미지 갤러리 (기존 클래스 유지) */
+.detail-images {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    margin-bottom: 24px;
+
+}
+
+.detail-image {
+    max-height: 200px;
+    border-radius: 4px;
+}
+
+/* 4. 버튼 영역 */
+/* 수정/삭제 버튼 묶음은 왼쪽으로 */
+.crud-buttons {
+    float: left;
+    display: flex;
+    gap: 8px;
+    margin-top: 24px;
+}
+
+/* 목록 버튼은 오른쪽으로 */
+.back-btn {
+    float: right;
+    margin-top: 24px;
+}
+
+/* 공통 버튼 스타일 (깔끔한 배경색) */
+.crud-buttons button,
+.back-btn {
+    background-color: #f0f0f0;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.crud-buttons button:hover,
+.back-btn:hover {
+    background-color: #e0e0e0;
+}
+
+/* float 해제 */
+.main-content::after {
+    content: '';
+    display: table;
+    clear: both;
+}
+
+/* 공유 + 좋아요 버튼을 한 줄에 나란히 */
+.interaction-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+/* 공유하기 버튼 스타일 */
+.share-btn {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.share-btn:hover {
+    opacity: 0.9;
+}

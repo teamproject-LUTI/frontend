@@ -1,0 +1,177 @@
+import React, { useState, useRef, useEffect  } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Topbar from '../../../components/layout/Topbar';
+import Sidebar from '../../../components/layout/Sidebar';
+import Footer from '../../../components/layout/Footer';
+import '../../../styles/community/review/ReviewWrite.css'
+import axios from "axios";
+import { Editor } from '@toast-ui/react-editor';
+import apiClient from "../../../util/apiClient";
+
+const ReviewWrite = () => {
+  const navigate = useNavigate();
+  const [title, setTitle] = useState('');
+  const [destination, setDestination] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  //에디터 참조를 위한 useRef
+  const editorRef = useRef(null);
+
+  //기본 썸네일(이미지 없을 경우)
+  const [thumbnailPreview, setThumbnailPreview] = useState('');
+  const defaultThumbnail = '/images/no_Image.png';
+
+  //빈 문서로 설정(Markdown 초기화)
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.getInstance().setMarkdown('');
+    }
+  }, []);
+
+  //
+  useEffect(() => {
+    const editor = editorRef.current?.getInstance();
+    if (!editor) return;
+
+    // 에디터 내용이 바뀔 때마다 첫 번째 <img> 태그 src 가져오기
+    editor.on('change', () => {
+      const html = editor.getHTML();
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      const firstImg = tmp.querySelector('img');
+      setThumbnailPreview(firstImg?.src || '');
+    });
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // 여행기간 문자열 조립
+    const travelPeriod = startDate && endDate ? `${startDate} ~ ${endDate}` : '';
+    // 에디터에서 본문 HTML 가져오기
+    const html = editorRef.current?.getInstance().getHTML();
+
+    try {
+      //  리뷰 본문 저장
+      const reviewRes = await axios.post('/api/reviews', {
+        title,
+        travelRegion: destination,
+        content: html,  //에디터에서 가져온 본문(HTML)
+        travelPeriod,
+      });
+
+
+      // reviewId 꺼내기
+      const reviewId = reviewRes.data;
+      if (!reviewId) {
+        console.error('reviewId가 없습니다!', reviewRes.data);
+        return;
+      }
+
+      // 저장하기 버튼 누르면 리뷰 목록 페이지로 이동
+      navigate('/community/review');
+    } catch (error) {
+      alert('리뷰 저장 실패!\n' + (error?.response?.data?.message || error.message));
+      console.error('리뷰 저장 실패:', error);
+    }
+  };
+
+  return (
+    <div className="main-layout">
+      <Topbar />
+      <div className="main-content-wrapper">
+        <Sidebar />
+        <main className="main-content">
+          <form className="review-form" onSubmit={handleSubmit}>
+            <h2>리뷰 작성</h2>
+
+            <div className="form-group">
+              <label>제목</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>여행지</label>
+              <input
+                type="text"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                placeholder="예: 제주도"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>여행 기간</label>
+              <div className="date-range">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  required
+                />
+                <span className="separator">~</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>썸네일 미리보기</label>
+              <div className="thumbnail-preview">
+                <img
+                    src={thumbnailPreview || defaultThumbnail}
+                    alt={thumbnailPreview ? '미리보기 썸네일' : '기본 썸네일'}
+                    className="review-thumbnail"
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>내용</label>
+              {/* Toast UI Editor로 대체 */}
+              <Editor
+                  previewStyle="vertical"   //미리보기 스타일 세로
+                  initialEditType="wysiwyg" //위지윅 모드로 시작
+                  height="500px"
+                  useCommandShortcut={true} //단축키 사용
+                  hideModeSwitch={true}     // 마크다운/위지윅 모드 전환 탭 숨기기
+                  initialValue=""           //빈 문자열로 설정
+                  ref={editorRef}           //ref 연결
+                  hooks={{              //이미지 업로드 훅
+                    //addImageBlobHook: 에디터에 붙여진 이미지 블롭(Blob)을 서버에 업로드하고 콜백으로 URL을 에디터에 삽입
+                    addImageBlobHook: async (blob, callback) => {
+                      const formData = new FormData();
+                      formData.append('image', blob);
+
+                      const res = await axios.post('/api/review-attachments/image', formData); // 에디터 이미지 업로드 전용 엔드포인트
+                      const imageUrl = res.data.url;
+                      //에디터에 업로드 된 이미지 URL과 대체 텍스트 삽입
+                      callback(imageUrl, '업로드된 이미지');
+                    }
+                  }}
+              />
+            </div>
+
+            <div className="button-group">
+              <button type="submit">저장하기</button>
+            </div>
+          </form>
+        </main>
+      </div>
+      <Footer />
+    </div>
+  );
+};
+
+export default ReviewWrite;
+
