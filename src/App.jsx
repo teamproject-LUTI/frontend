@@ -44,7 +44,10 @@ import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
 import LikeReview from "./pages/mypage/likereview/LikeReview";
 import MenuManagement from "./pages/management/MenuManagement";
-import AuthMAnagement from "./pages/management/AuthManagement"
+import AuthMAnagement from "./pages/management/AuthManagement";
+import NoticeWrite from './pages/community/notice/NoticeWrite';
+import NoticeDetail from './pages/community/notice/NoticeDetail';
+import NoticeEdit  from './pages/community/notice/NoticeEdit';
 
 const App = () => {
   return (
@@ -114,13 +117,6 @@ const App = () => {
                   </ProtectedRoute>
               } />
 
-              {/*QnA 목록 페이지*/}
-              <Route path='/community/qna' element={
-                  <ProtectedRoute>
-                      <QnaList />
-                  </ProtectedRoute>
-              } />
-
             {/* 마이페이지*/}
             <Route path='/mypage' element={<ProtectedRoute/>}>
               <Route index element={<MyPage/>}/>
@@ -161,13 +157,6 @@ const App = () => {
                   </ProtectedRoute>
               } />
 
-              {/*공지사항 목록 페이지*/}
-              <Route path='/community/notice' element={
-                  <ProtectedRoute>
-                      <NoticeList />
-                  </ProtectedRoute>
-              } />
-
               {/*QnA 목록 페이지*/}
               <Route path='/community/qna' element={
                   <ProtectedRoute>
@@ -182,7 +171,6 @@ const App = () => {
                   </ProtectedRoute>
               } />
 
-
               {/*QnA 상세보기 페이지*/}
               <Route path='/community/qna/:id' element={
                   <ProtectedRoute>
@@ -196,6 +184,34 @@ const App = () => {
                     <QnaEdit />
                 </ProtectedRoute>
               } />
+
+              {/* 공지사항 목록 */}
+              <Route path='/community/notice' element={
+                  <ProtectedRoute>
+                      <NoticeList/>
+                  </ProtectedRoute>
+              }/>
+
+              {/* 공지사항 글쓰기 */}
+              <Route path='/community/notice/write' element={
+                  <ProtectedRoute>
+                      <NoticeWrite/>
+                  </ProtectedRoute>
+              }/>
+
+              {/* 공지사항 상세보기 */}
+              <Route path='/community/notice/:noticeId' element={
+                  <ProtectedRoute>
+                      <NoticeDetail/>
+                  </ProtectedRoute>
+              }/>
+
+              {/* 공지사항 수정 */}
+              <Route path='/community/notice/edit/:noticeId' element={
+                  <ProtectedRoute>
+                      <NoticeEdit/>
+                  </ProtectedRoute>
+              }/>
 
             {/*리뷰 페이지*/}
             <Route path='/community/review' element={

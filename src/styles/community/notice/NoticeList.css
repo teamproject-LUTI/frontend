@@ -1,15 +1,116 @@
-.notice-list {
-    margin-top: 20px;
-    list-style: none;
-    padding: 0;
+/* src/styles/community/notice/NoticeList.css */
+
+/* 1. 헤더: 제목과 글쓰기 버튼 배치 */
+.notice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
 }
 
-.notice-item {
-    padding: 16px;
-    border-bottom: 1px solid #eee;
+.notice-header h1 {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 0;
 }
 
-.notice-link {
-    text-decoration: none;
-    color: black;
+.notice-header .write-button {
+    padding: 8px 16px;
+    background-color: #F76B59;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.notice-header .write-button:hover {
+    background-color: #e05a47;
+}
+
+/* 2. 공지사항 목록 테이블 */
+.notice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+
+.notice-table th,
+.notice-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.notice-table th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+}
+
+.notice-table tbody tr:hover {
+    background-color: #f3f4f6;
+    cursor: pointer;
+}
+
+.notice-table .title-cell {
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 3. 공지글 상태(답변 여부) 등 추가 컬럼 스타일 */
+.notice-table .status-cell {
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+/* 4. 페이지네이션 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 24px 0;
+}
+
+.pagination button {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #374151;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+    background-color: #F76B59;
+    color: #fff;
+    border-color: #F76B59;
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.pagination button.active {
+    background-color: #F76B59;
+    color: #fff;
+    border-color: #F76B59;
+}
+
+/* 5. 반응형: 좁은 화면에서 테이블 스크롤 */
+@media (max-width: 640px) {
+    .notice-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
 }

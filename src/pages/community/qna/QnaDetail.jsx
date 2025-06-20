@@ -1,4 +1,3 @@
-// src/pages/community/qna/QnaDetail.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -9,30 +8,29 @@ import Footer from '../../../components/layout/Footer';
 import '../../../styles/community/qna/QnaDetail.css';
 
 const QnaDetail = () => {
-    const { id } = useParams();
+    const { id } = useParams();  // 해당 문의글의 ID를 받아옵니다.
     const navigate = useNavigate();
-    const token = localStorage.getItem('accessToken');
+    const [ask, setAsk] = useState(null);  // 문의글 상태
+    const [attachments, setAttachments] = useState([]);  // 첨부파일 상태
+    const token = localStorage.getItem('accessToken');  // 로컬스토리지에서 JWT 가져오기
 
-    const [ask, setAsk] = useState(null);
-    const [attachments, setAttachments] = useState([]);
-
-    // 1) 문의글 데이터 불러오기
     useEffect(() => {
-        const fetchAsk = async () => {
+        // 문의글 조회 API 호출
+        const fetchQna = async () => {
             try {
                 const res = await axios.get(`/api/asks/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: { Authorization: `Bearer ${token}` }   // 인증 헤더 추가
                 });
-                // response.data.data 혹은 data 구조에 맞춰 조정
-                setAsk(res.data.data || res.data);
+                const dto = res.data.data;
+                setAsk(dto);
             } catch (err) {
                 console.error('문의글 조회 실패', err);
             }
         };
-        fetchAsk();
+        fetchQna();
     }, [id, token]);
 
-    // 2) 첨부파일 불러오기
+    // 첨부파일 목록 조회
     useEffect(() => {
         const fetchAttachments = async () => {
             try {
@@ -47,35 +45,71 @@ const QnaDetail = () => {
         fetchAttachments();
     }, [id, token]);
 
-    if (!ask) return null;
+    // 공유 버튼 핸들러
+    const handleShare = () => {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url)
+            .then(() => {
+                Swal.fire({
+                    title: 'URL 복사됨!',
+                    text: '현재 페이지 주소가 클립보드에 복사되었습니다.',
+                    icon: 'success',
+                    confirmButtonColor: '#F76B59',
+                });
+            })
+            .catch(() => {
+                Swal.fire({
+                    title: '복사 실패',
+                    text: 'URL 복사에 실패했어요. 직접 복사해주세요.',
+                    icon: 'error',
+                    confirmButtonColor: '#F76B59',
+                });
+            });
+    };
 
-    const { title, content, createdAt, answered, userName, userId } = ask;
+    // 수정 버튼 핸들러
+    const handleEdit = () => {
+        navigate(`/community/qna/edit/${id}`);
+    };
 
-    // 삭제 핸들러
+    // 삭제 버튼 핸들러
     const handleDelete = async () => {
         const result = await Swal.fire({
             title: '정말 삭제할까요?',
-            text: '삭제하면 되돌릴 수 없습니다.',
+            text: '삭제하면 되돌릴 수 없어요!',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: '삭제',
-            cancelButtonText: '취소',
             confirmButtonColor: '#F76B59',
             cancelButtonColor: '#d3d3d3',
+            confirmButtonText: '삭제',
+            cancelButtonText: '취소',
         });
+
         if (result.isConfirmed) {
             try {
                 await axios.delete(`/api/asks/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                await Swal.fire('삭제 완료', '문의글이 삭제되었습니다.', 'success');
+                await Swal.fire({
+                    title: '삭제 완료!',
+                    text: '글이 삭제되었어요.',
+                    icon: 'success',
+                    confirmButtonColor: '#F76B59',
+                });
                 navigate('/community/qna');
             } catch (err) {
                 console.error('삭제 실패', err);
-                Swal.fire('삭제 실패', '잠시 후 다시 시도해주세요.', 'error');
+                Swal.fire({
+                    title: '삭제 실패',
+                    text: '문제가 발생했어요. 잠시 후 다시 시도해주세요.',
+                    icon: 'error',
+                    confirmButtonColor: '#F76B59',
+                });
             }
         }
     };
+
+    if (!ask) return null;
 
     return (
         <div className="main-layout">
@@ -83,61 +117,54 @@ const QnaDetail = () => {
             <div className="main-content-wrapper">
                 <Sidebar />
                 <main className="main-content">
-                    <h1 className="detail-title">{title}</h1>
+                    <h1 className="detail-title">{ask.title}</h1>
 
+                    {/* 작성자 + 날짜 */}
                     <div className="detail-meta">
-                        <span className="detail-author">{userName}</span>
+                        <span className="detail-author">{ask.userName}</span>
                         <span className="detail-date">
-              {new Date(createdAt).toLocaleDateString('ko-KR', {
-                  year: 'numeric', month: '2-digit', day: '2-digit'
-              })}
-            </span>
-                        <span
-                            className={`status-badge ${answered ? 'answered' : 'pending'}`}
-                        >
-              {answered ? '답변 완료' : '답변 대기중'}
-            </span>
+                            {new Date(ask.createdAt).toLocaleDateString('ko-KR', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                            })}
+                        </span>
+                        {/* 공유 버튼 */}
+                        <div className="interaction-section">
+                            <button className="share-btn" onClick={handleShare}>
+                                공유하기
+                            </button>
+                        </div>
                     </div>
 
+                    {/* 첨부 이미지 갤러리 */}
                     {attachments.length > 0 && (
-                        <div className="detail-attachments">
-                            <h3>첨부파일</h3>
-                            <ul>
-                                {attachments.map(att => (
-                                    <li key={att.askAttachmentId}>
-                                        <a href={att.logicalPath} download>
-                                            {att.fileName}
-                                        </a>
-                                    </li>
-                                ))}
-                            </ul>
+                        <div className="detail-images">
+                            {attachments.map(att => (
+                                <img
+                                    key={att.askAttachmentId}
+                                    src={att.logicalPath}      // 서버에 매핑된 URL (/uploads/UUID.jpg)
+                                    alt={att.fileName}
+                                    className="detail-image"
+                                />
+                            ))}
                         </div>
                     )}
 
                     <div
                         className="detail-content"
-                        dangerouslySetInnerHTML={{ __html: content }}
-                    />
+                        dangerouslySetInnerHTML={{ __html: ask.content }}
+                    ></div>
 
-                    {/* 본인이 작성한 글일 때만 수정/삭제 버튼 보이기 */}
-                    {Number(userId) === Number(localStorage.getItem('userId')) && (
+                    {/* 내가 쓴 글일 때만 버튼 보이기 */}
+                    {ask.owner && (
                         <div className="crud-buttons">
-                            <button
-                                className="edit-btn"
-                                onClick={() => navigate(`/community/qna/edit/${id}`)}
-                            >
-                                수정
-                            </button>
-                            <button className="delete-btn" onClick={handleDelete}>
-                                삭제
-                            </button>
+                            <button className="edit-btn" onClick={handleEdit}>수정</button>
+                            <button className="delete-btn" onClick={handleDelete}>삭제</button>
                         </div>
                     )}
 
-                    <button
-                        className="back-btn"
-                        onClick={() => navigate('/community/qna')}
-                    >
+                    <button className="back-btn" onClick={() => navigate('/community/qna')}>
                         목록으로
                     </button>
                 </main>
