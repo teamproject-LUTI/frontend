@@ -1,6 +1,3 @@
-// ✅ PaymentHistoryTable.jsx
-// 이 컴포넌트는 사용자 결제 내역을 조회하고 결제일 최신순을 기본으로 정렬합니다.
-
 import React, { useEffect, useState } from "react";
 import {
   fetchPaymentsByUser,
@@ -30,8 +27,10 @@ const PaymentHistoryTable = () => {
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
-  const [sortOption, setSortOption] = useState("date-desc"); // 기본값: 최신순
+  const [sortOption, setSortOption] = useState("date-desc"); //기본 최신순
+  const [searchDate, setSearchDate] = useState("");
 
+  // 사용자 정보 조회
   const fetchUser = async () => {
     try {
       const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
@@ -44,6 +43,7 @@ const PaymentHistoryTable = () => {
     }
   };
 
+  // 결제 내역 조회
   const fetchData = async (uid) => {
     if (!uid) return;
     try {
@@ -69,18 +69,18 @@ const PaymentHistoryTable = () => {
         data = await fetchPaymentsByUser(uid);
       }
 
-      // 정렬 처리
+      // 검색일자 필터
+      if (searchDate !== "") {
+        data = data.filter(p => dayjs(p.paymentDate).format("YYYY-MM-DD") === searchDate);
+      }
+
+      // 정렬
       if (sortOption === "price-asc") {
         data.sort((a, b) => a.totalPrice - b.totalPrice);
       } else if (sortOption === "price-desc") {
         data.sort((a, b) => b.totalPrice - a.totalPrice);
       } else {
-        data.sort((a, b) => {
-          const dateA = dayjs(a.paymentDate);
-          const dateB = dayjs(b.paymentDate);
-          if (!dateA.isValid() || !dateB.isValid()) return 0;
-          return dateB.valueOf() - dateA.valueOf();
-        });
+        data.sort((a, b) => dayjs(b.paymentDate) - dayjs(a.paymentDate));
       }
 
       setPayments(data);
@@ -103,7 +103,7 @@ const PaymentHistoryTable = () => {
     return () => {
       window.addNewPayment = null;
     };
-  }, [userId, statusFilter, dateFilter, sortOption]);
+  }, [userId, statusFilter, dateFilter, sortOption, searchDate]);
 
   const handleCancel = async (paymentId) => {
     if (!window.confirm("정말 이 결제를 환불 처리하시겠습니까?")) return;
@@ -121,6 +121,7 @@ const PaymentHistoryTable = () => {
     setStatusFilter("all");
     setDateFilter("all");
     setSortOption("date-desc");
+    setSearchDate(""); // 초기화
     fetchData(userId);
   };
 
@@ -149,6 +150,8 @@ const PaymentHistoryTable = () => {
             <option value="price-desc">금액 높은 순</option>
             <option value="price-asc">금액 낮은 순</option>
           </select>
+
+          <input type="date" value={searchDate} onChange={(e) => setSearchDate(e.target.value)} />
 
           <button onClick={handleResetFilters}>초기화</button>
         </div>
