@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { savePayment } from "../../services/PaymentService";
-import { paymentMethodMap } from "../../util/paymentMethodMap";
+import { savePayment } from "../../../../luti/workspace/frontend/src/services/PaymentService";
+import { paymentMethodMap } from "../../../../luti/workspace/frontend/src/util/paymentMethodMap";
 
 const PaymentButtonCom = ({ paymentMethod, onPaymentComplete }) => {
   const navigate = useNavigate();
@@ -44,17 +44,18 @@ const PaymentButtonCom = ({ paymentMethod, onPaymentComplete }) => {
           }
 
           const paymentMethodId = paymentMethodMap[paymentMethod];
+          const nowKST = new Date(new Date().getTime() + 9 * 60 * 60 * 1000); // KST 보정
 
           const paymentData = {
-            userId: userInfo.userId,
-            impUid: rsp.imp_uid,
-            merchantUid: rsp.merchant_uid,
-            paymentMethodId,
-            totalPrice: totalAmount,
-            paymentDate: new Date().toISOString().split("T")[0],
-          };
+                userId: userInfo.userId,
+                impUid: rsp.imp_uid,
+                merchantUid: rsp.merchant_uid,
+                paymentMethodId,
+                totalPrice: totalAmount,
+                paymentDate: nowKST.toISOString(), // KST 시간으로 ISO 문자열 전송
+            };
 
-          console.log("📦 백엔드로 전송할 결제 데이터:", paymentData);
+            console.log("📦 백엔드로 전송할 결제 데이터:", paymentData);
 
           try {
             const savedPayment = await savePayment(paymentData);
