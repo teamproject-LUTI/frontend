@@ -1,31 +1,40 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import '../../../styles/community/notice/NoticeDetail.css';
 
 const NoticeDetail = () => {
-    const { id } = useParams();  // 해당 공지글의 ID를 받아옵니다.
+    const { id } = useParams();
     const navigate = useNavigate();
-    const [notice, setNotice] = useState(null);  // 공지글 상태
-    const token = localStorage.getItem('accessToken');  // 로컬스토리지에서 JWT 가져오기
+    const [notice, setNotice] = useState(null);
+    const token = localStorage.getItem('accessToken');
+
+    // 중복 호출 방지를 위한 ref
+    const hasViewCountIncreased = useRef(false);
 
     useEffect(() => {
-        // 공지글 조회 API 호출
+        // 이미 조회수가 증가했다면 더 이상 호출하지 않음
+        if (hasViewCountIncreased.current) return;
+
         const fetchNotice = async () => {
             try {
                 const res = await axios.get(`/api/notices/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }   // 인증 헤더 추가
+                    headers: { Authorization: `Bearer ${token}` }
                 });
                 const dto = res.data.data;
                 setNotice(dto);
+
+                // 조회수 증가 완료 표시
+                hasViewCountIncreased.current = true;
             } catch (err) {
                 console.error('공지글 조회 실패', err);
                 alert('공지 내용을 불러오지 못했습니다.');
             }
         };
+
         fetchNotice();
-    }, [id, token]);
+    }, [id, token]); // token이 변경될 때만 재실행
 
     // 수정 버튼 핸들러
     const handleEdit = () => {
@@ -73,13 +82,10 @@ const NoticeDetail = () => {
 
     return (
         <div className="main-layout">
-
             <div className="main-content-wrapper">
-
                 <main className="main-content">
                     <h1 className="detail-title">{notice.title}</h1>
 
-                    {/* 작성자 + 날짜 */}
                     <div className="detail-meta">
                         <span className="detail-author">{notice.userName}</span>
                         <span className="detail-date">
@@ -96,7 +102,6 @@ const NoticeDetail = () => {
                         dangerouslySetInnerHTML={{ __html: notice.content }}
                     ></div>
 
-                    {/* 내가 쓴 글일 때만 버튼 보이기 */}
                     {notice.owner && (
                         <div className="crud-buttons">
                             <button className="edit-btn" onClick={handleEdit}>수정</button>
