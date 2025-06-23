@@ -13,7 +13,6 @@ import {
   Eye,
   ImageIcon
 } from 'lucide-react';
-import Layout from '../../../components/layout/Layout';
 import apiClient from '../../../util/apiClient';
 import Swal from 'sweetalert2';
 import '../../../styles/MyPage/LikeReview.css';
@@ -258,7 +257,6 @@ const LikeReview = () => {
   const regions = ['all', '제주도', '부산', '경주', '강릉', '서울', '경기', '인천', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '울산', '대전', '대구', '광주', '세종'];
 
   return (
-      <Layout>
         <div className="like-review-container">
           <div className="like-review-content">
             {/* 헤더 */}
@@ -471,7 +469,6 @@ const LikeReview = () => {
             </div>
           </div>
         </div>
-      </Layout>
   );
 };
 

@@ -1,0 +1,834 @@
+/* ==================== 기본 레이아웃 ==================== */
+.chat-form {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: calc(100vh - 160px);
+}
+
+/* ==================== 초기 화면 ==================== */
+.initial-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+}
+
+.welcome-section {
+    margin-bottom: 40px;
+}
+
+.welcome-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #F76B59, #FFB399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.welcome-subtitle {
+    font-size: 1.2rem;
+    color: #666;
+    margin: 0;
+}
+
+.initial-search-form {
+    width: 100%;
+    max-width: 600px;
+}
+
+.initial-search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 3px solid #e0e0e0;
+    border-radius: 50px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.initial-search-container:focus-within {
+    border-color: #667eea;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
+}
+
+.initial-search-container .search-icon {
+    position: absolute;
+    left: 20px;
+    color: #FFB399;
+    z-index: 1;
+    width: 24px;
+    height: 24px;
+}
+
+.initial-search-input {
+    width: 100%;
+    padding: 20px 80px 20px 60px;
+    font-size: 1.2rem;
+    border: none;
+    outline: none;
+    background: transparent;
+}
+
+.initial-search-input::placeholder {
+    color: #999;
+}
+
+.initial-search-btn {
+    position: absolute;
+    right: 8px;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #ea3e24, #ef7566);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.initial-search-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #5a6fd8, #6a4190);
+    transform: scale(1.1);
+}
+
+.initial-search-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==================== 대화 화면 ==================== */
+.chat-screen {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 160px);
+    max-height: 800px;
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: white;
+    border-radius: 12px 12px 0 0;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.chat-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.bot-icon {
+    font-size: 1.5rem;
+}
+
+.new-search-btn {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #F76B59, #FFB399);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.new-search-btn:hover {
+    background: linear-gradient(135deg, #5a6fd8, #6a4190);
+    transform: translateY(-1px);
+}
+
+/* ==================== 메시지 영역 ==================== */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.chat-message {
+    display: flex;
+    margin-bottom: 16px;
+}
+
+.user-message {
+    justify-content: flex-end;
+}
+
+.user-message .message-content {
+    background: linear-gradient(135deg, #f17d70, #FFB399);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 18px 18px 4px 18px;
+    max-width: 70%;
+    word-wrap: break-word;
+}
+
+.bot-message {
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.bot-avatar {
+    width: 40px;
+    height: 40px;
+    background: url('/public/images/chat/luti_character.png') no-repeat center center;
+    background-size: cover;
+    border-radius: 50%;
+    border: 2px solid #F76B59;
+    flex-shrink: 0;
+    /* display: flex 관련 속성들 제거해도 됨 */
+}
+
+.bot-message .message-content {
+    background: white;
+    border-radius: 4px 18px 18px 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-width: 85%;
+    overflow: hidden;
+}
+
+.bot-response {
+    padding: 20px;
+}
+
+.response-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 8px 0;
+}
+
+.response-subtitle {
+    color: #666;
+    margin: 0 0 20px 0;
+}
+
+/* ==================== 하단 입력창 ==================== */
+.chat-input-container {
+    padding: 16px 20px;
+    background: white;
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.chat-input-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    padding: 4px;
+    transition: all 0.3s ease;
+}
+
+.chat-input-form:focus-within {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.chat-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1rem;
+}
+
+.chat-input::placeholder {
+    color: #999;
+}
+
+.chat-send-btn {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-send-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #5a6fd8, #6a4190);
+    transform: scale(1.1);
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==================== 로딩 & 에러 ==================== */
+.loading-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px;
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+    width: 20px;
+    height: 20px;
+}
+
+.loading-text {
+    color: #666;
+    font-size: 1rem;
+}
+
+.loading-icon {
+    animation: spin 1s linear infinite;
+    width: 16px;
+    height: 16px;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 16px 0;
+    border: 1px solid #ffcdd2;
+    border-left: 4px solid #c62828;
+}
+
+/* ==================== 검색 정보 ==================== */
+.search-info {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #e9ecef;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.search-info-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.info-icon {
+    width: 16px;
+    height: 16px;
+    color: #667eea;
+}
+
+/* ==================== 추천 루트 섹션 ==================== */
+.routes-section {
+    margin-top: 20px;
+}
+
+.routes-title {
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.routes-grid {
+    display: grid;
+    gap: 20px;
+}
+
+/* ==================== 여행 루트 카드 ==================== */
+.route-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.route-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: #667eea;
+}
+
+.route-card.selected {
+    border-color: #4CAF50;
+    background: linear-gradient(135deg, #f8fff8, #f0f8f0);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
+}
+
+.route-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.route-title {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.4rem;
+    font-weight: 700;
+    flex: 1;
+}
+
+.route-price-info {
+    text-align: right;
+}
+
+.route-price {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #e74c3c;
+    line-height: 1;
+}
+
+.route-meta {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.day-trip-badge {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* ==================== 호텔 정보 ==================== */
+.route-hotel-info {
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+
+.hotel-name {
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.hotel-details {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.hotel-price-per-night {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* ==================== 여행 일정 상세 ==================== */
+.route-itinerary {
+    margin-bottom: 16px;
+}
+
+.itinerary-title {
+    margin: 0 0 12px 0;
+    color: #2c3e50;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.itinerary-day {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: #fafbfc;
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+}
+
+.day-title {
+    font-weight: 700;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+}
+
+.day-date {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+.day-activity {
+    display: flex;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.activity-time {
+    font-weight: 600;
+    color: #667eea;
+    font-size: 0.9rem;
+    min-width: 60px;
+    margin-right: 12px;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-name {
+    font-weight: 600;
+    color: #2c3e50;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.activity-location {
+    font-size: 0.85rem;
+    color: #666;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.activity-description {
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+.activity-included {
+    display: inline-block;
+    background: #e8f5e8;
+    color: #2e7d32;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* ==================== 하이라이트 ==================== */
+.route-highlights {
+    margin-bottom: 16px;
+}
+
+.highlights-title {
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.highlights-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.highlight-tag {
+    background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+    color: #1976d2;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* ==================== 포함사항 ==================== */
+.route-included {
+    background: #e8f5e8;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.included-title {
+    margin: 0 0 6px 0;
+    color: #2e7d32;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.included-items {
+    font-size: 0.85rem;
+    color: #4caf50;
+    line-height: 1.4;
+}
+
+/* ==================== 추천 대상 ==================== */
+.route-best-for {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+    margin-bottom: 16px;
+}
+
+/* ==================== 선택 버튼 ==================== */
+.select-route-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #F76B59, #FFB399);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.select-route-btn:hover {
+    background: linear-gradient(135deg, #5a6fd8, #6a4190);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.select-route-btn.selected {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+}
+
+.select-route-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==================== 선택된 루트 섹션 ==================== */
+.selected-route-section {
+    background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+    padding: 24px;
+    border-radius: 16px;
+    margin-top: 20px;
+    text-align: center;
+    border: 2px solid #4CAF50;
+}
+
+.selected-title {
+    color: #2e7d32;
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.selected-description {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 1rem;
+}
+
+.travel-start-btn {
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.travel-start-btn:hover {
+    background: linear-gradient(135deg, #218838, #1aa179);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+}
+
+/* ==================== 플로팅 예약 버튼 ==================== */
+.floating-booking-btn {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    animation: slideUpFade 0.3s ease-out;
+}
+
+.floating-travel-btn {
+    padding: 16px 32px;
+    background: linear-gradient(135deg, #F76B59, #FFB088);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(247, 107, 89, 0.4);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    max-width: 90vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.floating-travel-btn:hover {
+    background: linear-gradient(135deg, #e55b47, #f76b59);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(247, 107, 89, 0.5);
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* ==================== 반응형 디자인 ==================== */
+@media (max-width: 768px) {
+    .chat-form {
+        padding: 16px;
+    }
+
+    .welcome-title {
+        font-size: 2rem;
+    }
+
+    .initial-search-container {
+        border-radius: 25px;
+    }
+
+    .initial-search-input {
+        padding: 16px 70px 16px 50px;
+        font-size: 1rem;
+    }
+
+    .chat-screen {
+        height: calc(100vh - 120px);
+    }
+
+    .chat-header {
+        padding: 12px 16px;
+    }
+
+    .chat-messages {
+        padding: 16px;
+    }
+
+    .bot-message .message-content {
+        max-width: 95%;
+    }
+
+    .user-message .message-content {
+        max-width: 85%;
+    }
+
+    .route-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .route-price-info {
+        text-align: left;
+    }
+
+    .day-activity {
+        flex-direction: column;
+    }
+
+    .activity-time {
+        min-width: auto;
+        margin-bottom: 8px;
+    }
+
+    .search-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-title {
+        font-size: 1.8rem;
+    }
+
+    .welcome-subtitle {
+        font-size: 1rem;
+    }
+
+    .initial-search-input {
+        padding: 14px 60px 14px 45px;
+        font-size: 0.95rem;
+    }
+
+    .initial-search-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .route-card {
+        padding: 16px;
+    }
+
+    .route-title {
+        font-size: 1.2rem;
+    }
+
+    .route-price {
+        font-size: 1.3rem;
+    }
+
+    /* 플로팅 버튼 모바일 반응형 */
+    .floating-travel-btn {
+        padding: 14px 24px;
+        font-size: 1rem;
+    }
+
+    .floating-booking-btn {
+        bottom: 20px;
+    }
+}
