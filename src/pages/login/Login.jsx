@@ -159,8 +159,7 @@ const Login = () => {
 
           {/* Forgot Password Link */}
           <div className="forgot-password">
-            <button className="forgot-link" disabled={isLoading}>
-            <button className="forgot-link" onClick={handleFindAccount}>
+            <button className="forgot-link" disabled={isLoading} onClick={handleFindAccount}>
               아이디/패스워드 찾기
             </button>
           </div>
