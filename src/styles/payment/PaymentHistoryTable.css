@@ -1,5 +1,6 @@
 .payment-table {
   width: 100%;
+  table-layout: fixed; /* 💡 고정 레이아웃 설정 */
   border-collapse: collapse;
   margin: 20px 0;
   background-color: #ffffff;
@@ -8,6 +9,32 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
+.payment-table th:nth-child(1), /* No */
+.payment-table td:nth-child(1) {
+  width: 5%;
+}
+
+.payment-table th:nth-child(2), /* 결제일시 */
+.payment-table td:nth-child(2) {
+  width: 10%;
+}
+
+.payment-table th:nth-child(3), /* 금액 */
+.payment-table td:nth-child(3) {
+  width: 8%;
+}
+
+.payment-table th:nth-child(4), /* 결제상태 */
+.payment-table td:nth-child(4) {
+  width: 5%;
+}
+
+.payment-table th:nth-child(5), /* 환불 */
+.payment-table td:nth-child(5) {
+  width: 5%;
+}
+
 
 .payment-table thead {
   background: linear-gradient(135deg, #F76B59 0%, #E75A4E 100%);

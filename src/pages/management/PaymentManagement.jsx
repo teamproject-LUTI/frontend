@@ -89,7 +89,6 @@ const PaymentManagement = () => {
                 return 0;
             });
 
-            // 검색 필터
             let filtered = [...sorted];
             if (searchUserId.trim() !== "") {
                 filtered = filtered.filter(p => String(p.userId).includes(searchUserId.trim()));
@@ -169,20 +168,21 @@ const PaymentManagement = () => {
                         placeholder="사용자 ID 검색"
                         value={searchUserId}
                         onChange={(e) => setSearchUserId(e.target.value)}
-                        className="payment-input"
+                        className="payment-management-input"
                     />
                     <input
                         type="date"
                         value={searchDate}
                         onChange={(e) => setSearchDate(e.target.value)}
-                        className="payment-input"
+                        className="payment-management-input"
                     />
 
-
-                    <button className="reset-button" onClick={handleResetFilters}>초기화</button>
+                    <button className="payment-management-reset-button" onClick={handleResetFilters}>
+                        초기화
+                    </button>
                 </div>
 
-                <table className="payment-table">
+                <table className="payment-management-table">
                     <thead>
                     <tr>
                         <th>순번</th>
@@ -206,11 +206,16 @@ const PaymentManagement = () => {
                                 <td>{payment.merchantUid}</td>
                                 <td>{payment.totalPrice.toLocaleString()}원</td>
                                 <td>
-                                  <span className={payment.paymentState === 1 ? "status-refunded" : "status-paid"}>
-                                     {payment.paymentState === 1 ? "환불" : "결제 완료"}
-                                  </span>
+                                        <span
+                                            className={
+                                                payment.paymentState === 1
+                                                    ? "payment-management-status-refunded"
+                                                    : "payment-management-status-paid"
+                                            }
+                                        >
+                                            {payment.paymentState === 1 ? "환불" : "결제 완료"}
+                                        </span>
                                 </td>
-
                                 <td>
                                     {payment.paymentState === 0 && (
                                         <button onClick={() => handleRefund(payment.paymentId)}>환불</button>
@@ -227,7 +232,7 @@ const PaymentManagement = () => {
                 </table>
 
                 {totalPages > 1 && (
-                    <div className="pagination">
+                    <div className="payment-management-pagination">
                         {Array.from({ length: totalPages }, (_, i) => (
                             <button
                                 key={i + 1}
