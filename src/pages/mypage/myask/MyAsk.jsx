@@ -12,7 +12,6 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react';
-import Layout from '../../../components/layout/Layout';
 import apiClient from '../../../util/apiClient';
 import Swal from 'sweetalert2';
 import '../../../styles/MyPage/MyAsk.css';
@@ -351,7 +350,6 @@ const MyAsk = () => {
   };
 
   return (
-      <Layout>
         <div className="my-ask-container">
           <div className="my-ask-content">
             {/* 헤더 */}
@@ -537,7 +535,6 @@ const MyAsk = () => {
             </div>
           </div>
         </div>
-      </Layout>
   );
 };
 

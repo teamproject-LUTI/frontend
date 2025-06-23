@@ -15,24 +15,20 @@ import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 
-// dayjs 한글 및 포맷 설정
 dayjs.extend(localizedFormat);
 dayjs.locale("ko");
 
 const PaymentHistoryTable = () => {
-  // 상태 정의
   const [payments, setPayments] = useState([]);
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
-  // 필터 상태값
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
-  const [sortOption, setSortOption] = useState("price-desc");
+  const [sortOption, setSortOption] = useState("date-desc"); // 기본값: 최신순
 
-  // 사용자 정보 조회
   const fetchUser = async () => {
     try {
       const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
@@ -45,14 +41,12 @@ const PaymentHistoryTable = () => {
     }
   };
 
-  // 결제 내역 API 호출 - 필터 조건 반영
   const fetchData = async (uid) => {
     if (!uid) return;
     try {
       setLoading(true);
       let data = [];
 
-      // 날짜 필터 변환
       let startDate = null;
       let endDate = null;
       if (dateFilter === "7days") {
@@ -63,18 +57,27 @@ const PaymentHistoryTable = () => {
         endDate = dayjs().toISOString();
       }
 
-      // 필터/정렬 조건 분기 처리
       if (statusFilter !== "all") {
         const state = parseInt(statusFilter, 10);
         data = await fetchPaymentsByState(uid, state);
       } else if (dateFilter !== "all") {
         data = await fetchPaymentsByDateRange(uid, startDate, endDate);
-      } else if (sortOption === "price-asc") {
-        data = await fetchPaymentsByPriceAsc(uid);
-      } else if (sortOption === "price-desc") {
-        data = await fetchPaymentsByPriceDesc(uid);
       } else {
-        data = await fetchPaymentsByDateDesc(uid);
+        data = await fetchPaymentsByUser(uid);
+      }
+
+      // 정렬 처리
+      if (sortOption === "price-asc") {
+        data.sort((a, b) => a.totalPrice - b.totalPrice);
+      } else if (sortOption === "price-desc") {
+        data.sort((a, b) => b.totalPrice - a.totalPrice);
+      } else {
+        data.sort((a, b) => {
+          const dateA = dayjs(a.paymentDate);
+          const dateB = dayjs(b.paymentDate);
+          if (!dateA.isValid() || !dateB.isValid()) return 0;
+          return dateB.valueOf() - dateA.valueOf();
+        });
       }
 
       setPayments(data);
@@ -85,12 +88,10 @@ const PaymentHistoryTable = () => {
     }
   };
 
-  // 최초 사용자 ID 불러오기
   useEffect(() => {
     fetchUser();
   }, []);
 
-  // 필터 변경 시 데이터 재요청
   useEffect(() => {
     if (userId !== null) {
       fetchData(userId);
@@ -101,7 +102,6 @@ const PaymentHistoryTable = () => {
     };
   }, [userId, statusFilter, dateFilter, sortOption]);
 
-  // 환불 처리
   const handleCancel = async (paymentId) => {
     if (!window.confirm("정말 이 결제를 환불 처리하시겠습니까?")) return;
     try {
@@ -114,11 +114,10 @@ const PaymentHistoryTable = () => {
     }
   };
 
-  // 필터 초기화 핸들러
   const handleResetFilters = () => {
     setStatusFilter("all");
     setDateFilter("all");
-    setSortOption("price-desc");
+    setSortOption("date-desc");
     fetchData(userId);
   };
 
@@ -129,33 +128,28 @@ const PaymentHistoryTable = () => {
 
   return (
       <div>
-        {/* 필터바 */}
         <div style={{ marginBottom: "1rem", display: "flex", gap: "1rem", alignItems: "center" }}>
-          {/* 결제 상태 필터 */}
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="all">전체 상태</option>
             <option value="0">결제 완료</option>
             <option value="1">환불</option>
           </select>
 
-          {/* 기간 필터 */}
           <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}>
             <option value="all">전체 기간</option>
             <option value="7days">최근 7일</option>
             <option value="30days">최근 30일</option>
           </select>
 
-          {/* 정렬 필터 */}
           <select value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
+            <option value="date-desc">최신순</option>
             <option value="price-desc">금액 높은 순</option>
             <option value="price-asc">금액 낮은 순</option>
           </select>
 
-          {/* 초기화 버튼 */}
           <button onClick={handleResetFilters}>초기화</button>
         </div>
 
-        {/* 테이블 */}
         <table className="payment-table">
           <thead>
           <tr>
@@ -193,7 +187,6 @@ const PaymentHistoryTable = () => {
           </tbody>
         </table>
 
-        {/* 페이징 */}
         <div className="pagination">
           <button disabled={page === 1} onClick={() => setPage(page - 1)}>이전</button>
           {Array.from({ length: totalPages }, (_, i) => (

@@ -1,5 +1,3 @@
-// authUtils.js - 인증 관련 유틸리티 함수들
-
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 // 인증 상태 캐시

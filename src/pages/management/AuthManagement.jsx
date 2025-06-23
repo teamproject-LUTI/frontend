@@ -1,14 +1,12 @@
-// AuthManagement.jsx - 백엔드 구조에 맞게 최종 수정
-
 import React, {useEffect, useState} from 'react';
 import Layout from '../../components/layout/Layout';
+import Pagination from '../../components/common/Pagination';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import '../../styles/management/AuthManagement.css';
 
 const AuthManagement = () => {
     const [userList, setUserList] = useState([]);
-    const [filteredUserList, setFilteredUserList] = useState([]);
     const [statistics, setStatistics] = useState({
         totalUsers: 0,
         adminCount: 0,
@@ -25,11 +23,11 @@ const AuthManagement = () => {
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState('all');
-
-// AuthManagement.jsx에 추가할 부분
-
-// 1. 현재 로그인한 사용자 정보를 저장할 state 추가
     const [currentUser, setCurrentUser] = useState(null);
+
+    // 검색/필터 상태를 실제 API 호출용으로 분리
+    const [appliedSearchTerm, setAppliedSearchTerm] = useState('');
+    const [appliedFilterRole, setAppliedFilterRole] = useState('all');
 
     // UserType 상수 (백엔드 UserTypeEnum과 일치)
     const USER_TYPE = {
@@ -106,36 +104,24 @@ const AuthManagement = () => {
 
     useEffect(() => {
         fetchUserList();
-        fetchCurrentUser()
+        fetchCurrentUser();
     }, []);
 
+    // 검색어나 필터가 변경될 때마다 디바운스 적용
     useEffect(() => {
-        filterUsers();
-    }, [userList, searchTerm, filterRole]);
+        const timeoutId = setTimeout(() => {
+            // 실제 적용된 검색/필터 조건 업데이트
+            setAppliedSearchTerm(searchTerm);
+            setAppliedFilterRole(filterRole);
+        }, 300); // 300ms 디바운스
 
-    const filterUsers = () => {
-        let filtered = userList;
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm, filterRole]);
 
-        // 검색어 필터링
-        if (searchTerm.trim()) {
-            filtered = filtered.filter(user =>
-                user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.nickname?.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
-
-        // 권한 필터링 - isAdmin 필드로 필터링 (백엔드에서 계산된 값)
-        if (filterRole !== 'all') {
-            filtered = filtered.filter(user => {
-                if (filterRole === 'admin') return user.isAdmin === true;
-                if (filterRole === 'user') return user.isAdmin === false;
-                return true;
-            });
-        }
-
-        setFilteredUserList(filtered);
-    };
+    // 실제 적용된 검색/필터 조건이 변경될 때 API 호출
+    useEffect(() => {
+        fetchUserList(0); // 첫 페이지부터 다시 조회
+    }, [appliedSearchTerm, appliedFilterRole]);
 
     //현재 사용자 정보
     const fetchCurrentUser = async () => {
@@ -149,35 +135,67 @@ const AuthManagement = () => {
         }
     };
 
-    // 사용자 목록 조회
+    // 사용자 목록 조회 - 수정된 버전
     const fetchUserList = async (page = 0, size = 20) => {
         try {
             setLoading(true);
 
-            const response = await api.get('/api/admin/users', {
-                params: {
-                    page,
-                    size,
-                    sortBy: 'createdAt',
-                    sortDir: 'desc'
+            // API 엔드포인트와 파라미터 설정
+            let apiUrl = '/api/admin/users';
+            let params = {
+                page,
+                size,
+                sortBy: 'createdAt',
+                sortDir: 'desc'
+            };
+
+            // 검색어와 권한 필터 조합에 따른 API 엔드포인트 결정
+            if (appliedSearchTerm.trim()) {
+                apiUrl = '/api/admin/users/search';
+                params.keyword = appliedSearchTerm.trim();
+
+                // 검색 + 권한 필터 조합
+                if (appliedFilterRole !== 'all') {
+                    params.role = appliedFilterRole;
                 }
-            });
+            } else if (appliedFilterRole !== 'all') {
+                // 권한 필터만
+                apiUrl = '/api/admin/users/by-role';
+                params.role = appliedFilterRole;
+            }
+
+            console.log('API 호출:', { apiUrl, params }); // 디버깅용
+
+            const response = await api.get(apiUrl, { params });
 
             if (response.data.success) {
-                setUserList(response.data.users || []);
-                setFilteredUserList(response.data.users || []);
+                const responseData = response.data;
 
-                // 페이징 정보 설정
+                // 사용자 목록 설정
+                setUserList(responseData.users || []);
+
+                // 페이징 정보 설정 - 일관된 구조로 처리
                 setPagination({
-                    currentPage: response.data.currentPage || 0,
-                    totalPages: response.data.totalPages || 0,
-                    totalElements: response.data.totalElements || 0,
-                    pageSize: response.data.pageSize || 20
+                    currentPage: responseData.currentPage ?? page,
+                    totalPages: responseData.totalPages ?? 0,
+                    totalElements: responseData.totalElements ?? 0,
+                    pageSize: responseData.pageSize ?? size
                 });
 
-                // 통계 정보 설정
-                if (response.data.statistics) {
-                    setStatistics(response.data.statistics);
+                console.log('페이징 정보 설정:', {
+                    currentPage: responseData.currentPage ?? page,
+                    totalPages: responseData.totalPages ?? 0,
+                    totalElements: responseData.totalElements ?? 0,
+                    pageSize: responseData.pageSize ?? size
+                });
+
+                // 통계 정보 처리
+                if (responseData.statistics) {
+                    // 전체 목록 조회 시에만 통계 정보 업데이트
+                    setStatistics(responseData.statistics);
+                } else if (page === 0 && !appliedSearchTerm && appliedFilterRole === 'all') {
+                    // 통계 정보가 없고 전체 목록 조회인 경우 별도 요청
+                    fetchStatistics();
                 }
             } else {
                 throw new Error(response.data.error || '사용자 목록을 불러오지 못했습니다.');
@@ -204,17 +222,36 @@ const AuthManagement = () => {
                 text: errorMessage,
                 confirmButtonColor: '#3085d6'
             });
+
+            // 오류 발생 시 빈 상태로 설정
+            setUserList([]);
+            setPagination({
+                currentPage: 0,
+                totalPages: 0,
+                totalElements: 0,
+                pageSize: size
+            });
         } finally {
             setLoading(false);
         }
     };
 
+    // 통계 정보만 별도로 조회
+    const fetchStatistics = async () => {
+        try {
+            const response = await api.get('/api/admin/users/statistics');
+            if (response.data.success) {
+                setStatistics(response.data.statistics);
+            }
+        } catch (error) {
+            console.error('통계 정보 조회 실패:', error);
+        }
+    };
+
     // 권한 변경 함수
     const toggleAdmin = async (userId, userName, isAdmin) => {
-
         // 자기 자신의 관리자 권한 해제 시도 체크
         if (currentUser && currentUser.userId === userId && isAdmin) {
-            // 현재 관리자인 자기 자신의 권한을 해제하려는 경우
             Swal.fire({
                 icon: 'warning',
                 title: '권한 변경 불가',
@@ -245,6 +282,7 @@ const AuthManagement = () => {
             reverseButtons: true
         });
 
+        if (!result.isConfirmed) return;
 
         try {
             const requestData = {
@@ -254,7 +292,6 @@ const AuthManagement = () => {
             const response = await api.post(`/api/admin/users/${userId}/role`, requestData);
 
             if (response.data.success) {
-
                 await Swal.fire({
                     icon: 'success',
                     title: '권한 변경 완료',
@@ -264,14 +301,15 @@ const AuthManagement = () => {
                     timerProgressBar: true
                 });
 
-                await fetchUserList();
-
+                // 현재 페이지 정보를 유지하면서 목록 새로고침
+                await fetchUserList(pagination.currentPage, pagination.pageSize);
+                // 통계 정보도 업데이트
+                await fetchStatistics();
             } else {
                 throw new Error(response.data.error || '권한 변경에 실패했습니다.');
             }
 
         } catch (error) {
-
             if (error.response) {
                 console.error('응답 상태:', error.response.status);
                 console.error('응답 데이터:', error.response.data);
@@ -290,7 +328,6 @@ const AuthManagement = () => {
             if (error.response?.data?.error) {
                 errorMessage = error.response.data.error;
 
-                // 자기 자신 권한 해제 시도인 경우 특별 처리
                 if (errorMessage.includes('자기 자신의 관리자 권한을 해제할 수 없습니다')) {
                     errorTitle = '권한 변경 불가';
                     errorIcon = 'warning';
@@ -375,52 +412,38 @@ const AuthManagement = () => {
         });
     };
 
-    // 페이지 변경 핸들러
+    // 페이지 변경 핸들러 - 핵심 수정 부분
     const handlePageChange = (newPage) => {
-        if (newPage >= 0 && newPage < pagination.totalPages) {
+        console.log('페이지 변경:', {
+            newPage,
+            currentPage: pagination.currentPage,
+            totalPages: pagination.totalPages,
+            appliedSearchTerm,
+            appliedFilterRole
+        });
+
+        // 유효한 페이지 범위 체크
+        if (newPage >= 0 && newPage < pagination.totalPages && newPage !== pagination.currentPage) {
+            // 현재 적용된 검색/필터 조건을 유지하면서 새로운 페이지로 이동
             fetchUserList(newPage, pagination.pageSize);
         }
     };
 
-    // 검색 기능
-    const handleSearch = async () => {
-        if (!searchTerm.trim()) {
-            fetchUserList();
-            return;
-        }
+    // 수동 검색 버튼 클릭 (즉시 검색)
+    const handleSearch = () => {
+        // 현재 입력된 검색어/필터를 즉시 적용
+        setAppliedSearchTerm(searchTerm);
+        setAppliedFilterRole(filterRole);
+        // useEffect에 의해 자동으로 fetchUserList(0)이 호출됨
+    };
 
-        try {
-            setLoading(true);
-            const response = await api.get('/api/admin/users/search', {
-                params: {
-                    keyword: searchTerm.trim(),
-                    page: 0,
-                    size: pagination.pageSize
-                }
-            });
-
-            if (response.data.success) {
-                setUserList(response.data.users || []);
-                setPagination({
-                    currentPage: response.data.currentPage || 0,
-                    totalPages: response.data.totalPages || 0,
-                    totalElements: response.data.totalElements || 0,
-                    pageSize: response.data.pageSize || 20
-                });
-            }
-        } catch (error) {
-            console.error('검색 오류:', error);
-            if (!error.message.includes('인증이 필요합니다') && !error.message.includes('관리자 권한')) {
-                Swal.fire({
-                    icon: 'error',
-                    title: '검색 오류',
-                    text: '검색 중 오류가 발생했습니다.',
-                    confirmButtonColor: '#3085d6'
-                });
-            }
-        } finally {
-            setLoading(false);
-        }
+    // 필터 초기화
+    const resetFilters = () => {
+        setSearchTerm('');
+        setFilterRole('all');
+        setAppliedSearchTerm('');
+        setAppliedFilterRole('all');
+        // useEffect에서 자동으로 fetchUserList가 호출됨
     };
 
     return (
@@ -430,7 +453,7 @@ const AuthManagement = () => {
                     <h2>회원 관리</h2>
                     <button
                         className="refresh-button"
-                        onClick={() => fetchUserList()}
+                        onClick={() => fetchUserList(pagination.currentPage, pagination.pageSize)}
                         disabled={loading}
                     >
                         {loading ? '새로고침 중...' : '새로고침'}
@@ -481,10 +504,7 @@ const AuthManagement = () => {
                             </button>
                             <button
                                 className="auth-clear-search"
-                                onClick={() => {
-                                    setSearchTerm('');
-                                    fetchUserList();
-                                }}
+                                onClick={() => setSearchTerm('')}
                                 style={{display: searchTerm ? 'block' : 'none'}}
                             >
                                 ✕
@@ -501,18 +521,19 @@ const AuthManagement = () => {
                         </select>
                     </div>
                     <div className="auth-search-results">
-                        검색 결과: <strong>{filteredUserList.length}명</strong>
-                        {(searchTerm || filterRole !== 'all') && (
-                            <button
-                                className="auth-reset-filters"
-                                onClick={() => {
-                                    setSearchTerm('');
-                                    setFilterRole('all');
-                                    fetchUserList();
-                                }}
-                            >
-                                필터 초기화
-                            </button>
+                        {/* 서버에서 필터링된 결과의 총 개수 표시 */}
+                        {(appliedSearchTerm || appliedFilterRole !== 'all') ? (
+                            <>
+                                필터링 결과: <strong>{pagination.totalElements}명</strong>
+                                <button
+                                    className="auth-reset-filters"
+                                    onClick={resetFilters}
+                                >
+                                    필터 초기화
+                                </button>
+                            </>
+                        ) : (
+                            <>전체 결과: <strong>{pagination.totalElements}명</strong></>
                         )}
                     </div>
                 </div>
@@ -531,7 +552,7 @@ const AuthManagement = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {filteredUserList.map(user => (
+                        {userList.map(user => (
                             <tr key={user.userId} className={user.isAdmin ? 'admin-row' : ''}>
                                 <td>{user.userId}</td>
                                 <td>
@@ -593,10 +614,10 @@ const AuthManagement = () => {
                                 </td>
                             </tr>
                         ))}
-                        {filteredUserList.length === 0 && !loading && (
+                        {userList.length === 0 && !loading && (
                             <tr>
                                 <td colSpan="7" className="no-data">
-                                    {searchTerm || filterRole !== 'all' ? '검색 조건에 맞는 회원이 없습니다.' : '회원이 없습니다.'}
+                                    {appliedSearchTerm || appliedFilterRole !== 'all' ? '검색 조건에 맞는 회원이 없습니다.' : '회원이 없습니다.'}
                                 </td>
                             </tr>
                         )}
@@ -611,40 +632,21 @@ const AuthManagement = () => {
                     </table>
                 </div>
 
-                {/* 페이징 */}
-                {pagination.totalPages > 1 && (
-                    <div className="pagination-container">
-                        <div className="pagination-info">
-                            {pagination.totalElements}명
-                            중 {(pagination.currentPage * pagination.pageSize) + 1}-{Math.min((pagination.currentPage + 1) * pagination.pageSize, pagination.totalElements)}명
-                            표시
-                        </div>
-                        <div className="pagination">
-                            <button
-                                disabled={pagination.currentPage === 0}
-                                onClick={() => handlePageChange(pagination.currentPage - 1)}
-                            >
-                                이전
-                            </button>
-                            {/* 페이지 번호 버튼들 */}
-                            {Array.from({length: pagination.totalPages}, (_, i) => (
-                                <button
-                                    key={i + 1}
-                                    className={pagination.currentPage === i ? 'active' : ''}
-                                    onClick={() => handlePageChange(i)}
-                                >
-                                    {i + 1}
-                                </button>
-                            ))}
-                            <button
-                                disabled={pagination.currentPage >= pagination.totalPages - 1}
-                                onClick={() => handlePageChange(pagination.currentPage + 1)}
-                            >
-                                다음
-                            </button>
-                        </div>
+                {/* Pagination 컴포넌트 - 항상 표시 (데이터가 있을 때) */}
+                {!loading && userList.length > 0 && (
+                    <div className="pagination-wrapper">
+                        <Pagination
+                            currentPage={pagination.currentPage}
+                            totalPages={pagination.totalPages}
+                            totalElements={pagination.totalElements}
+                            pageSize={pagination.pageSize}
+                            onPageChange={handlePageChange}
+                            showInfo={true}
+                            maxVisiblePages={5}
+                        />
                     </div>
                 )}
+
             </div>
         </Layout>
     );

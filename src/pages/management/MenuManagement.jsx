@@ -1,10 +1,10 @@
 import Layout from '../../components/layout/Layout';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Plus, Edit2, Trash2, ChevronRight, ChevronDown, Save, X,
     Home, MessageSquareMore, FileText, Volume2, HelpCircle, User,
     Star, Settings, Shield, Heart, MapPin, CreditCard, UserMinus,
-    MessageSquare, HeartPlus, MessageCircleQuestion
+    MessageSquare, HeartPlus, MessageCircleQuestion, GripVertical,UserX,KeyRound
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import axios from 'axios';
@@ -27,7 +27,9 @@ const MenuManagement = () => {
         'UserMinus': UserMinus,
         'MessageSquare': MessageSquare,
         'HeartPlus': HeartPlus,
-        'MessageCircleQuestion': MessageCircleQuestion
+        'MessageCircleQuestion': MessageCircleQuestion,
+        'UserX':UserX,
+        'KeyRound':KeyRound,
     };
 
     // 아이콘 렌더링 함수
@@ -44,6 +46,8 @@ const MenuManagement = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingMenu, setEditingMenu] = useState(null);
     const [expandedItems, setExpandedItems] = useState(new Set());
+    const [draggedItem, setDraggedItem] = useState(null);
+    const [dragOverItem, setDragOverItem] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -55,6 +59,10 @@ const MenuManagement = () => {
         level: 0,
         requiredRole: 1
     });
+
+    // 드래그 관련 참조
+    const dragItemRef = useRef(null);
+    const dragOverItemRef = useRef(null);
 
     // Axios 인스턴스 생성
     const api = axios.create({
@@ -178,6 +186,26 @@ const MenuManagement = () => {
         }
     };
 
+    // 사이드바 메뉴 새로고침 함수
+    const triggerSidebarRefresh = () => {
+
+        // 커스텀 이벤트 발생시켜 사이드바에 메뉴 변경 알림
+        const event = new CustomEvent('menuUpdated', {
+            detail: {
+                timestamp: new Date().getTime(),
+                action: 'refresh',
+                source: 'MenuManagement'
+            },
+            bubbles: true,
+            cancelable: true
+        });
+
+        const dispatched = window.dispatchEvent(event);
+
+        // 추가로 document에도 이벤트 발생 (혹시 모를 경우를 대비)
+        document.dispatchEvent(event);
+    };
+
     // 메뉴 저장
     const handleSaveMenu = async () => {
         if (!formData.name.trim()) {
@@ -211,6 +239,9 @@ const MenuManagement = () => {
 
             await loadMenus();
             closeModal();
+
+            // 사이드바 새로고침 트리거
+            triggerSidebarRefresh();
 
             Swal.fire({
                 icon: 'success',
@@ -263,6 +294,10 @@ const MenuManagement = () => {
             await api.delete(`/api/menus/${menuId}`);
 
             await loadMenus();
+
+            // 사이드바 새로고침 트리거
+            triggerSidebarRefresh();
+
             Swal.fire({
                 icon: 'success',
                 title: '삭제 완료',
@@ -284,6 +319,121 @@ const MenuManagement = () => {
                 title: '삭제 오류',
                 text: `삭제 중 오류가 발생했습니다: ${error.message}`
             });
+        }
+    };
+
+    // 드래그 앤 드롭 시작
+    const handleDragStart = (e, menu) => {
+        e.stopPropagation(); // 이벤트 버블링 방지
+        setDraggedItem(menu);
+        dragItemRef.current = menu;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', e.target);
+
+        // 드래그 중 스타일 적용
+        e.target.style.opacity = '0.5';
+
+    };
+
+    // 드래그 종료
+    const handleDragEnd = (e) => {
+        e.stopPropagation();
+        e.target.style.opacity = '1';
+        setDraggedItem(null);
+        setDragOverItem(null);
+        dragItemRef.current = null;
+        dragOverItemRef.current = null;
+
+    };
+
+    // 드래그 오버
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    // 드래그 엔터
+    const handleDragEnter = (e, menu) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverItem(menu);
+        dragOverItemRef.current = menu;
+    };
+
+    // 드래그 리브
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // 자식 요소로 이동하는 경우가 아닐 때만 드래그오버 제거
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+            setDragOverItem(null);
+            dragOverItemRef.current = null;
+        }
+    };
+
+    // 드롭
+    const handleDrop = async (e, targetMenu) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const draggedMenu = dragItemRef.current;
+        const targetMenuData = targetMenu;
+
+        if (!draggedMenu || !targetMenuData || draggedMenu.navigationMenuId === targetMenuData.navigationMenuId) {
+            return;
+        }
+
+        // 부모 ID 비교 함수 (null, undefined, 0을 모두 같은 것으로 처리)
+        const normalizeParentId = (parentId) => {
+            return parentId === null || parentId === undefined || parentId === 0 ? null : parentId;
+        };
+
+        const draggedParentId = normalizeParentId(draggedMenu.parentId);
+        const targetParentId = normalizeParentId(targetMenuData.parentId);
+
+        // 같은 부모를 가진 메뉴들끼리만 순서 변경 허용
+        if (draggedParentId !== targetParentId) {
+
+            Swal.fire({
+                icon: 'warning',
+                title: '순서 변경 불가',
+                text: '같은 레벨의 메뉴끼리만 순서를 변경할 수 있습니다.',
+                timer: 2000
+            });
+            return;
+        }
+
+        try {
+            const response = await api.put(`/api/menus/${draggedMenu.navigationMenuId}/reorder`, {
+                newOrder: targetMenuData.menuOrder,
+                parentId: targetParentId
+            });
+
+            await loadMenus();
+
+            // 사이드바 새로고침 트리거
+            triggerSidebarRefresh();
+
+            Swal.fire({
+                icon: 'success',
+                title: '순서 변경 완료',
+                text: '메뉴 순서가 변경되었습니다.',
+                timer: 1500,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+
+        } catch (error) {
+            console.error('드롭 오류:', error);
+
+            if (!error.message.includes('인증이 필요합니다') && !error.message.includes('관리자 권한')) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '순서 변경 오류',
+                    text: `순서 변경 중 오류가 발생했습니다: ${error.message}`
+                });
+            }
         }
     };
 
@@ -405,17 +555,52 @@ const MenuManagement = () => {
     const renderMenuItem = (menu, level = 0) => {
         const hasChildren = menu.children && menu.children.length > 0;
         const isExpanded = expandedItems.has(menu.navigationMenuId);
+        const isDraggedOver = dragOverItem?.navigationMenuId === menu.navigationMenuId;
+        const isDragging = draggedItem?.navigationMenuId === menu.navigationMenuId;
 
         return (
-            <div key={menu.navigationMenuId} className="menu-item" style={{
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                marginBottom: '8px',
-                padding: '12px',
-                backgroundColor: level > 0 ? '#f8f9fa' : '#fff'
-            }}>
+            <div
+                key={menu.navigationMenuId}
+                className="menu-item"
+                style={{
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    marginBottom: '8px',
+                    padding: '12px',
+                    backgroundColor: level > 0 ? '#f8f9fa' : '#fff',
+                    opacity: isDragging ? 0.5 : 1,
+                    borderColor: isDraggedOver ? '#007bff' : '#e0e0e0',
+                    borderWidth: isDraggedOver ? '2px' : '1px',
+                    transition: 'all 0.2s ease',
+                    position: 'relative'
+                }}
+                draggable
+                onDragStart={(e) => handleDragStart(e, menu)}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDragEnter={(e) => handleDragEnter(e, menu)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, menu)}
+            >
                 <div className="menu-item-content" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div className="menu-item-left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {/* 드래그 핸들 */}
+                        <div
+                            style={{
+                                cursor: 'grab',
+                                color: '#666',
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: '4px',
+                                borderRadius: '4px',
+                                backgroundColor: 'rgba(0,0,0,0.05)'
+                            }}
+                            title="드래그하여 순서 변경"
+                            onMouseDown={(e) => e.stopPropagation()}
+                        >
+                            <GripVertical size={16} />
+                        </div>
+
                         {hasChildren && (
                             <button
                                 onClick={() => toggleExpand(menu.navigationMenuId)}
@@ -490,8 +675,8 @@ const MenuManagement = () => {
                                 style={{
                                     padding: '6px',
                                     border: 'none',
-                                    backgroundColor: '#28a745',
-                                    color: 'white',
+                                    backgroundColor: '#d4edda ',
+                                    color: 'black',
                                     borderRadius: '4px',
                                     cursor: 'pointer'
                                 }}
@@ -506,8 +691,8 @@ const MenuManagement = () => {
                             style={{
                                 padding: '6px',
                                 border: 'none',
-                                backgroundColor: '#007bff',
-                                color: 'white',
+                                backgroundColor: '#cce7ff',
+                                color: 'black',
                                 borderRadius: '4px',
                                 cursor: 'pointer'
                             }}
@@ -521,8 +706,8 @@ const MenuManagement = () => {
                             style={{
                                 padding: '6px',
                                 border: 'none',
-                                backgroundColor: '#dc3545',
-                                color: 'white',
+                                backgroundColor: '#f8d7da ',
+                                color: 'black',
                                 borderRadius: '4px',
                                 cursor: 'pointer'
                             }}
@@ -625,6 +810,9 @@ const MenuManagement = () => {
                         <div>
                             <h1 style={{ margin: '0 0 8px 0', fontSize: '24px' }}>네비게이션 메뉴 관리</h1>
                             <p style={{ margin: 0, color: '#666' }}>총 {menus.length}개의 메뉴가 등록되어 있습니다</p>
+                            <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#999' }}>
+                                💡 드래그하여 메뉴 순서를 변경할 수 있습니다
+                            </p>
                         </div>
                         <button
                             onClick={() => openModal()}
@@ -840,7 +1028,10 @@ const MenuManagement = () => {
 
                                     <div style={{ display: 'flex', gap: '16px' }}>
                                         <div style={{ flex: 1 }}>
-                                            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>메뉴 순서</label>
+                                            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
+                                                메뉴 순서
+                                                <span style={{ fontSize: '12px', color: '#666', fontWeight: 'normal' }}> (저장 후 변경 가능)</span>
+                                            </label>
                                             <input
                                                 type="number"
                                                 value={formData.menuOrder}
