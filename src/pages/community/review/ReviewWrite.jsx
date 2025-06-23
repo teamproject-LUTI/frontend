@@ -74,98 +74,97 @@ const ReviewWrite = () => {
   };
 
   return (
-    <div className="main-layout">
-      <div className="main-content-wrapper">
-        <main className="main-content">
-          <form className="review-form" onSubmit={handleSubmit}>
-            <h2>리뷰 작성</h2>
+      <div className="main-layout">
+        <div className="main-content-wrapper">
+          <main className="main-content">
+            <form className="review-write-form" onSubmit={handleSubmit}>
+              <h2>리뷰 작성</h2>
 
-            <div className="form-group">
-              <label>제목</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>여행지</label>
-              <input
-                type="text"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                placeholder="예: 제주도"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>여행 기간</label>
-              <div className="date-range">
+              <div className="form-group">
+                <label>제목</label>
                 <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  required
-                />
-                <span className="separator">~</span>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  required
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
                 />
               </div>
-            </div>
 
-            <div className="form-group">
-              <label>썸네일 미리보기</label>
-              <div className="thumbnail-preview">
-                <img
-                    src={thumbnailPreview || defaultThumbnail}
-                    alt={thumbnailPreview ? '미리보기 썸네일' : '기본 썸네일'}
-                    className="review-thumbnail"
+              <div className="form-group">
+                <label>여행지</label>
+                <input
+                    type="text"
+                    value={destination}
+                    onChange={(e) => setDestination(e.target.value)}
+                    placeholder="예: 제주도"
+                    required
                 />
               </div>
-            </div>
 
-            <div className="form-group">
+              <div className="form-group">
+                <label>여행 기간</label>
+                <div className="date-range">
+                  <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      required
+                  />
+                  <span className="separator">~</span>
+                  <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      required
+                  />
+                </div>
+              </div>
 
-              {/* Toast UI Editor로 대체 */}
-              <Editor
-                  previewStyle="vertical"   //미리보기 스타일 세로
-                  initialEditType="wysiwyg" //위지윅 모드로 시작
-                  height="500px"
-                  useCommandShortcut={true} //단축키 사용
-                  hideModeSwitch={true}     // 마크다운/위지윅 모드 전환 탭 숨기기
-                  initialValue=""           //빈 문자열로 설정
-                  ref={editorRef}           //ref 연결
-                  hooks={{              //이미지 업로드 훅
-                    //addImageBlobHook: 에디터에 붙여진 이미지 블롭(Blob)을 서버에 업로드하고 콜백으로 URL을 에디터에 삽입
-                    addImageBlobHook: async (blob, callback) => {
-                      const formData = new FormData();
-                      formData.append('image', blob);
+              <div className="form-group">
+                <label>썸네일 미리보기</label>
+                <div className="thumbnail-preview">
+                  <img
+                      src={thumbnailPreview || defaultThumbnail}
+                      alt={thumbnailPreview ? '미리보기 썸네일' : '기본 썸네일'}
+                      className="review-thumbnail"
+                  />
+                </div>
+              </div>
 
-                      const res = await axios.post('/api/review-attachments/image', formData); // 에디터 이미지 업로드 전용 엔드포인트
-                      const imageUrl = res.data.url;
-                      //에디터에 업로드 된 이미지 URL과 대체 텍스트 삽입
-                      callback(imageUrl, '업로드된 이미지');
-                    }
-                  }}
-              />
-            </div>
+              <div className="form-group">
 
-            <div className="button-group">
-              <button type="submit">저장하기</button>
-            </div>
-          </form>
-        </main>
+                {/* Toast UI Editor로 대체 */}
+                <Editor
+                    previewStyle="vertical"   //미리보기 스타일 세로
+                    initialEditType="wysiwyg" //위지윅 모드로 시작
+                    height="500px"
+                    useCommandShortcut={true} //단축키 사용
+                    hideModeSwitch={true}     // 마크다운/위지윅 모드 전환 탭 숨기기
+                    initialValue=""           //빈 문자열로 설정
+                    ref={editorRef}           //ref 연결
+                    hooks={{              //이미지 업로드 훅
+                      //addImageBlobHook: 에디터에 붙여진 이미지 블롭(Blob)을 서버에 업로드하고 콜백으로 URL을 에디터에 삽입
+                      addImageBlobHook: async (blob, callback) => {
+                        const formData = new FormData();
+                        formData.append('image', blob);
+
+                        const res = await axios.post('/api/review-attachments/image', formData); // 에디터 이미지 업로드 전용 엔드포인트
+                        const imageUrl = res.data.url;
+                        //에디터에 업로드 된 이미지 URL과 대체 텍스트 삽입
+                        callback(imageUrl, '업로드된 이미지');
+                      }
+                    }}
+                />
+              </div>
+
+              <div className="button-group">
+                <button type="submit">저장하기</button>
+              </div>
+            </form>
+          </main>
+        </div>
       </div>
-    </div>
   );
 };
 
 export default ReviewWrite;
-

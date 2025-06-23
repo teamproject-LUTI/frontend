@@ -194,34 +194,34 @@
     color: #666;
 }
 
-/* 게시판 페이지네이션 스타일 */
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: 24px;
-}
+/*!* 게시판 페이지네이션 스타일 *!*/
+/*.pagination {*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    gap: 8px;*/
+/*    margin-top: 24px;*/
+/*}*/
 
-/* pagination 버튼 기본 스타일 */
-.pagination button {
-    padding: 6px 12px;
-    background: transparent;
-    border: none;
-    color: #333;
-    cursor: pointer;
-}
+/*!* pagination 버튼 기본 스타일 *!*/
+/*.pagination button {*/
+/*    padding: 6px 12px;*/
+/*    background: transparent;*/
+/*    border: none;*/
+/*    color: #333;*/
+/*    cursor: pointer;*/
+/*}*/
 
-/* 비활성화된 버튼 스타일 */
-.pagination button:disabled {
-    opacity: 0.5;
-    cursor: default;
-}
+/*!* 비활성화된 버튼 스타일 *!*/
+/*.pagination button:disabled {*/
+/*    opacity: 0.5;*/
+/*    cursor: default;*/
+/*}*/
 
-/* 현재 페이지 버튼 강조 */
-.pagination button.active {
-    background: #F76B59;
-    border-color: #F76B59;
-    color: #fff;
-    border-radius: 5px;
-}
+/*!* 현재 페이지 버튼 강조 *!*/
+/*.pagination button.active {*/
+/*    background: #F76B59;*/
+/*    border-color: #F76B59;*/
+/*    color: #fff;*/
+/*    border-radius: 5px;*/
+/*}*/
