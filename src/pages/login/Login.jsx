@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GoogleLoginButton from '../login/GoogleLoginButton';
+import KakaoLoginButton from '../login/KakaoLoginButton';
 import { authUtils } from '../../util/authUtils';
 import '../../styles/login/Login.css';
 import { useAuth } from "../../util/AuthContext";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingProvider, setLoadingProvider] = useState(null); // 'google' | 'kakao' | null
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [loginForm, setLoginForm] = useState({
     email: '',
@@ -14,28 +16,43 @@ const Login = () => {
   });
   const navigate = useNavigate();
 
-  // 🚨 인증 상태 확인 useEffect 완전 제거!
-  // 로그인 페이지에서는 인증 체크를 하지 않습니다.
-
   // 구글 로그인 핸들러
   const handleGoogleLogin = () => {
     if (isLoading) return;
 
     setIsLoading(true);
+    setLoadingProvider('google');
     try {
       console.log('구글 로그인 시작');
       authUtils.startGoogleLogin();
     } catch (error) {
       console.error('구글 로그인 시작 중 오류:', error);
       setIsLoading(false);
+      setLoadingProvider(null);
+    }
+  };
+
+  // 카카오 로그인 핸들러
+  const handleKakaoLogin = () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    setLoadingProvider('kakao');
+    try {
+      console.log('카카오 로그인 시작');
+      authUtils.startKakaoLogin();
+    } catch (error) {
+      console.error('카카오 로그인 시작 중 오류:', error);
+      setIsLoading(false);
+      setLoadingProvider(null);
     }
   };
 
   // 일반 로그인
-// Login.jsx의 handleRegularLogin 함수 수정
   const handleRegularLogin = async () => {
     console.log('일반 로그인');
     setIsLoading(true);
+    setLoadingProvider('regular');
 
     try {
       const response = await fetch('http://localhost:8080/api/auth/login', {
@@ -74,6 +91,7 @@ const Login = () => {
       alert('로그인 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
+      setLoadingProvider(null);
     }
   };
 
@@ -100,6 +118,7 @@ const Login = () => {
                   className="form-input"
                   value={loginForm.email}
                   onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
+                  disabled={isLoading}
               />
             </div>
 
@@ -110,6 +129,7 @@ const Login = () => {
                   className="form-input"
                   value={loginForm.password}
                   onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                  disabled={isLoading}
               />
             </div>
 
@@ -117,14 +137,16 @@ const Login = () => {
             <button
                 className="btn btn-primary"
                 onClick={handleRegularLogin}
+                disabled={isLoading}
             >
-              로그인
+              {loadingProvider === 'regular' ? '로그인 중...' : '로그인'}
             </button>
 
             {/* Signup Button */}
             <button
                 className="btn btn-secondary"
                 onClick={handleSignup}
+                disabled={isLoading}
             >
               회원가입
             </button>
@@ -132,7 +154,7 @@ const Login = () => {
 
           {/* Forgot Password Link */}
           <div className="forgot-password">
-            <button className="forgot-link">
+            <button className="forgot-link" disabled={isLoading}>
               아이디/패스워드 찾기
             </button>
           </div>
@@ -152,19 +174,20 @@ const Login = () => {
                     disabled={isLoading}
                     className="social-btn-google"
                 >
-                  {isLoading ? '로그인 중...' : '구글'}
+                  {loadingProvider === 'google' ? '로그인 중...' : '구글'}
                 </GoogleLoginButton>
               </div>
 
-              {/* 카카오 (향후 구현) */}
-              <button className="social-btn" disabled>
-                <div className="social-icon kakao">
-                  <div className="social-icon-inner kakao-inner">
-                    <span>K</span>
-                  </div>
-                </div>
-                <span className="social-label">카카오</span>
-              </button>
+              {/* 카카오 로그인 버튼 */}
+              <div className="social-btn-wrapper">
+                <KakaoLoginButton
+                    onClick={handleKakaoLogin}
+                    disabled={isLoading}
+                    className="social-btn-kakao"
+                >
+                  {loadingProvider === 'kakao' ? '로그인 중...' : '카카오'}
+                </KakaoLoginButton>
+              </div>
             </div>
           </div>
 
@@ -172,7 +195,12 @@ const Login = () => {
           {isLoading && (
               <div className="loading-overlay">
                 <div className="loading-spinner"></div>
-                <p>구글 로그인 중...</p>
+                <p>
+                  {loadingProvider === 'google' && '구글 로그인 중...'}
+                  {loadingProvider === 'kakao' && '카카오 로그인 중...'}
+                  {loadingProvider === 'regular' && '로그인 중...'}
+                  {!loadingProvider && '처리 중...'}
+                </p>
               </div>
           )}
         </div>
