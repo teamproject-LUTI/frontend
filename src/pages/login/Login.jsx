@@ -97,8 +97,13 @@ const Login = () => {
 
   // 회원가입 페이지로 이동
   const handleSignup = () => {
-    window.location.href = '/membership';
-  };
+    navigate('/membership');
+  }
+
+  // 아이디 비밀번호 찾기 페이지로 이동
+  const handleFindAccount = () => {
+    navigate('/account/find');
+  }
 
   return (
       <div className="login-container">
@@ -154,7 +159,7 @@ const Login = () => {
 
           {/* Forgot Password Link */}
           <div className="forgot-password">
-            <button className="forgot-link" disabled={isLoading}>
+            <button className="forgot-link" disabled={isLoading} onClick={handleFindAccount}>
               아이디/패스워드 찾기
             </button>
           </div>

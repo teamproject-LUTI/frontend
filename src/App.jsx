@@ -47,6 +47,7 @@ import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
 import LikeReview from "./pages/mypage/likereview/LikeReview";
 import MenuManagement from "./pages/management/MenuManagement";
+import FindAccountPage from './pages/login/FindAccountPage';
 import AuthMAnagement from "./pages/management/AuthManagement";
 
 import PasswordChangePage from "./pages/mypage/password/PasswordChangePage";
@@ -57,7 +58,7 @@ const App = () => {
     const location = useLocation();
 
     // 레이아웃이 필요 없는 페이지들 (로그인, 회원가입 등)
-    const noLayoutPaths = ['/', '/login', '/membership', '/auth/error', '/account/restore'];
+    const noLayoutPaths = ['/', '/login', '/membership', '/auth/error', '/account/restore', '/account/find'];
     const needsLayout = !noLayoutPaths.includes(location.pathname);
 
     return (
@@ -228,6 +229,7 @@ const App = () => {
                         <Route path='/auth/error' element={<OAuth2ErrorPage/>}/>
                         <Route path='/account/restore' element={<AccountRestorePage/>}/>
                         <Route path='/login/OAuth2CallbackHandler' element={<OAuth2CallbackHandler/>}/>
+                        <Route path='/account/find' element={<FindAccountPage/>}/>
                     </Routes>
                 )}
             </div>

@@ -33,6 +33,34 @@
     margin-bottom: 1rem;
 }
 
+.emailVerificationGroup {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.emailVerificationGroup input[type="email"] {
+    flex: 1;
+    height: 48px;
+    padding: 0.875rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    color: #374151;
+    box-sizing: border-box;
+}
+
+.emailVerificationGroup .btn {
+    flex-shrink: 0;
+    width: 120px;
+    height: 48px;
+}
+
+.btn-no-margin {
+    margin: 0 0 !important;
+    padding: 0 0 !important;
+}
+
 .formLabel {
     display: block;
     margin-bottom: 0.5rem;
@@ -72,23 +100,16 @@
     align-items: center;
 }
 
-.phoneSelect {
-    width: 120px;
-    padding: 0.75rem 0.5rem;
+.phoneSelect,
+.phoneGroup input {
+    width: 138.61px;
+    padding: 0.625rem 0.5rem;
     border: 1px solid #d1d5db;
     border-radius: 0.5rem;
     font-size: 1rem;
     color: #374151;
     background-color: white;
-}
-
-.phoneInput {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    color: #374151;
+    box-sizing: border-box;
 }
 
 .radioGroup {
@@ -128,6 +149,7 @@
     background-color: #F76B59;
     color: white;
 }
+
 .btn:hover {
     background-color: #e55a48;
 }
@@ -143,6 +165,7 @@
     font-size: 0.875rem;
     transition: color 0.2s;
 }
+
 .login-link-anchor:hover {
     color: #e55a48;
 }
