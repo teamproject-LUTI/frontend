@@ -102,6 +102,23 @@ export const fetchPaymentsByDateDesc = async (userId) => {
   return res.data;
 };
 
+// 전체 사용자 기준 결제 상태별 조회 (관리자용)
+export const fetchAllPaymentsByState = async (state) => {
+  const res = await apiClient.get(`/api/payments/state/${state}`);
+  return res.data;
+};
+
+// 전체 사용자 기준 결제 상태 + 날짜 범위로 조회 (관리자용)
+export const fetchAllPaymentsByDateRange = async (state, start, end) => {
+  const res = await apiClient.get(`/api/payments/state/${state}/range`, {
+    params: {
+      start,
+      end
+    }
+  });
+  return res.data;
+};
+
 // 모듈 전체 export (선택적)
 export default {
   savePayment,
@@ -111,5 +128,7 @@ export default {
   fetchPaymentsByPriceAsc,
   fetchPaymentsByState,
   fetchPaymentsByDateRange,
-  fetchPaymentsByDateDesc
+  fetchPaymentsByDateDesc,
+  fetchAllPaymentsByState,
+  fetchAllPaymentsByDateRange
 };

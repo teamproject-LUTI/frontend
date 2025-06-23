@@ -4,7 +4,7 @@ import Sidebar from '../components/layout/Sidebar';
 import Footer from '../components/layout/Footer';
 import '../styles/Main.css';
 import Swal from 'sweetalert2';
-import ChatForm from '../pages/travel/ChatForm';
+import ChatForm from "../components/chatgpt/ChatForm";
 
 const Main = ({ children }) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);

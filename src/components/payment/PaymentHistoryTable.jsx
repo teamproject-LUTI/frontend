@@ -1,6 +1,3 @@
-// ✅ PaymentHistoryTable.jsx
-// 이 컴포넌트는 사용자 결제 내역을 조회하고 결제일 최신순을 기본으로 정렬합니다.
-
 import React, { useEffect, useState } from "react";
 import {
   fetchPaymentsByUser,
