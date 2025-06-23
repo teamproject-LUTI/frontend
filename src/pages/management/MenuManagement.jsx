@@ -1,4 +1,3 @@
-import Layout from '../../components/layout/Layout';
 import React, { useState, useEffect, useRef } from 'react';
 import {
     Plus, Edit2, Trash2, ChevronRight, ChevronDown, Save, X,
@@ -782,347 +781,343 @@ const MenuManagement = () => {
 
     if (loading) {
         return (
-            <Layout>
-                <div style={{
-                    padding: '20px',
-                    textAlign: 'center',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    minHeight: '400px'
-                }}>
-                    <div>
-                        <div style={{ fontSize: '18px', marginBottom: '10px' }}>로딩 중...</div>
-                        <div style={{ fontSize: '14px', color: '#666' }}>메뉴 데이터를 불러오고 있습니다.</div>
-                    </div>
+            <div style={{
+                padding: '20px',
+                textAlign: 'center',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: '400px'
+            }}>
+                <div>
+                    <div style={{ fontSize: '18px', marginBottom: '10px' }}>로딩 중...</div>
+                    <div style={{ fontSize: '14px', color: '#666' }}>메뉴 데이터를 불러오고 있습니다.</div>
                 </div>
-            </Layout>
+            </div>
         );
     }
 
     const menuTree = buildMenuTree(menus);
 
     return (
-        <Layout>
-            <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-                <div style={{ marginBottom: '24px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <div>
-                            <h1 style={{ margin: '0 0 8px 0', fontSize: '24px' }}>네비게이션 메뉴 관리</h1>
-                            <p style={{ margin: 0, color: '#666' }}>총 {menus.length}개의 메뉴가 등록되어 있습니다</p>
-                            <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#999' }}>
-                                💡 드래그하여 메뉴 순서를 변경할 수 있습니다
-                            </p>
-                        </div>
-                        <button
-                            onClick={() => openModal()}
-                            style={{
-                                padding: '12px 16px',
-                                backgroundColor: '#F76B59',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px'
-                            }}
-                        >
-                            <Plus size={20} />
-                            <span>최상위 메뉴 추가</span>
-                        </button>
-                    </div>
-
+        <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <div>
-                        {menuTree.length === 0 ? (
-                            <div style={{
-                                textAlign: 'center',
-                                padding: '40px',
-                                border: '2px dashed #ccc',
-                                borderRadius: '8px'
-                            }}>
-                                <div style={{ marginBottom: '16px', fontSize: '16px', color: '#666' }}>
-                                    등록된 메뉴가 없습니다.
-                                </div>
+                        <h1 style={{ margin: '0 0 8px 0', fontSize: '24px' }}>네비게이션 메뉴 관리</h1>
+                        <p style={{ margin: 0, color: '#666' }}>총 {menus.length}개의 메뉴가 등록되어 있습니다</p>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#999' }}>
+                            💡 드래그하여 메뉴 순서를 변경할 수 있습니다
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => openModal()}
+                        style={{
+                            padding: '12px 16px',
+                            backgroundColor: '#F76B59',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        <Plus size={20} />
+                        <span>최상위 메뉴 추가</span>
+                    </button>
+                </div>
+
+                <div>
+                    {menuTree.length === 0 ? (
+                        <div style={{
+                            textAlign: 'center',
+                            padding: '40px',
+                            border: '2px dashed #ccc',
+                            borderRadius: '8px'
+                        }}>
+                            <div style={{ marginBottom: '16px', fontSize: '16px', color: '#666' }}>
+                                등록된 메뉴가 없습니다.
+                            </div>
+                            <button
+                                onClick={() => openModal()}
+                                style={{
+                                    padding: '12px 16px',
+                                    backgroundColor: '#28a745',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                <Plus size={16} />
+                                <span>첫 번째 메뉴 추가하기</span>
+                            </button>
+                        </div>
+                    ) : (
+                        <div>
+                            {menuTree.map(menu => renderMenuItem(menu))}
+                            <div style={{ marginTop: '16px' }}>
                                 <button
                                     onClick={() => openModal()}
                                     style={{
                                         padding: '12px 16px',
-                                        backgroundColor: '#28a745',
-                                        color: 'white',
-                                        border: 'none',
+                                        border: '2px dashed #F76B59',
+                                        backgroundColor: 'transparent',
+                                        color: '#F76B59',
                                         borderRadius: '6px',
                                         cursor: 'pointer',
-                                        display: 'inline-flex',
+                                        display: 'flex',
                                         alignItems: 'center',
-                                        gap: '8px'
+                                        gap: '8px',
+                                        width: '100%',
+                                        justifyContent: 'center'
                                     }}
                                 >
                                     <Plus size={16} />
-                                    <span>첫 번째 메뉴 추가하기</span>
+                                    <span>최상위 메뉴 추가</span>
                                 </button>
-                            </div>
-                        ) : (
-                            <div>
-                                {menuTree.map(menu => renderMenuItem(menu))}
-                                <div style={{ marginTop: '16px' }}>
-                                    <button
-                                        onClick={() => openModal()}
-                                        style={{
-                                            padding: '12px 16px',
-                                            border: '2px dashed #F76B59',
-                                            backgroundColor: 'transparent',
-                                            color: '#F76B59',
-                                            borderRadius: '6px',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                            width: '100%',
-                                            justifyContent: 'center'
-                                        }}
-                                    >
-                                        <Plus size={16} />
-                                        <span>최상위 메뉴 추가</span>
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {isModalOpen && (
-                        <div style={{
-                            position: 'fixed',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            zIndex: 1000
-                        }}>
-                            <div style={{
-                                backgroundColor: 'white',
-                                borderRadius: '8px',
-                                padding: '24px',
-                                width: '90%',
-                                maxWidth: '600px',
-                                maxHeight: '90vh',
-                                overflowY: 'auto'
-                            }}>
-                                <h2 style={{ margin: '0 0 20px 0', fontSize: '20px' }}>
-                                    {editingMenu ? '메뉴 수정' : '메뉴 추가'}
-                                </h2>
-
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>메뉴명 *</label>
-                                        <input
-                                            type="text"
-                                            value={formData.name}
-                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                            style={{
-                                                width: '100%',
-                                                padding: '8px',
-                                                border: '1px solid #ccc',
-                                                borderRadius: '4px',
-                                                fontSize: '14px'
-                                            }}
-                                            placeholder="메뉴명을 입력하세요"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>설명</label>
-                                        <input
-                                            type="text"
-                                            value={formData.description}
-                                            onChange={(e) => setFormData({...formData, description: e.target.value})}
-                                            style={{
-                                                width: '100%',
-                                                padding: '8px',
-                                                border: '1px solid #ccc',
-                                                borderRadius: '4px',
-                                                fontSize: '14px'
-                                            }}
-                                            placeholder="메뉴 설명을 입력하세요"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>URL</label>
-                                        <input
-                                            type="text"
-                                            value={formData.url}
-                                            onChange={(e) => setFormData({...formData, url: e.target.value})}
-                                            style={{
-                                                width: '100%',
-                                                padding: '8px',
-                                                border: '1px solid #ccc',
-                                                borderRadius: '4px',
-                                                fontSize: '14px'
-                                            }}
-                                            placeholder="/path/to/page"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>아이콘</label>
-                                        <select
-                                            value={formData.icon}
-                                            onChange={(e) => setFormData({...formData, icon: e.target.value})}
-                                            style={{
-                                                width: '100%',
-                                                padding: '8px',
-                                                border: '1px solid #ccc',
-                                                borderRadius: '4px',
-                                                fontSize: '14px'
-                                            }}
-                                        >
-                                            <option value="">아이콘 선택</option>
-                                            {Object.keys(iconMap).map(iconName => (
-                                                <option key={iconName} value={iconName}>
-                                                    {iconName}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        {formData.icon && (
-                                            <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <span>미리보기:</span>
-                                                {renderIcon(formData.icon, 20)}
-                                                <span>{formData.icon}</span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>상위 메뉴</label>
-                                        <select
-                                            value={formData.parentId || ''}
-                                            onChange={(e) => {
-                                                const parentId = e.target.value === '' ? null : parseInt(e.target.value);
-                                                const parentMenu = menus.find(m => m.navigationMenuId === parentId);
-                                                setFormData({
-                                                    ...formData,
-                                                    parentId: parentId,
-                                                    level: parentId ? (parentMenu?.level || 0) + 1 : 0
-                                                });
-                                            }}
-                                            style={{
-                                                width: '100%',
-                                                padding: '8px',
-                                                border: '1px solid #ccc',
-                                                borderRadius: '4px',
-                                                fontSize: '14px'
-                                            }}
-                                        >
-                                            {getParentOptions().map(option => (
-                                                <option key={option.value || 'null'} value={option.value || ''}>
-                                                    {option.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div style={{ display: 'flex', gap: '16px' }}>
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
-                                                메뉴 순서
-                                                <span style={{ fontSize: '12px', color: '#666', fontWeight: 'normal' }}> (저장 후 변경 가능)</span>
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={formData.menuOrder}
-                                                onChange={(e) => setFormData({...formData, menuOrder: parseInt(e.target.value) || 1})}
-                                                style={{
-                                                    width: '100%',
-                                                    padding: '8px',
-                                                    border: '1px solid #ccc',
-                                                    borderRadius: '4px',
-                                                    fontSize: '14px'
-                                                }}
-                                                min="1"
-                                            />
-                                        </div>
-
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>필요 권한</label>
-                                            <select
-                                                value={formData.requiredRole || 1}
-                                                onChange={(e) => setFormData({...formData, requiredRole: parseInt(e.target.value)})}
-                                                style={{
-                                                    width: '100%',
-                                                    padding: '8px',
-                                                    border: '1px solid #ccc',
-                                                    borderRadius: '4px',
-                                                    fontSize: '14px'
-                                                }}
-                                            >
-                                                <option value={1}>일반사용자</option>
-                                                <option value={2}>관리자</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.isActive}
-                                                onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
-                                            />
-                                            활성화
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-                                    <button
-                                        onClick={closeModal}
-                                        style={{
-                                            flex: 1,
-                                            padding: '12px',
-                                            border: '1px solid #ccc',
-                                            backgroundColor: '#f8f9fa',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: '8px'
-                                        }}
-                                    >
-                                        <X size={16} />
-                                        <span>취소</span>
-                                    </button>
-                                    <button
-                                        onClick={handleSaveMenu}
-                                        style={{
-                                            flex: 1,
-                                            padding: '12px',
-                                            border: 'none',
-                                            backgroundColor: '#007bff',
-                                            color: 'white',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: '8px'
-                                        }}
-                                    >
-                                        <Save size={16} />
-                                        <span>저장</span>
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     )}
                 </div>
+
+                {isModalOpen && (
+                    <div style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1000
+                    }}>
+                        <div style={{
+                            backgroundColor: 'white',
+                            borderRadius: '8px',
+                            padding: '24px',
+                            width: '90%',
+                            maxWidth: '600px',
+                            maxHeight: '90vh',
+                            overflowY: 'auto'
+                        }}>
+                            <h2 style={{ margin: '0 0 20px 0', fontSize: '20px' }}>
+                                {editingMenu ? '메뉴 수정' : '메뉴 추가'}
+                            </h2>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>메뉴명 *</label>
+                                    <input
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px',
+                                            border: '1px solid #ccc',
+                                            borderRadius: '4px',
+                                            fontSize: '14px'
+                                        }}
+                                        placeholder="메뉴명을 입력하세요"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>설명</label>
+                                    <input
+                                        type="text"
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px',
+                                            border: '1px solid #ccc',
+                                            borderRadius: '4px',
+                                            fontSize: '14px'
+                                        }}
+                                        placeholder="메뉴 설명을 입력하세요"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>URL</label>
+                                    <input
+                                        type="text"
+                                        value={formData.url}
+                                        onChange={(e) => setFormData({...formData, url: e.target.value})}
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px',
+                                            border: '1px solid #ccc',
+                                            borderRadius: '4px',
+                                            fontSize: '14px'
+                                        }}
+                                        placeholder="/path/to/page"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>아이콘</label>
+                                    <select
+                                        value={formData.icon}
+                                        onChange={(e) => setFormData({...formData, icon: e.target.value})}
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px',
+                                            border: '1px solid #ccc',
+                                            borderRadius: '4px',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        <option value="">아이콘 선택</option>
+                                        {Object.keys(iconMap).map(iconName => (
+                                            <option key={iconName} value={iconName}>
+                                                {iconName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {formData.icon && (
+                                        <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span>미리보기:</span>
+                                            {renderIcon(formData.icon, 20)}
+                                            <span>{formData.icon}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>상위 메뉴</label>
+                                    <select
+                                        value={formData.parentId || ''}
+                                        onChange={(e) => {
+                                            const parentId = e.target.value === '' ? null : parseInt(e.target.value);
+                                            const parentMenu = menus.find(m => m.navigationMenuId === parentId);
+                                            setFormData({
+                                                ...formData,
+                                                parentId: parentId,
+                                                level: parentId ? (parentMenu?.level || 0) + 1 : 0
+                                            });
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px',
+                                            border: '1px solid #ccc',
+                                            borderRadius: '4px',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        {getParentOptions().map(option => (
+                                            <option key={option.value || 'null'} value={option.value || ''}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '16px' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
+                                            메뉴 순서
+                                            <span style={{ fontSize: '12px', color: '#666', fontWeight: 'normal' }}> (저장 후 변경 가능)</span>
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={formData.menuOrder}
+                                            onChange={(e) => setFormData({...formData, menuOrder: parseInt(e.target.value) || 1})}
+                                            style={{
+                                                width: '100%',
+                                                padding: '8px',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '4px',
+                                                fontSize: '14px'
+                                            }}
+                                            min="1"
+                                        />
+                                    </div>
+
+                                    <div style={{ flex: 1 }}>
+                                        <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>필요 권한</label>
+                                        <select
+                                            value={formData.requiredRole || 1}
+                                            onChange={(e) => setFormData({...formData, requiredRole: parseInt(e.target.value)})}
+                                            style={{
+                                                width: '100%',
+                                                padding: '8px',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '4px',
+                                                fontSize: '14px'
+                                            }}
+                                        >
+                                            <option value={1}>일반사용자</option>
+                                            <option value={2}>관리자</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.isActive}
+                                            onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                                        />
+                                        활성화
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                                <button
+                                    onClick={closeModal}
+                                    style={{
+                                        flex: 1,
+                                        padding: '12px',
+                                        border: '1px solid #ccc',
+                                        backgroundColor: '#f8f9fa',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px'
+                                    }}
+                                >
+                                    <X size={16} />
+                                    <span>취소</span>
+                                </button>
+                                <button
+                                    onClick={handleSaveMenu}
+                                    style={{
+                                        flex: 1,
+                                        padding: '12px',
+                                        border: 'none',
+                                        backgroundColor: '#007bff',
+                                        color: 'white',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px'
+                                    }}
+                                >
+                                    <Save size={16} />
+                                    <span>저장</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
-        </Layout>
+        </div>
     );
 };
 

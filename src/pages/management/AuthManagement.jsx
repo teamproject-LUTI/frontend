@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import Layout from '../../components/layout/Layout';
 import Pagination from '../../components/common/Pagination';
 import Swal from 'sweetalert2';
 import axios from 'axios';
@@ -447,7 +446,6 @@ const AuthManagement = () => {
     };
 
     return (
-        <Layout>
             <div className="user-management-container">
                 <div className="header-section">
                     <h2>회원 관리</h2>
@@ -648,7 +646,6 @@ const AuthManagement = () => {
                 )}
 
             </div>
-        </Layout>
     );
 };
 
