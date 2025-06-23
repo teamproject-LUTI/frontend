@@ -1,26 +1,40 @@
 .review-header {
     display: flex;
-    justify-content: space-between;
+    /*justify-content: space-between;*/
     align-items: center;
     margin-bottom: 16px;
 }
 
-.write-button {
+.review-header h1{
+    margin-right: auto;
+}
+
+/* 글쓰기 버튼 스타일 */
+.review-list-write-button {
     padding: 8px 16px;
     background-color: #F76B59;
     color: white;
     border-radius: 4px;
     text-decoration: none;
     border: none;
+    margin-left: 12px;
+    height: var(--ctrl-height);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
 
 .review-link {
     text-decoration: none;
     color: black;
-
 }
 
-/** 게시판 카드 형태 스타일 */
+.review-item{
+    cursor: pointer;
+}
+
+/* 게시판 카드 형태 스타일 */
 .review-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -45,7 +59,6 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-
 .review-thumbnail {
     width: 100%;            /* 카드 가로폭 꽉 채움 */
     aspect-ratio: 16 / 10;  /* 400px:250px 비율(=1.6) 유지 */
@@ -53,10 +66,7 @@
     border-radius: 8px;
 }
 
-
-
-
-.review-title {
+.review-title-box{
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -66,11 +76,11 @@
     margin-top: 13px;
 }
 
-.title-text {
+.list-title-text {
     font-size: 20px;
     font-weight: bold;
     margin: 0;
-    flex: 1;
+    flex-grow: 1;           /* ✅ 남는 공간을 다 차지하게 */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -79,17 +89,112 @@
 .heart-img {
     width: 20px;
     height: 20px;
-    /*cursor: pointer;*/
+    flex-shrink: 0;
 }
 
-.review-meta {
+.review-list-meta {
     display: flex;
     justify-content: space-between;
     font-size: 14px;
     color: #666;
 }
 
-/** 게시판 페이지네이션 스타일 */
+
+/* 검색창 스타일 */
+:root {
+    --ctrl-height: 40px;
+}
+
+/* 전체 검색 박스 컨테이너 */
+.search-controls {
+    display: flex;
+    align-items: center;
+    height: var(--ctrl-height);
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* select 스타일 (왼쪽) */
+.search-controls select {
+    appearance: none;
+    border: none;
+    padding: 0 12px;
+    height: 100%;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* select와 input 사이 구분선 */
+.search-controls .search-input-wrapper {
+    flex: 1;
+    position: relative;
+    border-left: 1px solid #ccc;
+}
+
+/* 검색어 입력 영역 너비 조절 */
+.search-input-wrapper {
+    position: relative;
+    width: 300px;
+    flex: none;
+}
+
+/* 검색어 입력 input 스타일 */
+.search-controls .search-input-wrapper input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    padding: 0 36px 0 12px;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+    background-color: transparent;  /* 기본 흰색 대신 투명 처리 */
+}
+
+/* 돋보기 아이콘 위치 */
+.review-list-search-icon {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    color: #666;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.select-wrapper {
+    position: relative;
+    width: 100px;
+}
+
+/* select가 wrapper 전체를 덮도록 */
+.select-wrapper select {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 0 30px 0 12px;
+    appearance: none;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+/* select, input 포커스 시 outline 제거 */
+.select-wrapper select:focus,
+.search-input-wrapper input:focus {
+    outline: none;
+}
+
+.review-list-select-icon {
+    position: absolute;
+    top: 11px;
+    right: 5px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #666;
+}
+
+/* 게시판 페이지네이션 스타일 */
 .pagination {
     display: flex;
     justify-content: center;

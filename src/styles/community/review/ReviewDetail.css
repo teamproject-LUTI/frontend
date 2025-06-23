@@ -17,44 +17,60 @@
 
 .detail-meta {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 16px;      /* 요소 사이 간격 */
-    margin-top: 12px; /* 제목과 메타 사이 간격 */
+    margin-bottom: 16px;
+}
+
+.meta-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 /* 작성자, 날짜는 왼쪽에 inline-block 처리 */
 .detail-author,
 .detail-date {
-    display: inline-block;
     font-size: 14px;
-    color: #666;
-    margin-right: 8px;
-    vertical-align: middle;
+    color: #555;
+    margin-right: 12px;
 }
 
-/* 좋아요 섹션은 오른쪽 끝으로 */
+/* 작성자, 작성날짜, 공유, 좋아요 */
 .interaction-section {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 20px;
     margin-left: auto; /* 공유+좋아요를 오른쪽 끝으로 밀기 */
 }
+
 /* 하트 아이콘 크기, 호버 효과 */
-.heart-img {
-    width: 24px;
-    height: 24px;
+.click-heart-img {
+    width: 18px;
+    height: 18px;
     cursor: pointer;
     transition: transform 0.2s ease;
 }
 
-.heart-img:hover {
+.click-heart-img:hover {
     transform: scale(1.1);
 }
 
+.like-button{
+    display: flex;
+    align-items: center; /* ✅ 세로 정렬 */
+    gap: 6px;
+}
 
 .like-count {
-    font-size: 16px;
-    color: #f76b59;
+    font-size: 0.9rem;
+    margin-left: 10px;
+    position: relative;
+    top: -3px;
+}
+
+.like-section {
+    padding-top: 5px;
 }
 
 /* 3. 구분선 & 내용 */
@@ -81,24 +97,23 @@
 }
 
 /* 4. 버튼 영역 */
-/* 수정/삭제 버튼 묶음은 왼쪽으로 */
-.crud-buttons {
+/* 수정/삭제 버튼 묶음 왼쪽에 배치 */
+.review-list-crud-buttons {
     float: left;
     display: flex;
     gap: 8px;
     margin-top: 24px;
 }
 
-/* 목록 버튼은 오른쪽으로 */
-.back-btn {
+/* 목록 버튼 오른쪽에 배치 */
+.review-list-back-btn {
     float: right;
     margin-top: 24px;
 }
 
 /* 공통 버튼 스타일 (깔끔한 배경색) */
-.crud-buttons button,
-.back-btn {
-    background-color: #f0f0f0;
+.review-list-crud-buttons button,
+.review-list-back-btn{
     border: none;
     padding: 8px 16px;
     border-radius: 4px;
@@ -107,9 +122,34 @@
     transition: background-color 0.2s ease;
 }
 
-.crud-buttons button:hover,
-.back-btn:hover {
-    background-color: #e0e0e0;
+/* 삭제 버튼 */
+.review-list-delete-btn {
+    background-color: #FFE2E2;
+    color: #FF7373;
+}
+
+.review-list-delete-btn:hover {
+    background-color: #FFBDBD;
+}
+
+/* 수정 버튼 */
+.review-list-edit-btn {
+    background-color: #E9F8E3;
+    color: #7AD25A;
+}
+
+.review-list-edit-btn:hover {
+    background-color: #D3F2C9;
+}
+
+/* 목록 버튼 */
+.review-list-back-btn {
+    background-color: #d4e7ff;
+    color: #268afa;
+}
+
+.review-list-back-btn:hover {
+    background-color: #b8d8ff;
 }
 
 /* float 해제 */
@@ -119,23 +159,32 @@
     clear: both;
 }
 
-/* 공유 + 좋아요 버튼을 한 줄에 나란히 */
-.interaction-section {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 16px;
-}
-
 /* 공유하기 버튼 스타일 */
 .share-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     border: none;
-    padding: 6px 12px;
     border-radius: 4px;
+    font-size: 14px;
     cursor: pointer;
-    font-size: 0.9rem;
+    background-color: #F9FAFB;
 }
 
 .share-btn:hover {
     opacity: 0.9;
+}
+
+.share-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* 조회수 스타일 */
+.detail-views {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* 아이콘과 숫자 사이 간격을 6px로 설정 */
+    font-size: 0.9rem;
+    color: #666;
 }
