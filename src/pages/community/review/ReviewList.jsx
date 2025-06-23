@@ -3,7 +3,6 @@ import axios from 'axios';
 import { Search, ChevronDown  } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Topbar from '../../../components/layout/Topbar';
-import Sidebar from '../../../components/layout/Sidebar';
 import Footer from '../../../components/layout/Footer';
 import '../../../styles/community/review/ReviewList.css';
 
@@ -57,7 +56,6 @@ const ReviewList = () => {
       <div className="main-layout">
         <Topbar />
         <div className="main-content-wrapper">
-          <Sidebar />
           <main className="main-content">
             <div className="review-header">
               <h1>여행 후기</h1>
