@@ -24,6 +24,7 @@ const NoticeDetail = () => {
                 setNotice(dto);
             } catch (err) {
                 console.error('공지글 조회 실패', err);
+                alert('공지 내용을 불러오지 못했습니다.');
             }
         };
         fetchNotice();

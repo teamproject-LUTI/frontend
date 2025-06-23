@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Search, MapPin, Calendar, Users, Loader2, Send} from "lucide-react";
-import '../../styles/chatgpt/ChatForm.css';
+// import '../../styles/chatgpt/ChatForm.css';
 
 /* ────────── 추천 여행 루트 카드 ────────── */
 const TravelRouteCard = ({route, isSelected, onSelect, loading}) => {

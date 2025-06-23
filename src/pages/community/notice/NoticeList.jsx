@@ -59,13 +59,13 @@ const NoticeList = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {notices.map((n, idx) => (
+                        {notices.map((n) => (
                             <tr
                                 key={n.noticeId}
                                 onClick={() => navigate(`/community/notice/${n.noticeId}`)}
                                 className="notice-row"
                             >
-                                <td>{(page - 1) * size + idx + 1}</td>
+                                <td>{n.noticeId}</td>
                                 <td className="notice-title">{n.title}</td>
                                 <td>{n.userName}</td>
                                 <td>{n.createdAt.substring(0, 10)}</td>
