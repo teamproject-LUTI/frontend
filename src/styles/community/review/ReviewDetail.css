@@ -45,14 +45,14 @@
 }
 
 /* 하트 아이콘 크기, 호버 효과 */
-.heart-img {
-    width: 20px;
-    height: 20px;
+.click-heart-img {
+    width: 18px;
+    height: 18px;
     cursor: pointer;
     transition: transform 0.2s ease;
 }
 
-.heart-img:hover {
+.click-heart-img:hover {
     transform: scale(1.1);
 }
 
@@ -63,11 +63,14 @@
 }
 
 .like-count {
-    font-size: 16px;
+    font-size: 0.9rem;
     margin-left: 10px;
-    margin-bottom: 2px;
     position: relative;
-    top: -4px;
+    top: -3px;
+}
+
+.like-section {
+    padding-top: 5px;
 }
 
 /* 3. 구분선 & 내용 */
@@ -94,24 +97,23 @@
 }
 
 /* 4. 버튼 영역 */
-/* 수정/삭제 버튼 묶음은 왼쪽으로 */
-.crud-buttons {
+/* 수정/삭제 버튼 묶음 왼쪽에 배치 */
+.review-list-crud-buttons {
     float: left;
     display: flex;
     gap: 8px;
     margin-top: 24px;
 }
 
-/* 목록 버튼은 오른쪽으로 */
-.back-btn {
+/* 목록 버튼 오른쪽에 배치 */
+.review-list-back-btn {
     float: right;
     margin-top: 24px;
 }
 
 /* 공통 버튼 스타일 (깔끔한 배경색) */
-.crud-buttons button,
-.back-btn {
-    background-color: #f0f0f0;
+.review-list-crud-buttons button,
+.review-list-back-btn{
     border: none;
     padding: 8px 16px;
     border-radius: 4px;
@@ -120,9 +122,34 @@
     transition: background-color 0.2s ease;
 }
 
-.crud-buttons button:hover,
-.back-btn:hover {
-    background-color: #e0e0e0;
+/* 삭제 버튼 */
+.review-list-delete-btn {
+    background-color: #FFE2E2;
+    color: #FF7373;
+}
+
+.review-list-delete-btn:hover {
+    background-color: #FFBDBD;
+}
+
+/* 수정 버튼 */
+.review-list-edit-btn {
+    background-color: #E9F8E3;
+    color: #7AD25A;
+}
+
+.review-list-edit-btn:hover {
+    background-color: #D3F2C9;
+}
+
+/* 목록 버튼 */
+.review-list-back-btn {
+    background-color: #d4e7ff;
+    color: #268afa;
+}
+
+.review-list-back-btn:hover {
+    background-color: #b8d8ff;
 }
 
 /* float 해제 */
@@ -137,18 +164,27 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
     border: none;
     border-radius: 4px;
     font-size: 14px;
     cursor: pointer;
-
+    background-color: #F9FAFB;
 }
+
+.share-btn:hover {
+    opacity: 0.9;
+}
+
 .share-icon {
     width: 16px;
     height: 16px;
 }
 
-.share-btn:hover {
-    opacity: 0.9;
+/* 조회수 스타일 */
+.detail-views {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* 아이콘과 숫자 사이 간격을 6px로 설정 */
+    font-size: 0.9rem;
+    color: #666;
 }

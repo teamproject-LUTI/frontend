@@ -70,7 +70,7 @@ const ReviewEdit = () => {
 
             // 에디터에서 최신 HTML 가져오기
             const html = editorRef.current.getInstance().getHTML();
-            
+
             // 리뷰 수정 API 호출
             await axios.put(
                 `/api/reviews/${id}`,

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Eye, Share2  } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -15,8 +16,15 @@ const ReviewDetail = () => {
     const [attachments, setAttachments] = useState([]);
     // 로컬스토리지에 저장된 JWT 가져오기
     const token = localStorage.getItem('accessToken');
+    // 마운트 시 fetchReview가 한 번만 실행되도록 제어하는 ref 플래그
+    const hasFetched = useRef(false);
 
     useEffect(() => {
+
+        if (hasFetched.current) return;  // 이미 fetchReview가 실행된 적이 있으면 더 이상 실행하지 않음
+        hasFetched.current = true;       // 최초 실행 시 플래그를 true로 설정하여 이후엔 스킵하게 만듦
+
+
         const fetchReview = async () => {
             try {
                 const res = await axios.get(`/api/reviews/${id}`, {
@@ -131,12 +139,17 @@ const ReviewDetail = () => {
                                 })}
                         </span>
                         </div>
-                        {/* 공유 + 좋아요 */}
+                        {/* 공유 + 조회수 + 좋아요 */}
                         <div className="interaction-section">
                             <button className="share-btn" onClick={handleShare}>
-                                <img src="/images/community/share-icon.png" alt="공유 아이콘" className="share-icon" />
+                                <Share2 className="share-icon" size={16} color="#000" />
                                 공유하기
                             </button>
+                            {/* 조회수 추가 */}
+                            <span className="detail-views">
+                                <Eye className="view-icon" size={18} color="#000" />
+                                {review.viewCount}
+                            </span>
                             <LikeButton
                                 initialLiked={review.liked}
                                 initialCount={review.likeCount}
@@ -163,12 +176,12 @@ const ReviewDetail = () => {
                     ></div>
                     {/*내가 쓴 글일 때만 버튼 보이기 */}
                     {review.owner && (
-                        <div className="crud-buttons">
-                            <button className="edit-btn" onClick={handleEdit}>수정</button>
-                            <button className="delete-btn" onClick={handleDelete}>삭제</button>
+                        <div className="review-list-crud-buttons">
+                            <button className="review-list-edit-btn" onClick={handleEdit}>수정</button>
+                            <button className="review-list-delete-btn" onClick={handleDelete}>삭제</button>
                         </div>
                     )}
-                    <button className="back-btn" onClick={() => navigate('/community/review')}>
+                    <button className="review-list-back-btn" onClick={() => navigate('/community/review')}>
                         목록으로
                     </button>
                 </main>
