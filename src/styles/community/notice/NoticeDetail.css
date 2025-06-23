@@ -1,0 +1,55 @@
+/* src/styles/community/notice/NoticeDetail.css */
+
+.main-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.detail-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.detail-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.detail-images {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    margin-bottom: 24px;
+}
+
+.detail-image {
+    max-height: 200px;
+    border-radius: 4px;
+}
+
+.detail-content {
+    border-top: 1px solid #ddd;
+    padding-top: 16px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    font-size: 16px;
+}
+
+.back-btn {
+    background-color: #f0f0f0;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.back-btn:hover {
+    background-color: #e0e0e0;
+}
