@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, ArrowLeft, Shield, AlertTriangle} from 'lucide-react';
-import Layout from '../../../components/layout/Layout';
 import { useAuth } from '../../../util/AuthContext';
 import apiClient from '../../../util/apiClient';
 import Swal from 'sweetalert2';
@@ -281,7 +280,6 @@ const PasswordChangePage = () => {
   // 소셜 로그인 사용자인 경우 차단 메시지 표시
   if (user && isSocialUser()) {
     return (
-        <Layout>
           <div className="password-change-container">
             <div className="password-change-content">
               <div className="social-user-blocked">
@@ -290,12 +288,10 @@ const PasswordChangePage = () => {
               </div>
             </div>
           </div>
-        </Layout>
     );
   }
 
   return (
-      <Layout>
         <div className="password-change-container">
           <div className="password-change-content">
             {/* 헤더 */}
@@ -472,7 +468,6 @@ const PasswordChangePage = () => {
             </div>
           </div>
         </div>
-      </Layout>
   );
 };
 

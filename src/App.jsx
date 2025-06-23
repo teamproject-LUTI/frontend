@@ -51,6 +51,7 @@ import AuthMAnagement from "./pages/management/AuthManagement";
 
 import PasswordChangePage from "./pages/mypage/password/PasswordChangePage";
 import PaymentManagement from "./pages/management/PaymentManagement";
+import OAuth2CallbackHandler from "./pages/login/OAuth2CallbackHandler";
 
 const App = () => {
     const location = useLocation();
@@ -226,6 +227,7 @@ const App = () => {
                         <Route path='/membership' element={<Membership/>}/>
                         <Route path='/auth/error' element={<OAuth2ErrorPage/>}/>
                         <Route path='/account/restore' element={<AccountRestorePage/>}/>
+                        <Route path='/login/OAuth2CallbackHandler' element={<OAuth2CallbackHandler/>}/>
                     </Routes>
                 )}
             </div>

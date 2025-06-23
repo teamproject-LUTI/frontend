@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import Layout from '../../components/layout/Layout';
 import { User, Phone, Mail, MapPin, Calendar } from 'lucide-react';
 import axios from 'axios';
 import '../../styles/MyPage/MyPage.css';
@@ -148,7 +147,6 @@ const MyPage = () => {
   // 로딩 중일 때
   if (loading) {
     return (
-        <Layout>
           <div className="mypage-container">
             <div className="mypage-content">
               <div className="loading-section">
@@ -157,12 +155,10 @@ const MyPage = () => {
               </div>
             </div>
           </div>
-        </Layout>
     );
   }
 
   return (
-      <Layout>
         <div className="mypage-container">
           <div className="mypage-content">
             {/* 에러 메시지 표시 */}
@@ -259,7 +255,6 @@ const MyPage = () => {
             </div>
           </div>
         </div>
-      </Layout>
   );
 };
 
