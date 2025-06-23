@@ -39,7 +39,7 @@ const LikeButton = ({ initialLiked, initialCount }) => {
             <img
                 src={isLiked ? '/images/community/heart-filled.png' : '/images/community/heart-empty.png'}
                 alt="좋아요"
-                className="heart-img"
+                className="click-heart-img"
                 onClick={handleLike}
             />
             <span className="like-count">{likeCount}</span>
