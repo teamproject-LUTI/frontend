@@ -39,7 +39,6 @@ import WithdrawPage from "./pages/mypage/withdraw/WithdrawPage";
 import AccountRestorePage from "./pages/mypage/withdraw/AccountRestorePage";
 import PasswordConfirmPage from "./pages/mypage/PasswordConfirmPage";
 import { AuthProvider } from "./util/AuthContext";
-import Review from './pages/community/Review';
 import Payment from './pages/mypage/Payment';
 import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
@@ -48,6 +47,7 @@ import MenuManagement from "./pages/management/MenuManagement";
 import AuthMAnagement from "./pages/management/AuthManagement"
 import PasswordChangePage from "./pages/mypage/password/PasswordChangePage";
 import PaymentManagement from "./pages/management/PaymentManagement";
+import OAuth2CallbackHandler from "./pages/login/OAuth2CallbackHandler";
 
 const App = () => {
     const location = useLocation();
@@ -200,6 +200,7 @@ const App = () => {
                         <Route path='/membership' element={<Membership/>}/>
                         <Route path='/auth/error' element={<OAuth2ErrorPage/>}/>
                         <Route path='/account/restore' element={<AccountRestorePage/>}/>
+                        <Route path='/login/OAuth2CallbackHandler' element={<OAuth2CallbackHandler/>}/>
                     </Routes>
                 )}
             </div>

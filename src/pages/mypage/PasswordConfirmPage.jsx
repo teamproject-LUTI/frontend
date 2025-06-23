@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, ArrowLeft, Shield, AlertTriangle } from 'lucide-react';
-import Layout from '../../components/layout/Layout';
 import { useAuth } from '../../util/AuthContext';
 import apiClient from '../../util/apiClient';
 import '../../styles/MyPage/PasswordConfirmPage.css';
@@ -84,7 +83,6 @@ const PasswordConfirmPage = () => {
   };
 
   return (
-      <Layout>
         <div className="password-confirm-container">
           <div className="password-confirm-content">
             {/* 헤더 */}
@@ -180,7 +178,6 @@ const PasswordConfirmPage = () => {
             </div>
           </div>
         </div>
-      </Layout>
   );
 };
 
