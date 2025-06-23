@@ -2,9 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import Topbar from '../../../components/layout/Topbar';
-import Sidebar from '../../../components/layout/Sidebar';
-import Footer from '../../../components/layout/Footer';
 import '../../../styles/community/notice/NoticeDetail.css';
 
 const NoticeDetail = () => {
@@ -17,7 +14,7 @@ const NoticeDetail = () => {
         // 공지글 조회 API 호출
         const fetchNotice = async () => {
             try {
-                const res = await axios.get(`/api/notice/${id}`, {
+                const res = await axios.get(`/api/notices/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }   // 인증 헤더 추가
                 });
                 const dto = res.data.data;
@@ -50,7 +47,7 @@ const NoticeDetail = () => {
 
         if (result.isConfirmed) {
             try {
-                await axios.delete(`/api/notice/${id}`, {
+                await axios.delete(`/api/notices/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 await Swal.fire({
@@ -76,9 +73,9 @@ const NoticeDetail = () => {
 
     return (
         <div className="main-layout">
-            <Topbar />
+
             <div className="main-content-wrapper">
-                <Sidebar />
+
                 <main className="main-content">
                     <h1 className="detail-title">{notice.title}</h1>
 
@@ -112,7 +109,6 @@ const NoticeDetail = () => {
                     </button>
                 </main>
             </div>
-            <Footer />
         </div>
     );
 };

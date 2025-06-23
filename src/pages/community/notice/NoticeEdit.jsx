@@ -3,9 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Topbar from '../../../components/layout/Topbar';
-import Sidebar from '../../../components/layout/Sidebar';
-import Footer from '../../../components/layout/Footer';
 import { Editor } from '@toast-ui/react-editor';
 import '../../../styles/community/notice/NoticeEdit.css';
 
@@ -65,9 +62,9 @@ const NoticeEdit = () => {
 
     return (
         <div className="main-layout">
-            <Topbar />
+
             <div className="main-content-wrapper">
-                <Sidebar />
+
                 <main className="main-content">
                     <form className="notice-edit-form" onSubmit={handleSubmit}>
                         <h2>공지사항 수정</h2>
@@ -122,7 +119,7 @@ const NoticeEdit = () => {
                     </form>
                 </main>
             </div>
-            <Footer />
+
         </div>
     );
 };

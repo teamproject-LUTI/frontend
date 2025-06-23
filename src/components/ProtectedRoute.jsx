@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../util/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, isLoading } = useAuth();
@@ -67,9 +67,8 @@ const ProtectedRoute = ({ children }) => {
         return <Navigate to="/" replace />;
     }
 
-    // 인증된 경우 자식 컴포넌트 렌더링
     console.log('인증 성공 - 컴포넌트 렌더링');
-    return children;
+    return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;

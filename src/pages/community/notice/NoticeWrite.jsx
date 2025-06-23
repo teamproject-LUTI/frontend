@@ -1,9 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Topbar from '../../../components/layout/Topbar';
-import Sidebar from '../../../components/layout/Sidebar';
-import Footer from '../../../components/layout/Footer';
 import '../../../styles/community/notice/NoticeWrite.css';
 import { Editor } from '@toast-ui/react-editor';
 import { useAuth } from '../../../util/AuthContext';  // <-- AuthContext 훅 import
@@ -59,9 +56,9 @@ const NoticeWrite = () => {
 
     return (
         <div className="main-layout">
-            <Topbar />
+
             <div className="main-content-wrapper">
-                <Sidebar />
+
                 <main className="main-content">
                     <form className="notice-write-form" onSubmit={handleSubmit}>
                         <h2>공지 작성</h2>
@@ -119,7 +116,7 @@ const NoticeWrite = () => {
                     </form>
                 </main>
             </div>
-            <Footer />
+
         </div>
     );
 };

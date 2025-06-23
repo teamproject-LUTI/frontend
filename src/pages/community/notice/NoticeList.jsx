@@ -3,9 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import Topbar from '../../../components/layout/Topbar';
-import Sidebar from '../../../components/layout/Sidebar';
-import Footer from '../../../components/layout/Footer';
 import '../../../styles/community/notice/NoticeList.css';
 
 const NoticeList = () => {
@@ -33,9 +30,9 @@ const NoticeList = () => {
 
     return (
         <div className="main-layout">
-            <Topbar />
+
             <div className="main-content-wrapper">
-                <Sidebar />
+
                 <main className="main-content">
                     <div className="notice-header">
                         <h1>공지사항</h1>
@@ -100,7 +97,6 @@ const NoticeList = () => {
                     </div>
                 </main>
             </div>
-            <Footer />
         </div>
     );
 };

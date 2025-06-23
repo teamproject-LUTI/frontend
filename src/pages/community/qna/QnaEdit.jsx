@@ -2,9 +2,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Topbar from '../../../components/layout/Topbar';
-import Sidebar from '../../../components/layout/Sidebar';
-import Footer from '../../../components/layout/Footer';
 import { Editor } from '@toast-ui/react-editor';
 
 const QnaEdit = () => {
@@ -71,9 +68,9 @@ const QnaEdit = () => {
 
     return (
         <div className="main-layout">
-            <Topbar />
+
             <div className="main-content-wrapper">
-                <Sidebar />
+
                 <main className="main-content">
                     <form className="qna-form" onSubmit={handleSubmit}>
                         <h2>문의 수정</h2>
@@ -129,7 +126,7 @@ const QnaEdit = () => {
                     </form>
                 </main>
             </div>
-            <Footer />
+
         </div>
     );
 };
