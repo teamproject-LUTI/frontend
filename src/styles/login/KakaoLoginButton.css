@@ -1,0 +1,138 @@
+/* KakaoLoginButton.css */
+
+.kakao-login-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    background-color: #FEE500;
+    border: 1px solid #FEE500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.kakao-login-button:hover:not(.disabled) {
+    background-color: #FDD835;
+    border-color: #FDD835;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(253, 216, 53, 0.4);
+}
+
+.kakao-login-button:active:not(.disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(253, 216, 53, 0.4);
+}
+
+.kakao-login-button.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.kakao-login-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 2;
+}
+
+.kakao-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.kakao-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.kakao-login-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #3C1E1E;
+    line-height: 1;
+}
+
+/* 로딩 상태 */
+.kakao-login-button.loading {
+    pointer-events: none;
+}
+
+.kakao-login-button.loading .kakao-login-text::after {
+    content: '...';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% {
+        color: rgba(60, 30, 30, 0.4);
+        text-shadow: 0.25em 0 0 rgba(60, 30, 30, 0.4),
+        0.5em 0 0 rgba(60, 30, 30, 0.4);
+    }
+    40% {
+        color: #3C1E1E;
+        text-shadow: 0.25em 0 0 rgba(60, 30, 30, 0.4),
+        0.5em 0 0 rgba(60, 30, 30, 0.4);
+    }
+    60% {
+        text-shadow: 0.25em 0 0 #3C1E1E,
+        0.5em 0 0 rgba(60, 30, 30, 0.4);
+    }
+    80%, 100% {
+        text-shadow: 0.25em 0 0 #3C1E1E,
+        0.5em 0 0 #3C1E1E;
+    }
+}
+
+/* 작은 화면 대응 */
+@media (max-width: 480px) {
+    .kakao-login-button {
+        padding: 14px 16px;
+    }
+
+    .kakao-login-text {
+        font-size: 15px;
+    }
+}
+
+/* 호버 애니메이션 개선 */
+.kakao-login-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.2),
+            transparent
+    );
+    transition: left 0.5s;
+}
+
+.kakao-login-button:hover:not(.disabled)::before {
+    left: 100%;
+}
+
+/* 포커스 스타일 */
+.kakao-login-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(254, 229, 0, 0.3);
+}
+
+.kakao-login-button:focus:not(:focus-visible) {
+    box-shadow: none;
+}

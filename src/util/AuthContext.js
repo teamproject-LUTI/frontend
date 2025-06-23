@@ -17,7 +17,8 @@ export const AuthProvider = ({ children }) => {
 
   // 로그인이 필요 없는 경로
   const publicPaths = [
-    "/", "/login", "/membership", "/auth/error", "/account/restore"
+    "/", "/login", "/membership", "/auth/error", "/account/restore",
+    "/login/oauth2/code/kakao", "/login/oauth2/code/google"
   ];
 
   const [authState, setAuthState] = useState({
@@ -34,7 +35,7 @@ export const AuthProvider = ({ children }) => {
   // 인증 상태 확인 함수
   const checkAuth = useCallback(async () => {
     if (publicPaths.includes(location.pathname)) {
-      console.log('공개 경로 - 인증 확인 생략');
+      console.log('공개 경로 - 인증 확인 생략:', location.pathname);
       setAuthState(prev => ({
         ...prev,
         isAuthenticated: false,
@@ -44,7 +45,6 @@ export const AuthProvider = ({ children }) => {
       return false;
     }
 
-    /* eslint-disable */
     if (authState.hasChecked && authState.isAuthenticated !== null) {
       console.log('인증 상태 이미 확인됨 - 스킵');
       return authState.isAuthenticated;
@@ -74,6 +74,7 @@ export const AuthProvider = ({ children }) => {
             userData = apiResponse.user;
           }
         } catch (userError) {
+          console.warn('사용자 정보 조회 실패:', userError);
           userData = null;
         }
 
@@ -109,7 +110,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       isCheckingRef.current = false;
     }
-  }, [location.pathname]);
+  }, [location.pathname, authState.hasChecked, authState.isAuthenticated]);
 
   // 디바운스된 인증 확인 함수
   const debouncedCheckAuth = useCallback(() => {
@@ -127,10 +128,9 @@ export const AuthProvider = ({ children }) => {
     }, 100);
   }, [checkAuth]);
 
-  // 사용자 정보 업데이트 함수 추가
+  // 사용자 정보 업데이트 함수
   const updateUser = useCallback(async (updatedData) => {
     try {
-
       // 현재 user 정보와 업데이트된 정보를 병합
       const updatedUser = {
         ...authState.user,
@@ -147,20 +147,21 @@ export const AuthProvider = ({ children }) => {
 
       return true;
     } catch (error) {
+      console.error('사용자 정보 업데이트 실패:', error);
       return false;
     }
   }, [authState.user]);
 
-  // 사용자 정보 새로고침 함수 추가
+  // 사용자 정보 새로고침 함수
   const refreshUser = useCallback(async () => {
     try {
       console.log('사용자 정보 새로고침 시작...');
 
       const userData = await authUtils.getUserInfo();
-      if (userData) {
+      if (userData && userData.success && userData.user) {
         setAuthState(prev => ({
           ...prev,
-          user: userData
+          user: userData.user
         }));
         console.log('사용자 정보 새로고침 완료');
         return true;
@@ -172,7 +173,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // 로그아웃 함수 (기존 방식 유지)
+  // 로그아웃 함수
   const logout = async () => {
     try {
       await authUtils.logout();
@@ -212,6 +213,23 @@ export const AuthProvider = ({ children }) => {
     console.log('AuthContext 상태 리셋 완료');
   };
 
+  // 강제 인증 재확인 함수 (OAuth2 콜백 후 사용)
+  const forceCheckAuth = useCallback(async () => {
+    console.log('강제 인증 재확인 시작...');
+
+    // 캐시 및 상태 초기화
+    authUtils.refreshCache();
+    setAuthState(prev => ({
+      ...prev,
+      hasChecked: false,
+      isLoading: true
+    }));
+
+    // 새로운 인증 확인
+    isCheckingRef.current = false;
+    return await checkAuth();
+  }, [checkAuth]);
+
   // 컴포넌트 마운트 시 한 번만 인증 확인
   useEffect(() => {
     debouncedCheckAuth();
@@ -223,12 +241,15 @@ export const AuthProvider = ({ children }) => {
     };
   }, [debouncedCheckAuth]);
 
-  // 페이지 포커스 시 인증 상태 재확인
+  // 페이지 포커스 시 인증 상태 재확인 (5분 간격)
   useEffect(() => {
+    let lastCheck = Date.now();
+
     const handleFocus = () => {
-      const lastCheck = Date.now();
-      if (!authState.hasChecked || (Date.now() - lastCheck) > 5 * 60 * 1000) {
+      const now = Date.now();
+      if (!authState.hasChecked || (now - lastCheck) > 5 * 60 * 1000) {
         console.log('페이지 포커스 - 인증 상태 재확인');
+        lastCheck = now;
         debouncedCheckAuth();
       }
     };
@@ -237,9 +258,19 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener('focus', handleFocus);
   }, [debouncedCheckAuth, authState.hasChecked]);
 
+  // 전역 authContextReset 함수 등록 (apiClient에서 사용)
+  useEffect(() => {
+    window.authContextReset = resetAuth;
+
+    return () => {
+      delete window.authContextReset;
+    };
+  }, []);
+
   const value = {
     ...authState,
     checkAuth: debouncedCheckAuth,
+    forceCheckAuth,
     logout,
     resetAuth,
     updateUser,

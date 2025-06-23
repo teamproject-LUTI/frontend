@@ -47,6 +47,7 @@ import LikeReview from "./pages/mypage/likereview/LikeReview";
 import MenuManagement from "./pages/management/MenuManagement";
 import AuthMAnagement from "./pages/management/AuthManagement"
 import PasswordChangePage from "./pages/mypage/password/PasswordChangePage";
+import OAuth2CallbackHandler from "./pages/login/OAuth2CallbackHandler";
 
 const App = () => {
   return (
@@ -64,6 +65,9 @@ const App = () => {
             <Route path='/account/restore' element={<AccountRestorePage/>}/>
 
             <Route path='/membership' element={<Membership/>}/>
+
+            <Route path='/login/oauth2/code/kakao' element={<OAuth2CallbackHandler/>}/>
+            <Route path='/login/oauth2/code/google' element={<OAuth2CallbackHandler/>}/>
 
             {/*메인 페이지*/}
             <Route path='/main' element={
