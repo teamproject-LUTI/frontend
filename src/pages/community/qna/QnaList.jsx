@@ -2,9 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import Topbar from '../../../components/layout/Topbar';
-import Sidebar from '../../../components/layout/Sidebar';
-import Footer from '../../../components/layout/Footer';
 import '../../../styles/community/qna/QnaList.css';
 
 const QnaList = () => {
@@ -33,9 +30,9 @@ const QnaList = () => {
 
     return (
         <div className="main-layout">
-            <Topbar />
+
             <div className="main-content-wrapper">
-                <Sidebar />
+
                 <main className="main-content">
                     {/* 헤더 */}
                     <div className="qna-header">
@@ -108,7 +105,7 @@ const QnaList = () => {
                     </div>
                 </main>
             </div>
-            <Footer />
+
         </div>
     );
 };

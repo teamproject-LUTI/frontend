@@ -28,11 +28,14 @@ import ReviewList from './pages/community/review/ReviewList';
 import ReviewDetail from './pages/community/review/ReviewDetail';
 import ReviewWrite from './pages/community/review/ReviewWrite';
 import ReviewEdit from './pages/community/review/ReviewEdit';
-import NoticeList from './pages/community/notice/NoticeList';
 import QnaList from './pages/community/qna/QnaList';
 import QnaWrite from './pages/community/qna/QnaWrite';
 import QnaDetail from './pages/community/qna/QnaDetail';
 import QnaEdit from './pages/community/qna/QnaEdit';
+import NoticeList from './pages/community/notice/NoticeList';
+import NoticeWrite from './pages/community/notice/NoticeWrite';
+import NoticeDetail from './pages/community/notice/NoticeDetail';
+import NoticeEdit  from './pages/community/notice/NoticeEdit';
 import MyPage from "./pages/mypage/MyPage"
 import MyPageProfile from "./pages/mypage/profile/MyPageProfile"
 import WithdrawPage from "./pages/mypage/withdraw/WithdrawPage";
@@ -45,7 +48,8 @@ import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
 import LikeReview from "./pages/mypage/likereview/LikeReview";
 import MenuManagement from "./pages/management/MenuManagement";
-import AuthMAnagement from "./pages/management/AuthManagement"
+import AuthMAnagement from "./pages/management/AuthManagement";
+
 import PasswordChangePage from "./pages/mypage/password/PasswordChangePage";
 import PaymentManagement from "./pages/management/PaymentManagement";
 
@@ -95,13 +99,6 @@ const App = () => {
                                 </ProtectedRoute>
                             } />
 
-                            {/* 커뮤니티 - 공지사항 */}
-                            <Route path='/community/notice' element={
-                                <ProtectedRoute>
-                                    <NoticeList />
-                                </ProtectedRoute>
-                            } />
-
                             {/* 커뮤니티 - QnA */}
                             <Route path='/community/qna' element={
                                 <ProtectedRoute>
@@ -115,17 +112,47 @@ const App = () => {
                                 </ProtectedRoute>
                             } />
 
+                            {/*QnA 상세보기 페이지*/}
                             <Route path='/community/qna/:id' element={
                                 <ProtectedRoute>
                                     <QnaDetail />
                                 </ProtectedRoute>
                             } />
 
+                            {/*QnA 수정 페이지*/}
                             <Route path='/community/qna/edit/:id' element={
                                 <ProtectedRoute>
                                     <QnaEdit />
                                 </ProtectedRoute>
                             } />
+
+                            {/* 공지사항 목록 */}
+                            <Route path='/community/notice' element={
+                                <ProtectedRoute>
+                                    <NoticeList/>
+                                </ProtectedRoute>
+                            }/>
+
+                            {/* 공지사항 글쓰기 */}
+                            <Route path='/community/notice/write' element={
+                                <ProtectedRoute>
+                                    <NoticeWrite/>
+                                </ProtectedRoute>
+                            }/>
+
+                            {/* 공지사항 상세보기 */}
+                            <Route path='/community/notice/:id' element={
+                                <ProtectedRoute>
+                                    <NoticeDetail/>
+                                </ProtectedRoute>
+                            }/>
+
+                            {/* 공지사항 수정 */}
+                            <Route path='/community/notice/edit/:id' element={
+                                <ProtectedRoute>
+                                    <NoticeEdit/>
+                                </ProtectedRoute>
+                            }/>
 
                             {/* 마이페이지 - 개별 Routes로 변경 */}
                             <Route path='/mypage' element={
