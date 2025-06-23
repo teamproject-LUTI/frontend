@@ -3,8 +3,6 @@ import { Eye, Share2  } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import Topbar from '../../../components/layout/Topbar';
-import Footer from '../../../components/layout/Footer';
 import '../../../styles/community/review/ReviewDetail.css';
 import LikeButton from '../../../components/community/review/LikeButton';
 
@@ -120,7 +118,6 @@ const ReviewDetail = () => {
 
     return (
         <div className="main-layout">
-            <Topbar />
             <div className="main-content-wrapper">
                 <main className="main-content">
                     <h1 className="detail-title">{review.title}</h1>
@@ -184,7 +181,6 @@ const ReviewDetail = () => {
                     </button>
                 </main>
             </div>
-            <Footer />
         </div>
     );
 };

@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Search, ChevronDown  } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Topbar from '../../../components/layout/Topbar';
-import Footer from '../../../components/layout/Footer';
 import '../../../styles/community/review/ReviewList.css';
 
 const ReviewList = () => {
@@ -54,7 +52,6 @@ const ReviewList = () => {
 
   return (
       <div className="main-layout">
-        <Topbar />
         <div className="main-content-wrapper">
           <main className="main-content">
             <div className="review-header">
@@ -157,7 +154,6 @@ const ReviewList = () => {
 
           </main>
         </div>
-        <Footer />
       </div>
   );
 };
