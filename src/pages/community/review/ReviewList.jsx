@@ -5,7 +5,6 @@ import Sidebar from '../../../components/layout/Sidebar';
 import Footer from '../../../components/layout/Footer';
 import '../../../styles/community/review/ReviewList.css';
 import axios from 'axios';
-import apiClient from "../../../util/apiClient";
 
 const ReviewList = () => {
   const [reviews, setReviews] = useState([]);
