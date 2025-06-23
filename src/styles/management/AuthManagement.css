@@ -392,55 +392,6 @@
     box-shadow: none;
 }
 
-/* 페이징 스타일 - 다른 화면과 일치 */
-.pagination-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-    margin-top: 20px;
-}
-
-.pagination-info {
-    color: #6c757d;
-    font-size: 14px;
-}
-
-/** 게시판 페이지네이션 스타일 */
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: 24px;
-}
-
-/* pagination 버튼 기본 스타일 */
-.pagination button {
-    padding: 6px 12px;
-    background: transparent;
-    border: none;
-    color: #333;
-    cursor: pointer;
-}
-
-/* 비활성화된 버튼 스타일 */
-.pagination button:disabled {
-    opacity: 0.5;
-    cursor: default;
-}
-
-/* 현재 페이지 버튼 강조 */
-.pagination button.active {
-    background: #F76B59;
-    border-color: #F76B59;
-    color: #fff;
-    border-radius: 5px;
-}
-
 .no-data,
 .loading {
     text-align: center;
@@ -497,16 +448,6 @@
         align-items: flex-start;
     }
 
-    .pagination-container {
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .pagination {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
     .user-table {
         font-size: 12px;
     }
@@ -537,17 +478,4 @@
         border-color: #3182ce;
     }
 
-    .pagination-container {
-        background-color: #2d3748;
-        border-color: #4a5568;
-    }
-
-    .pagination button {
-        color: #e2e8f0;
-    }
-
-    .pagination button.active {
-        background: #F76B59;
-        color: #fff;
-    }
 }

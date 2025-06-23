@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { authUtils } from './authUtils';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback} from 'react';
 import { useLocation } from 'react-router-dom';
+import { authUtils } from './authUtils';
 
 const AuthContext = createContext();
 
@@ -13,13 +13,12 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const location = useLocation();
+    const location = useLocation();
 
-  // 로그인이 필요 없는 경로
-  const publicPaths = [
-    "/", "/login", "/membership", "/auth/error", "/account/restore"
-  ];
-
+    // 로그인이 필요 없는 경로
+    const publicPaths = [
+        "/", "/login", "/membership", "/auth/error", "/account/restore"
+    ];
   const [authState, setAuthState] = useState({
     isAuthenticated: null,
     isLoading: true,
