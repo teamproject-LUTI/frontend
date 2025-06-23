@@ -1,3 +1,5 @@
+// PaymentHistoryTable.jsx
+
 import React, { useEffect, useState } from "react";
 import {
   fetchPaymentsByUser,
@@ -27,10 +29,9 @@ const PaymentHistoryTable = () => {
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
-  const [sortOption, setSortOption] = useState("date-desc"); //기본 최신순
+  const [sortOption, setSortOption] = useState("date-desc");
   const [searchDate, setSearchDate] = useState("");
 
-  // 사용자 정보 조회
   const fetchUser = async () => {
     try {
       const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
@@ -43,7 +44,6 @@ const PaymentHistoryTable = () => {
     }
   };
 
-  // 결제 내역 조회
   const fetchData = async (uid) => {
     if (!uid) return;
     try {
@@ -69,12 +69,10 @@ const PaymentHistoryTable = () => {
         data = await fetchPaymentsByUser(uid);
       }
 
-      // 검색일자 필터
       if (searchDate !== "") {
         data = data.filter(p => dayjs(p.paymentDate).format("YYYY-MM-DD") === searchDate);
       }
 
-      // 정렬
       if (sortOption === "price-asc") {
         data.sort((a, b) => a.totalPrice - b.totalPrice);
       } else if (sortOption === "price-desc") {
@@ -121,7 +119,7 @@ const PaymentHistoryTable = () => {
     setStatusFilter("all");
     setDateFilter("all");
     setSortOption("date-desc");
-    setSearchDate(""); // 초기화
+    setSearchDate("");
     fetchData(userId);
   };
 
@@ -132,7 +130,7 @@ const PaymentHistoryTable = () => {
 
   return (
       <div>
-        <div style={{ marginBottom: "1rem", display: "flex", gap: "1rem", alignItems: "center" }}>
+        <div className="payment-filters">
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="all">전체 상태</option>
             <option value="0">결제 완료</option>
@@ -151,9 +149,9 @@ const PaymentHistoryTable = () => {
             <option value="price-asc">금액 낮은 순</option>
           </select>
 
-          <input type="date" value={searchDate} onChange={(e) => setSearchDate(e.target.value)} />
+          <input type="date" value={searchDate} onChange={(e) => setSearchDate(e.target.value)} className="payment-date-input" />
 
-          <button onClick={handleResetFilters}>초기화</button>
+          <button className="payment-reset-button" onClick={handleResetFilters}>초기화</button>
         </div>
 
         <table className="payment-table">

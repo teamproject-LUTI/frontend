@@ -49,7 +49,7 @@
 }
 
 .payment-table button {
-  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%); /* Medium Blue gradient for refund button (2nd priority) */
+  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
   color: white;
   border: none;
   padding: 8px 16px;
@@ -60,13 +60,13 @@
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 5px rgba(74, 144, 226, 0.2); /* Medium Blue shadow for button */
+  box-shadow: 0 2px 5px rgba(74, 144, 226, 0.2);
 }
 
 .payment-table button:hover {
-  background: linear-gradient(135deg, #357ABD 0%, #285F8F 100%); /* Darker Medium Blue on hover */
+  background: linear-gradient(135deg, #357ABD 0%, #285F8F 100%);
   transform: translateY(-2px);
-  box-shadow: none; /* Highlight shadow removed on hover */
+  box-shadow: none;
 }
 
 .payment-table button:active {
@@ -91,16 +91,6 @@
   color: #2c3e50;
 }
 
-/* 결제수단 스타일 */
-.payment-table .payment-method {
-  background-color: #ffebe7; /* Light peach/orange background */
-  color: #e75a4e; /* Darker orange/red text for contrast */
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
 /* 빈 데이터 스타일 */
 .payment-table .empty-data {
   color: #6c757d;
@@ -109,21 +99,49 @@
   text-align: center;
 }
 
-/* 반응형 디자인 */
-@media (max-width: 768px) {
-  .payment-table {
-    font-size: 12px;
-  }
-  
-  .payment-table th,
-  .payment-table td {
-    padding: 8px 6px;
-  }
-  
-  .payment-table button {
-    padding: 6px 12px;
-    font-size: 11px;
-  }
+/* 필터 영역 스타일 */
+.payment-filters {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* select 필터 공통 스타일 */
+.payment-filters select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  appearance: auto; /* 기본 select 화살표 표시 */
+  width: 120px; /* 박스 폭 줄이기 */
+  background-color: white;
+  cursor: pointer;
+}
+
+/* 날짜 input */
+.payment-date-input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* 초기화 버튼 */
+.payment-reset-button {
+  background: #e75a4e;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.payment-reset-button:hover {
+  background: #c9473e;
 }
 
 /* 로딩 스타일 */
@@ -149,29 +167,28 @@
   100% { transform: rotate(360deg); }
 }
 
-/* 결제 버튼 전용 스타일 */
-.payment-button {
-  background: linear-gradient(135deg, #F76B59 0%, #E75A4E 100%);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 30px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 10px rgba(231, 90, 78, 0.25);
-}
+/* 반응형 */
+@media (max-width: 768px) {
+  .payment-table {
+    font-size: 12px;
+  }
 
-.payment-button:hover {
-  background: linear-gradient(135deg, #e75a4e 0%, #c9473e 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(231, 90, 78, 0.3);
-}
+  .payment-table th,
+  .payment-table td {
+    padding: 8px 6px;
+  }
 
-.payment-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 5px rgba(231, 90, 78, 0.2);
+  .payment-table button {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .payment-filters {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .payment-filters select {
+    width: 100%;
+  }
 }
