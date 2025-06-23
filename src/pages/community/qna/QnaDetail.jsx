@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import '../../../styles/community/qna/QnaDetail.css';
+import CommentSection from "../comment/CommentSection";
 
 const QnaDetail = () => {
     const { id } = useParams();  // 해당 문의글의 ID를 받아옵니다.
@@ -164,6 +165,11 @@ const QnaDetail = () => {
                     <button className="back-btn" onClick={() => navigate('/community/qna')}>
                         목록으로
                     </button>
+                    {/* 댓글 섹션 추가 */}
+                    <CommentSection
+                        parentType="ASK"
+                        parentId={id}
+                    />
                 </main>
             </div>
 

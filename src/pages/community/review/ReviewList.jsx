@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Topbar from '../../../components/layout/Topbar';
-import Sidebar from '../../../components/layout/Sidebar';
-import Footer from '../../../components/layout/Footer';
 import '../../../styles/community/review/ReviewList.css';
 import axios from 'axios';
 
@@ -31,9 +28,7 @@ const ReviewList = () => {
 
     return (
         <div className="main-layout">
-      <Topbar />
       <div className="main-content-wrapper">
-        <Sidebar />
         <main className="main-content">
           <div className="review-header">
             <h1>여행 후기</h1>
@@ -103,7 +98,6 @@ const ReviewList = () => {
 
         </main>
       </div>
-      <Footer />
     </div>
     );
 };

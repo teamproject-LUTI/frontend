@@ -1,8 +1,5 @@
 import React, { useState, useRef, useEffect  } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Topbar from '../../../components/layout/Topbar';
-import Sidebar from '../../../components/layout/Sidebar';
-import Footer from '../../../components/layout/Footer';
 import '../../../styles/community/review/ReviewWrite.css'
 import axios from "axios";
 import { Editor } from '@toast-ui/react-editor';
@@ -78,9 +75,7 @@ const ReviewWrite = () => {
 
   return (
     <div className="main-layout">
-      <Topbar />
       <div className="main-content-wrapper">
-        <Sidebar />
         <main className="main-content">
           <form className="review-form" onSubmit={handleSubmit}>
             <h2>리뷰 작성</h2>
@@ -168,7 +163,6 @@ const ReviewWrite = () => {
           </form>
         </main>
       </div>
-      <Footer />
     </div>
   );
 };
