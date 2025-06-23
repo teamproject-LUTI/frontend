@@ -55,3 +55,44 @@
     border-radius: 5px;
     cursor: pointer;
 }
+
+.submit-btn:hover {
+    background-color: #e55a48;
+}
+
+.email-verification-group {
+    display: flex;
+    gap: 8px; /* 입력창과 버튼 사이 간격 */
+    align-items: center;
+}
+
+.email-verification-group input {
+    flex: 1;
+}
+
+.verify-btn {
+    white-space: nowrap;
+    padding: 12px;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    color: #ff6b5e;
+    border: 1px solid #ff6b5e;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 16px;
+}
+
+.verify-btn:hover {
+    background-color: #ff6b5e;
+    color: white;
+}
+
+.verify-btn:disabled {
+    background-color: #ccc;
+    border: 1px solid #ccc;
+    color: white;
+    cursor: default;
+}
