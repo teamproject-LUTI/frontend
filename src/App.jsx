@@ -39,7 +39,7 @@ import AccountRestorePage from "./pages/mypage/withdraw/AccountRestorePage";
 import PasswordConfirmPage from "./pages/mypage/PasswordConfirmPage";
 import { AuthProvider } from "./util/AuthContext";
 import Review from './pages/community/Review';
-import ChatForm from "./pages/travel/ChatForm";
+import ChatForm from "./components/chatgpt/ChatForm";
 import Payment from './pages/mypage/Payment';
 import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
