@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Layout from '../../components/layout/Layout';
 import { User, Phone, Mail, MapPin, Calendar } from 'lucide-react';
-import apiClient from '../../util/apiClient';
+import axios from 'axios';
 import '../../styles/MyPage/MyPage.css';
 
 const MyPage = () => {
@@ -18,7 +18,8 @@ const MyPage = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const fetchedRef = useRef(false);
+  useRef(false);
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
   // 전화번호 형식 변환 (010-1234-5678)
   const formatPhoneNumber = (phoneNumber) => {
@@ -58,22 +59,18 @@ const MyPage = () => {
     }
   };
 
-  // apiClient를 사용한 프로필 조회 (자동 토큰 갱신 적용)
+  // useCallback으로 함수를 먼저 정의
   const fetchMyPageProfile = useCallback(async () => {
-    if (fetchedRef.current) {
-      console.log('이미 프로필을 가져왔습니다. 중복 호출 방지');
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
-      fetchedRef.current = true;
 
-      console.log('마이페이지 프로필 조회 시작...');
-
-      // apiClient 사용 - 401 에러 시 자동으로 토큰 갱신 후 재시도
-      const response = await apiClient.get('/api/mypage');
+      const response = await axios.get(`${API_BASE_URL}/api/mypage`, {
+        withCredentials: true,
+        validateStatus: function (status) {
+          return (status >= 200 && status < 300) || status === 401;
+        }
+      });
 
       if (response.status === 200 && response.data.success) {
         const profileData = response.data.profile;
@@ -82,7 +79,7 @@ const MyPage = () => {
         const basicInfo = profileData.basicInfo || {};
         const contactInfo = profileData.contactInfo || {};
 
-        const userData = {
+        setUserInfo({
           name: basicInfo.name || '정보 없음',
           nickname: basicInfo.nickname || '정보 없음',
           email: contactInfo.email || '정보 없음',
@@ -91,11 +88,14 @@ const MyPage = () => {
           gender: formatGender(basicInfo.gender) || '정보 없음',
           address: contactInfo.address || '주소를 입력하세요...',
           profileImage: basicInfo.profileImage || null
-        };
+        });
 
-        setUserInfo(userData);
         console.log('마이페이지 프로필 조회 성공:', profileData);
 
+      } else if (response.status === 401) {
+        console.log('인증 오류 - 로그인 페이지로 리다이렉트');
+        window.location.href = '/';
+        return;
       } else {
         throw new Error(response.data.error || '프로필 조회에 실패했습니다.');
       }
@@ -103,10 +103,9 @@ const MyPage = () => {
     } catch (error) {
       console.error('마이페이지 조회 중 오류:', error);
 
-      // 401 에러는 apiClient 인터셉터에서 처리되므로 별도 처리 불필요
       if (error.response?.status === 401) {
-        console.log('401 에러 - apiClient 인터셉터에서 처리됨');
-        // 인터셉터에서 토큰 갱신 후 자동 재시도됨
+        console.log('인증 만료 - 로그인 페이지로 리다이렉트');
+        window.location.href = '/';
         return;
       }
 
@@ -127,19 +126,12 @@ const MyPage = () => {
     } finally {
       setLoading(false);
     }
-  }, []); // 의존성 배열 최소화
+  }, [API_BASE_URL]); // API_BASE_URL을 의존성에 추가
 
   // useEffect에서 함수 호출
   useEffect(() => {
     fetchMyPageProfile();
   }, [fetchMyPageProfile]);
-
-  // 재시도 함수
-  const handleRetry = () => {
-    fetchedRef.current = false; // 재시도 허용
-    setError(null);
-    fetchMyPageProfile();
-  };
 
   const InfoRow = ({ icon: Icon, label, value }) => (
       <div className="info-row">
@@ -178,7 +170,7 @@ const MyPage = () => {
                 <div className="error-section">
                   <p className="error-message">⚠️ {error}</p>
                   <button
-                      onClick={handleRetry}
+                      onClick={fetchMyPageProfile}
                       className="retry-button"
                   >
                     다시 시도

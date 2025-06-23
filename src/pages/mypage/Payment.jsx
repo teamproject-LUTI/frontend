@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import Topbar from '../../components/layout/Topbar';
-import Sidebar from '../../components/layout/Sidebar';
-import Footer from '../../components/layout/Footer';
-import PaymentButtonCom from '../../components/payment/PaymentButtonCom';
-import PaymentHistoryTable from '../../components/payment/PaymentHistoryTable';
+import Topbar from '../components/layout/Topbar';
+import Sidebar from '../components/layout/Sidebar';
+import Footer from '../components/layout/Footer';
+import PaymentButtonCom from '../components/payment/PaymentButtonCom';
+import PaymentHistoryTable from '../components/payment/PaymentHistoryTable';
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";

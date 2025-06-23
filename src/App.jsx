@@ -83,7 +83,12 @@ const App = () => {
               </ProtectedRoute>
             } />
 
+            {/*멤버쉽 페이지*/}
+
+            <Route path='/membership' element={<Membership/>}/>
+
               {/*리뷰 목록 페이지*/}
+
               <Route path='/community/review' element={
                   <ProtectedRoute>
                       <ReviewList />
