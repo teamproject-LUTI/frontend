@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import '../../styles/login/FindAccount.css';
-import Layout from '../../components/layout/Layout';
 import Swal from 'sweetalert2';
 import EmailVerification from '../../components/login/EmailVerification';
+import Topbar from "../../components/layout/Topbar";
 
 const FindAccountPage = () => {
     const [activeTab, setActiveTab] = useState('findId'); // 'findId' 또는 'findPassword'
@@ -197,7 +197,8 @@ const FindAccountPage = () => {
 
 
     return (
-        <Layout>
+        <div>
+            <Topbar />
             <div className="find-account-container">
                 <div className="find-account-box">
                     <div className="tab-header">
@@ -271,7 +272,8 @@ const FindAccountPage = () => {
                 onCodeChange={(e) => setVerificationCode(e.target.value)}
                 errorMessage={verificationError}
             />
-        </Layout>
+        </div>
+
     );
 };
 
