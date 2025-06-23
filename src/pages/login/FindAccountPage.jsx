@@ -70,9 +70,46 @@ const FindAccountPage = () => {
         }
     };
 
-    const handlePwSubmit = (e) => {
+    const handlePwSubmit = async (e) => {
         e.preventDefault();
-        console.log('비밀번호 찾기 요청:', pwForm);
+
+        if (!pwForm.name || !pwForm.email) {
+            Swal.fire({ icon: 'warning', text: '이름과 이메일을 입력해주세요.' });
+            return;
+        }
+
+        if (!isVerified) {
+            Swal.fire({ icon: 'warning', text: '이메일 인증을 먼저 완료해주세요.' });
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:8080/api/account/find-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include', // 세션 공유
+                body: JSON.stringify({
+                    email: pwForm.email,
+                    name: pwForm.name
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    text: result.message || '임시 비밀번호가 이메일로 전송되었습니다.'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    text: result.message || '비밀번호 재설정 실패'
+                });
+            }
+        } catch (error) {
+            Swal.fire({ icon: 'error', text: '요청 중 오류가 발생했습니다.' });
+        }
     };
 
     const isValidEmailFormat = (email) => {
@@ -142,7 +179,7 @@ const FindAccountPage = () => {
                 if (res.status === 200) {
                     Swal.fire({
                         icon: 'success',
-                        text: '이메일 인증이 완료되었습니다. 임시 비밀번호가 이메일로 전송되었습니다.' });
+                        text: '이메일 인증이 완료되었습니다.' });
                     setIsVerified(true); // 인증 완료 상태
                     setShowVerification(false);
                     setVerificationError('')
