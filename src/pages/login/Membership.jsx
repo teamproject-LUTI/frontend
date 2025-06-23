@@ -1,8 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import '../../styles/login/Membership.css';
-import Layout from '../../components/layout/Layout';
+import '../../components/layout/Topbar'
 import Swal from 'sweetalert2';
 import EmailVerification from '../../components/login/EmailVerification';
+import Topbar from "../../components/layout/Topbar";
 
 const Membership = () => {
     const [formData, setFormData] = useState({
@@ -299,8 +300,10 @@ const Membership = () => {
 
 
     return (
-        <Layout hideSidebar={true}>
+        <div>
+            <Topbar />
             <div className="membershipContainer">
+
                 <div className="membershipFormWrapper">
                     <div className="membershipHeader">
                         <h2 className="tagline">회원가입</h2>
@@ -573,6 +576,7 @@ const Membership = () => {
                         </a>
                     </div>
                 </div>
+
             </div>
 
             <EmailVerification
@@ -583,7 +587,9 @@ const Membership = () => {
                 onCodeChange={handleCodeChange}
                 errorMessage={verificationError}
             />
-        </Layout>
+        </div>
+
+
     );
 };
 
