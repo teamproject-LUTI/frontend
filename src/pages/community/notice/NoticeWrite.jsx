@@ -1,54 +1,43 @@
-// src/pages/community/qna/QnaEdit.jsx
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import '../../../styles/community/notice/NoticeWrite.css';
 import { Editor } from '@toast-ui/react-editor';
+import { useAuth } from '../../../util/AuthContext';  // <-- AuthContext 훅 import
 
-const QnaEdit = () => {
-    const { id } = useParams();
+const NoticeWrite = () => {
     const navigate = useNavigate();
-    const token = localStorage.getItem('accessToken');
-
-    const [title, setTitle] = useState('');
-    const [initialContent, setInitialContent] = useState('');
-
     const editorRef = useRef(null);
 
-    // 1) 기존 문의글 조회
-    useEffect(() => {
-        const fetchQna = async () => {
-            try {
-                const res = await axios.get(`/api/asks/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                const dto = res.data.data || res.data; // 응답 구조에 맞게 조정
-                setTitle(dto.title);
-                setInitialContent(dto.content);
-            } catch (err) {
-                console.error('문의글 조회 실패', err);
-            }
-        };
-        fetchQna();
-    }, [id, token]);
+    // AuthContext에서 userId, token 가져오기
+    const { userId, accessToken: token } = useAuth();
 
-    // 2) initialContent가 준비되면 에디터에 HTML 세팅
+    // 제목 상태
+    const [title, setTitle] = useState('');
+
+    // 마운트 시 에디터 내용 초기화
     useEffect(() => {
-        if (editorRef.current && initialContent) {
-            const editor = editorRef.current.getInstance();
-            editor.setHTML(initialContent);
+        if (editorRef.current) {
+            editorRef.current.getInstance().setMarkdown('');
         }
-    }, [initialContent]);
+    }, []);
 
-    // 3) 수정 완료 핸들러
+    // 폼 제출 핸들러
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        const html = editorRef.current.getInstance().getHTML();
+        // 에디터에서 HTML 컨텐츠 꺼내기
+        const contentHtml = editorRef.current.getInstance().getHTML();
 
         try {
-            await axios.put(
-                `/api/asks/${id}`,
-                { title, content: html },
+            // 기존 NoticeController#createNotice(Long userId, NoticeRequestDto dto) 방식에 맞춰
+            // userId 쿼리스트링, body에 DTO와 인증 헤더 전달
+            await axios.post(
+                // `/api/notices?userId=${userId}`,
+                '/api/notices',
+                {
+                    title,
+                    content: contentHtml
+                },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -56,15 +45,14 @@ const QnaEdit = () => {
                     }
                 }
             );
-            navigate(`/community/qna/${id}`);
+
+            // 작성 완료 후 공지사항 목록 페이지로 이동
+            navigate('/community/notice');
         } catch (err) {
-            console.error('문의글 수정 실패', err);
-            alert('수정에 실패했습니다. 다시 시도해주세요.');
+            console.error('공지사항 저장 실패:', err);
+            alert('공지사항 저장에 실패했습니다. 다시 시도해주세요.');
         }
     };
-
-    // 데이터 로딩 전에는 아무것도 렌더링하지 않음
-    if (!initialContent) return null;
 
     return (
         <div className="main-layout">
@@ -72,38 +60,40 @@ const QnaEdit = () => {
             <div className="main-content-wrapper">
 
                 <main className="main-content">
-                    <form className="qna-form" onSubmit={handleSubmit}>
-                        <h2>문의 수정</h2>
+                    <form className="notice-write-form" onSubmit={handleSubmit}>
+                        <h2>공지 작성</h2>
 
                         <div className="form-group">
-                            <label htmlFor="qna-title">제목</label>
+                            <label htmlFor="notice-title">제목</label>
                             <input
-                                id="qna-title"
+                                id="notice-title"
                                 type="text"
                                 value={title}
                                 onChange={e => setTitle(e.target.value)}
                                 required
+                                placeholder="제목을 입력하세요"
                             />
                         </div>
 
                         <div className="form-group">
                             <label>내용</label>
                             <Editor
-                                key={initialContent}             // initialContent 변경 시 리마운트
                                 ref={editorRef}
-                                initialValue={initialContent}    // 기존 HTML
+                                initialValue=""
                                 previewStyle="vertical"
                                 initialEditType="wysiwyg"
-                                height="500px"
+                                height="400px"
                                 useCommandShortcut={true}
                                 hideModeSwitch={true}
                                 hooks={{
                                     addImageBlobHook: async (blob, callback) => {
                                         const formData = new FormData();
                                         formData.append('image', blob);
+                                        // 필요한 엔드포인트 수정
                                         const imgRes = await axios.post(
-                                            '/api/ask-attachments/image',
-                                            formData
+                                            '/api/notice-attachments/image',
+                                            formData,
+                                            { headers: { 'Content-Type': 'multipart/form-data' } }
                                         );
                                         callback(imgRes.data.url, '업로드된 이미지');
                                     }
@@ -113,12 +103,12 @@ const QnaEdit = () => {
 
                         <div className="button-group">
                             <button type="submit" className="save-btn">
-                                수정 완료
+                                저장하기
                             </button>
                             <button
                                 type="button"
                                 className="cancel-btn"
-                                onClick={() => navigate('/community/qna')}
+                                onClick={() => navigate('/community/notice')}
                             >
                                 취소
                             </button>
@@ -131,4 +121,4 @@ const QnaEdit = () => {
     );
 };
 
-export default QnaEdit;
+export default NoticeWrite;

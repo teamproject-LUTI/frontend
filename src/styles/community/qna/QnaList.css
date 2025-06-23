@@ -18,7 +18,13 @@
 
 .qna-table {
     width: 100%;
+    margin: 0 auto;             /* ← 가로 중앙 정렬 */
     border-collapse: collapse;
+}
+
+/* 첫 번째(헤더) 줄만 굵은 테두리로 */
+.qna-table thead th {
+    border-bottom: 2px solid #333;  /* ← 볼드 처리된 첫 번째 선 */
 }
 
 .qna-table th,
@@ -31,6 +37,22 @@
 .qna-table th {
     font-weight: bold;
     color: #333;
+}
+
+/* 1) 제목 칸 넓히기 */
+.qna-table th:nth-child(2),
+.qna-table td:nth-child(2) {
+    width: 50%;
+    max-width: 600px;
+}
+
+/* 2) 답변여부 칸 오른쪽 정렬 */
+.qna-table th:last-child,
+.qna-table td:last-child {
+    text-align: right;
+}
+.qna-table td:last-child {
+    margin-right: 50px;
 }
 
 .qna-row {
