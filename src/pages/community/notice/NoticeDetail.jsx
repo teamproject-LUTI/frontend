@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import '../../../styles/community/notice/NoticeDetail.css';
+import CommentSection from "../comment/CommentSection";
 
 const NoticeDetail = () => {
     const { id } = useParams();
@@ -112,6 +113,11 @@ const NoticeDetail = () => {
                     <button className="back-btn" onClick={() => navigate('/community/notice')}>
                         목록으로
                     </button>
+                    {/* 댓글 섹션 추가 */}
+                    <CommentSection
+                        parentType="NOTICE"
+                        parentId={id}
+                    />
                 </main>
             </div>
         </div>
