@@ -1,7 +1,4 @@
 import React, { useState } from 'react';
-import Topbar from '../components/layout/Topbar';
-import Sidebar from '../components/layout/Sidebar';
-import Footer from '../components/layout/Footer';
 import '../styles/Main.css';
 import Swal from 'sweetalert2';
 import ChatForm from "../components/chatgpt/ChatForm";
@@ -24,9 +21,7 @@ const Main = ({ children }) => {
 
     return (
         <div className="main-layout">
-            <Topbar />
             <div className="main-content-wrapper">
-                <Sidebar />
                 <main className="main-content">
                     {/* GPT 여행 검색창 삽입 */}
                     <ChatForm />
@@ -83,8 +78,6 @@ const Main = ({ children }) => {
                     </div>
                 </main>
             </div>
-            <Footer />
-
         </div>
     );
 };
