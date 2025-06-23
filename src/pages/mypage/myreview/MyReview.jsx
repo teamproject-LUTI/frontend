@@ -28,7 +28,10 @@ const ReviewList = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const [cnt, views, likes] = await Promise.all([axios.get('/api/reviews/myreviews/count', {withCredentials: true}), axios.get('/api/reviews/myreviews/views', {withCredentials: true}), axios.get('/api/reviews/myreviews/likes', {withCredentials: true})]);
+                const [cnt, views, likes] =
+                    await Promise.all([axios.get('/api/reviews/myreviews/count', {withCredentials: true}),
+                        axios.get('/api/reviews/myreviews/views', {withCredentials: true}),
+                        axios.get('/api/reviews/myreviews/likes', {withCredentials: true})]);
                 setMyStats({
                     posts: cnt.data, views: views.data, likes: likes.data
                 });

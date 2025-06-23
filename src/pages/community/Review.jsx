@@ -1,8 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Topbar from '../../components/layout/Topbar';
-import Sidebar from '../../components/layout/Sidebar';
-import Footer from '../../components/layout/Footer';
-
 const Review = () => {
    const [reviews, setReviews] = useState([]);
 
@@ -20,9 +16,7 @@ const Review = () => {
 
   return (
     <div className="main-layout">
-      <Topbar />
       <div className="main-content-wrapper">
-        <Sidebar />
         <main className="main-content">
           <h1>여행 후기 게시판 ✈️</h1>
           <ul>
@@ -36,7 +30,6 @@ const Review = () => {
           </ul>
         </main>
       </div>
-      <Footer />
     </div>
   );
 };
