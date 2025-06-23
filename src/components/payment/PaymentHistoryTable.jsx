@@ -9,7 +9,6 @@ import {
   fetchPaymentsByDateRange
 } from "../../services/PaymentService";
 import axios from "axios";
-import { getPaymentMethodName } from "../../util/paymentMethodMap";
 import "../../styles/payment/PaymentHistoryTable.css";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";

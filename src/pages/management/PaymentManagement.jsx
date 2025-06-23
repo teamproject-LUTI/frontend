@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Layout from "../../components/layout/Layout";
 import {
     fetchAllPaymentsByState,
     fetchAllPaymentsByDateRange,
@@ -127,7 +126,6 @@ const PaymentManagement = () => {
     const totalPages = Math.ceil(totalCount / itemsPerPage);
 
     return (
-        <Layout>
             <div className="payment-management-container">
                 <div className="payment-stats">
                     <div className="stat-item">
@@ -245,7 +243,6 @@ const PaymentManagement = () => {
                     </div>
                 )}
             </div>
-        </Layout>
     );
 };
 
