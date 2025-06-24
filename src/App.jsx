@@ -16,6 +16,13 @@ import './styles/login/Membership.css';
 import './styles/login/GoogleLoginButton.css';
 import './styles/common/LutiModal.css';
 import './styles/common/theme-override.css';
+<<<<<<< HEAD
+=======
+import './styles/MyPage/PasswordChangePage.css'
+import '@toast-ui/editor/dist/toastui-editor.css';
+import './styles/MyPage/Route.css';
+import { Route, Routes, useLocation } from "react-router-dom";
+>>>>>>> 4b27a43c6c5bbfea5ff5afa8ca8bba1cc6f7d8ec
 import Layout from "./components/layout/Layout";
 import Main from "./pages/Main";
 import Login from "./pages/login/Login";
@@ -39,23 +46,34 @@ import MyPageProfile from "./pages/mypage/profile/MyPageProfile"
 import WithdrawPage from "./pages/mypage/withdraw/WithdrawPage";
 import AccountRestorePage from "./pages/mypage/withdraw/AccountRestorePage";
 import PasswordConfirmPage from "./pages/mypage/PasswordConfirmPage";
+<<<<<<< HEAD
+=======
+import { AuthProvider } from "./util/AuthContext";
+import ChatForm from "./components/chatgpt/ChatForm";
+>>>>>>> 4b27a43c6c5bbfea5ff5afa8ca8bba1cc6f7d8ec
 import Payment from './pages/mypage/Payment';
 import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
 import LikeReview from "./pages/mypage/likereview/LikeReview";
 import MenuManagement from "./pages/management/MenuManagement";
+import FindAccountPage from './pages/login/FindAccountPage';
 import AuthMAnagement from "./pages/management/AuthManagement";
 import PasswordChangePage from "./pages/mypage/password/PasswordChangePage";
 import PaymentManagement from "./pages/management/PaymentManagement";
+<<<<<<< HEAD
 
 import { AuthProvider } from "./util/AuthContext";
 import { Route, Routes, useLocation } from "react-router-dom";
+=======
+import RouteMark from "./pages/mypage/route/Route";
+import OAuth2CallbackHandler from "./pages/login/OAuth2CallbackHandler";
+>>>>>>> 4b27a43c6c5bbfea5ff5afa8ca8bba1cc6f7d8ec
 
 const App = () => {
     const location = useLocation();
 
     // 레이아웃이 필요 없는 페이지들 (로그인, 회원가입 등)
-    const noLayoutPaths = ['/', '/login', '/membership', '/auth/error', '/account/restore'];
+    const noLayoutPaths = ['/', '/login', '/membership', '/auth/error', '/account/restore', '/account/find'];
     const needsLayout = !noLayoutPaths.includes(location.pathname);
 
     return (
@@ -199,6 +217,12 @@ const App = () => {
                                 </ProtectedRoute>
                             }/>
 
+                            <Route path='/mypage/routes' element={
+                                <ProtectedRoute>
+                                    <RouteMark/>
+                                </ProtectedRoute>
+                            }/>
+
                             {/* 관리자 페이지 - 개별 Routes로 변경 */}
                             <Route path='/admin/menus' element={
                                 <ProtectedRoute>
@@ -215,6 +239,14 @@ const App = () => {
                                     <PaymentManagement />
                                 </ProtectedRoute>
                             } />
+
+                            {/*gpt 페이지*/}
+                            <Route path='travel/chatform' element={
+                                <ProtectedRoute>
+                                    <ChatForm/>
+                                </ProtectedRoute>
+                            } />
+
                         </Routes>
                     </Layout>
                 ) : (
@@ -225,6 +257,11 @@ const App = () => {
                         <Route path='/membership' element={<Membership/>}/>
                         <Route path='/auth/error' element={<OAuth2ErrorPage/>}/>
                         <Route path='/account/restore' element={<AccountRestorePage/>}/>
+<<<<<<< HEAD
+=======
+                        <Route path='/login/OAuth2CallbackHandler' element={<OAuth2CallbackHandler/>}/>
+                        <Route path='/account/find' element={<FindAccountPage/>}/>
+>>>>>>> 4b27a43c6c5bbfea5ff5afa8ca8bba1cc6f7d8ec
                     </Routes>
                 )}
             </div>

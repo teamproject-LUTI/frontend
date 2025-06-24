@@ -1,5 +1,5 @@
 // src/pages/community/qna/QnaList.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../../../styles/community/qna/QnaList.css';
@@ -9,41 +9,112 @@ const QnaList = () => {
     const [page, setPage] = useState(1);
     const size = 10; // 한 페이지당 항목 수
     const [totalPages, setTotalPages] = useState(1);
+    const [refreshTrigger, setRefreshTrigger] = useState(0); // 새로고침 트리거
 
     const navigate = useNavigate();
 
+    // 문의글 목록을 가져오는 함수
+    const fetchAsks = useCallback(async () => {
+        try {
+            const res = await axios.get('/api/asks', {
+                params: { page, size }
+            });
+            // 응답 예시: { data: [ {...}, ... ], pageInfo: { totalPages: x, ... } }
+            setAsks(res.data.data || []);
+            setTotalPages(res.data.pageInfo?.totalPages || 1);
+        } catch (err) {
+            console.error('문의 목록 조회 실패', err);
+        }
+    }, [page, size]);
+
+    // 페이지 변경 시 또는 새로고침 트리거 변경 시 목록 재조회
     useEffect(() => {
-        const fetchAsks = async () => {
-            try {
-                const res = await axios.get('/api/asks', {
-                    params: { page, size }
-                });
-                // 응답 예시: { data: [ {...}, ... ], pageInfo: { totalPages: x, ... } }
-                setAsks(res.data.data || []);
-                setTotalPages(res.data.pageInfo?.totalPages || 1);
-            } catch (err) {
-                console.error('문의 목록 조회 실패', err);
+        fetchAsks();
+    }, [fetchAsks, refreshTrigger]);
+
+    // 페이지 이동 시 목록 새로고침 (브라우저 포커스 시)
+    useEffect(() => {
+        const handleFocus = () => {
+            console.log('페이지 포커스 - 문의글 목록 새로고침');
+            setRefreshTrigger(prev => prev + 1);
+        };
+
+        // 페이지가 다시 포커스될 때 목록 새로고침
+        window.addEventListener('focus', handleFocus);
+
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+        };
+    }, []);
+
+    // 페이지 이동 시 목록 새로고침 (visibility 변경 시)
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (!document.hidden) {
+                console.log('페이지 가시성 변경 - 문의글 목록 새로고침');
+                setRefreshTrigger(prev => prev + 1);
             }
         };
-        fetchAsks();
-    }, [page]);
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, []);
+
+    // 수동 새로고침 함수
+    const handleRefresh = () => {
+        console.log('수동 새로고침 실행');
+        setRefreshTrigger(prev => prev + 1);
+    };
+
+    // 특정 문의글의 답변 상태를 업데이트하는 함수
+    const updateAskAnswerStatus = useCallback((askId, answered) => {
+        setAsks(prevAsks =>
+            prevAsks.map(ask =>
+                ask.askId === askId
+                    ? { ...ask, answered }
+                    : ask
+            )
+        );
+    }, []);
+
+    // 전역적으로 사용할 수 있도록 window 객체에 함수 등록
+    useEffect(() => {
+        window.updateQnaAnswerStatus = updateAskAnswerStatus;
+        window.refreshQnaList = handleRefresh;
+
+        return () => {
+            delete window.updateQnaAnswerStatus;
+            delete window.refreshQnaList;
+        };
+    }, [updateAskAnswerStatus]);
 
     return (
         <div className="main-layout">
-
             <div className="main-content-wrapper">
-
                 <main className="main-content">
                     {/* 헤더 */}
                     <div className="qna-header">
                         <h1>문의 내역</h1>
-                        <button
-                            type="button"
-                            className="ask-button"
-                            onClick={() => navigate('/community/qna/write')}
-                        >
-                            질문하기
-                        </button>
+                        <div className="qna-header-actions">
+                            <button
+                                type="button"
+                                className="refresh-button"
+                                onClick={handleRefresh}
+                                title="목록 새로고침"
+                            >
+                                🔄
+                            </button>
+                            <button
+                                type="button"
+                                className="ask-button"
+                                onClick={() => navigate('/community/qna/write')}
+                            >
+                                질문하기
+                            </button>
+                        </div>
                     </div>
 
                     {/* 테이블 */}
@@ -69,15 +140,24 @@ const QnaList = () => {
                                 <td>{a.userName}</td>
                                 <td>{a.createdAt.substring(0, 10)}</td>
                                 <td>
-                                    {a.answered
-                                        ? <span className="badge badge-success">답변 완료</span>
-                                        : <span className="badge badge-pending">답변 대기중</span>
-                                    }
+                                    <span
+                                        className={`badge ${a.answered ? 'badge-success' : 'badge-pending'}`}
+                                        key={`${a.askId}-${a.answered}`} // 상태 변경 시 리렌더링 강제
+                                    >
+                                        {a.answered ? '답변 완료' : '답변 대기중'}
+                                    </span>
                                 </td>
                             </tr>
                         ))}
                         </tbody>
                     </table>
+
+                    {/* 목록이 비어있을 때 */}
+                    {asks.length === 0 && (
+                        <div className="qna-empty">
+                            <p>등록된 문의가 없습니다.</p>
+                        </div>
+                    )}
 
                     {/* 페이지네이션 */}
                     <div className="pagination">
@@ -105,7 +185,6 @@ const QnaList = () => {
                     </div>
                 </main>
             </div>
-
         </div>
     );
 };

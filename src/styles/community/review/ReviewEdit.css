@@ -1,0 +1,193 @@
+/* ReviewEdit.css */
+
+/* .review-form 을 2컬럼 그리드로 설정 */
+.review-form.edit-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+}
+
+/* 제목(form-group 1), 에디터(form-group 4), 버튼 그룹(.button-group)은 전체 폭 차지 */
+.review-form.edit-form .form-group:nth-of-type(1),
+.review-form.edit-form .form-group:nth-of-type(4),
+.review-form.edit-form .button-group {
+    grid-column: 1 / -1;
+}
+
+/* 제목 그룹(첫째) */
+.review-form.edit-form .form-group:nth-of-type(1) {
+    display: flex;
+    align-items: center;
+}
+
+.review-form.edit-form .form-group:nth-of-type(1) label {
+    min-width: 80px;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.review-form.edit-form .form-group:nth-of-type(1) input[type="text"] {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* 여행지 그룹(둘째) → 왼쪽 컬럼 */
+.review-form.edit-form .form-group:nth-of-type(2) {
+    display: flex;
+    align-items: center;
+}
+
+.review-form.edit-form .form-group:nth-of-type(2) label {
+    min-width: 80px;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.review-form.edit-form .form-group:nth-of-type(2) input[type="text"] {
+    flex: 1;
+    padding: 8px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* 여행 기간 그룹(셋째) → 오른쪽 컬럼 */
+.review-form.edit-form .form-group:nth-of-type(3) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.review-form.edit-form .form-group:nth-of-type(3) label {
+    min-width: 80px;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.review-form.edit-form .form-group:nth-of-type(3) .date-range {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 8px;
+}
+
+.review-form.edit-form .form-group:nth-of-type(3) .date-range input[type="date"] {
+    flex: 1;
+    padding: 8px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.review-form.edit-form .form-group:nth-of-type(3) .date-range .separator {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+/* 에디터(group 4)와 버튼 그룹 기본 스타일 (전체 폭) */
+.review-form.edit-form .form-group:nth-of-type(4) {
+    /* Editor 자체 스타일이 있으면 여기서 조정 */
+}
+
+.review-form.edit-form .button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* 공통 input 스타일 (추가로 override 필요시) */
+.review-form.edit-form input[type="text"],
+.review-form.edit-form input[type="date"] {
+    box-sizing: border-box;
+}
+
+/* 기존 첨부파일 전체 컨테이너 */
+.edit-attachments-container {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* 기존 첨부파일 섹션 */
+.edit-attachments {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+/* '기존 첨부파일' 텍스트 */
+.edit-attachments-label {
+    font-weight: bold;
+    white-space: nowrap;
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+/* 기존 첨부파일 리스트 */
+.edit-attachments-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* 각각의 파일 아이템 */
+.edit-attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #f4f4f4;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #333;
+}
+
+/* 삭제 버튼 */
+.edit-attachment-remove {
+    all: unset;
+    display: inline-flex;        /* ✅ 텍스트와 수평 정렬 유지 */
+    align-items: center;         /* ✅ 수직 중앙 정렬 */
+    justify-content: center;
+    cursor: pointer;
+    color: #515151;
+    margin-left: 4px;
+    vertical-align: middle;      /* ✅ 세로 정렬 미세 조정 */
+    line-height: 1;
+}
+
+.edit-attachment-remove:hover {
+    color: #e63946;
+}
+
+/* 첨부파일 추가 input은 아래에 위치 */
+.edit-attachment-upload {
+    margin-left: 80px;
+}
+
+.edit-attachments-list a{
+    text-decoration: none;
+    color: #333;
+}
+
+/* “수정 완료” 버튼 스타일 */
+.review-form.edit-form .button-group button[type="submit"] {
+    background-color: #F76B58;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    width: 120px;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+
+}
+
+.review-form.edit-form .button-group button[type="submit"]:hover {
+    opacity: 0.9;
+}

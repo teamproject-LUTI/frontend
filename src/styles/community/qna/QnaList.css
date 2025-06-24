@@ -7,6 +7,12 @@
     margin-bottom: 16px;
 }
 
+.qna-header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
 .ask-button {
     padding: 8px 16px;
     background-color: #F76B59;
@@ -14,6 +20,26 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.ask-button:hover {
+    background-color: #e55a48;
+}
+
+.refresh-button {
+    padding: 8px 12px;
+    background-color: #f0f0f0;
+    color: #333;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+.refresh-button:hover {
+    background-color: #e0e0e0;
 }
 
 .qna-table {
@@ -74,16 +100,31 @@
     border-radius: 12px;
     font-size: 0.85rem;
     border: 1px solid;
+    transition: all 0.3s ease;
 }
 
 .badge-success {
     color: #16a34a;
     border-color: #16a34a;
+    background-color: rgba(22, 163, 74, 0.1);
 }
 
 .badge-pending {
     color: #2563eb;
     border-color: #2563eb;
+    background-color: rgba(37, 99, 235, 0.1);
+}
+
+/* 빈 목록 스타일 */
+.qna-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    font-size: 16px;
+}
+
+.qna-empty p {
+    margin: 0;
 }
 
 /* 페이지네이션 */
@@ -111,4 +152,30 @@
     background-color: #F76B59;
     color: #fff;
     border-radius: 4px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .qna-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .qna-header-actions {
+        justify-content: center;
+    }
+
+    .qna-table {
+        font-size: 14px;
+    }
+
+    .qna-table th,
+    .qna-table td {
+        padding: 8px 4px;
+    }
+
+    .title-cell {
+        max-width: 200px;
+    }
 }

@@ -1,33 +1,43 @@
-.mypage-container {
+/* MyPageProfile.css - 프로필 이미지 좌측 배치 수정 */
+
+.profile-mypage-container {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
 
-.mypage-content {
+.profile-mypage-content {
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    min-height: 600px;
 }
 
+/* 프로필 이미지 섹션 - 좌측으로 이동 */
 .profile-image-section {
+    flex: 0 0 300px; /* 고정 너비 */
     display: flex;
-    justify-content: center;
-    padding: 30px 20px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 30px;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
 }
 
 .profile-image-container {
     position: relative;
     display: inline-block;
+    margin-bottom: 2rem;
 }
 
 .profile-image {
-    width: 120px;
-    height: 120px;
+    width: 150px; /* 크기 약간 증가 */
+    height: 150px;
     border-radius: 50%;
     overflow: hidden;
     border: 4px solid white;
@@ -41,7 +51,7 @@
     object-fit: cover;
 }
 
-.default-avatar {
+.profile-default-avatar {
     width: 100%;
     height: 100%;
     background-color: #f3f4f6;
@@ -50,25 +60,110 @@
     justify-content: center;
 }
 
-.avatar-icon {
-    width: 60px;
-    height: 60px;
+.profile-avatar-icon {
+    width: 70px; /* 아이콘 크기도 증가 */
+    height: 70px;
     color: #9ca3af;
 }
 
-.info-sections {
-    padding: 30px;
+/* 프로필 이미지 컨트롤 영역 - 좌우 배치 */
+.profile-image-controls-horizontal {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 1rem;
+    z-index: 10;
 }
 
-.info-section {
+/* 이미지 업로드 버튼 */
+.profile-image-upload-horizontal {
+    position: relative;
+}
+
+.profile-upload-button-horizontal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; /* 크기 증가 */
+    height: 40px;
+    background-color: #F76B59;
+    border: 3px solid white;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.profile-upload-button-horizontal:hover {
+    background-color: #e55a48;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.profile-upload-button-horizontal:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.profile-upload-icon {
+    width: 18px; /* 아이콘 크기 증가 */
+    height: 18px;
+}
+
+/* 이미지 삭제 버튼 */
+.profile-image-delete-horizontal {
+    position: relative;
+}
+
+.profile-delete-button-horizontal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #ef4444;
+    border: 3px solid white;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    font-size: 20px; /* 폰트 크기 증가 */
+    font-weight: bold;
+    transition: all 0.2s;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.profile-delete-button-horizontal:hover {
+    background-color: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.profile-delete-button-horizontal:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 정보 섹션들 - 우측 배치 */
+.profile-info-sections {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.profile-info-section {
     margin-bottom: 30px;
 }
 
-.info-section:last-child {
+.profile-info-section:last-child {
     margin-bottom: 0;
 }
 
-.section-header {
+.profile-section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -77,36 +172,36 @@
     border-bottom: 2px solid #F76B59;
 }
 
-.section-header h2 {
+.profile-section-header h2 {
     color: #2d3748;
     font-size: 1.5rem;
     font-weight: 600;
     margin: 0;
 }
 
-.section-actions {
+.profile-section-actions {
     display: flex;
     gap: 8px;
 }
 
-.info-content {
+.profile-info-content {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
-.info-row {
+.profile-info-row {
     display: flex;
     align-items: center;
     padding: 15px 0;
     border-bottom: 1px solid #f3f4f6;
 }
 
-.info-row:last-child {
+.profile-info-row:last-child {
     border-bottom: none;
 }
 
-.info-label {
+.profile-info-label {
     display: flex;
     align-items: center;
     min-width: 120px;
@@ -114,20 +209,20 @@
     font-weight: 500;
 }
 
-.info-icon {
+.profile-info-icon {
     width: 18px;
     height: 18px;
     margin-right: 8px;
     color: #F76B59;
 }
 
-.info-value {
+.profile-info-value {
     flex: 1;
     color: #2d3748;
 }
 
 /* 편집 가능한 입력 필드 스타일 */
-.edit-input {
+.profile-edit-input {
     width: 100%;
     padding: 8px 12px;
     border: 1px solid #ddd;
@@ -138,23 +233,25 @@
     transition: border-color 0.2s ease;
 }
 
-.edit-input:focus {
+.profile-edit-input:focus {
     outline: none;
     border-color: #F76B59;
     box-shadow: 0 0 0 2px rgba(247, 107, 89, 0.1);
 }
 
-.edit-input:hover {
+.profile-edit-input:hover {
     border-color: #9ca3af;
 }
 
 /* 버튼 스타일 */
-.edit-actions {
+.profile-edit-actions {
     display: flex;
     gap: 8px;
 }
 
-.save-button, .cancel-button, .edit-button {
+.profile-save-button,
+.profile-cancel-button,
+.profile-edit-button {
     padding: 6px 12px;
     border: none;
     border-radius: 4px;
@@ -163,363 +260,92 @@
     transition: all 0.2s ease;
 }
 
-.save-button {
+.profile-save-button {
     background-color: #F76B59;
     color: white;
 }
 
-.save-button:hover {
+.profile-save-button:hover {
     background-color: #e55a48;
 }
 
-.cancel-button {
+.profile-cancel-button {
     background-color: #6c757d;
     color: white;
 }
 
-.cancel-button:hover {
+.profile-cancel-button:hover {
     background-color: #5a6268;
 }
 
-.edit-button {
+.profile-edit-button {
     background-color: #007bff;
     color: white;
 }
 
-.edit-button:hover {
+.profile-edit-button:hover {
     background-color: #0056b3;
 }
 
-/* 프로필 이미지 컨트롤 영역 - 좌우 배치 */
-.image-controls-horizontal {
-    position: absolute;
-    bottom: -15px; /* 프로필 이미지 아래로 살짝 내림 */
-    left: 50%;
-    transform: translateX(-50%); /* 중앙 정렬 */
-    display: flex;
-    gap: 1rem; /* 버튼 간 간격 */
-    z-index: 10;
-}
-
-/* 이미지 업로드 버튼 - 왼쪽 */
-.image-upload-horizontal {
-    position: relative;
-}
-
-.upload-button-horizontal {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background-color: #F76B59;
-    border: 3px solid white;
-    border-radius: 50%;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-}
-
-.upload-button-horizontal:hover {
-    background-color: #e55a48;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.upload-button-horizontal:disabled {
-    opacity: 0.8;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.upload-icon {
-    width: 16px;
-    height: 16px;
-}
-
-/* 이미지 삭제 버튼 - 오른쪽 */
-.image-delete-horizontal {
-    position: relative;
-}
-
-.delete-button-horizontal {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background-color: #ef4444;
-    border: 3px solid white;
-    border-radius: 50%;
-    color: white;
-    cursor: pointer;
-    font-size: 18px;
-    font-weight: bold;
-    transition: all 0.2s;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-}
-
-.delete-button-horizontal:hover {
-    background-color: #dc2626;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.delete-button-horizontal:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* 프로필 이미지 컨테이너 여백 조정 */
-.profile-image-container {
-    margin-bottom: 2rem; /* 버튼 공간 확보 */
-}
-
-/* 반응형 디자인 */
-@media (max-width: 768px) {
-    .image-controls-horizontal {
-        gap: 0.75rem;
-        bottom: -12px;
-    }
-
-    .upload-button-horizontal,
-    .delete-button-horizontal {
-        width: 32px;
-        height: 32px;
-        border-width: 2px;
-    }
-
-    .upload-icon {
-        width: 14px;
-        height: 14px;
-    }
-
-    .delete-button-horizontal {
-        font-size: 16px;
-    }
-}
-
-@media (max-width: 480px) {
-    .image-controls-horizontal {
-        gap: 0.5rem;
-        bottom: -10px;
-    }
-
-    .upload-button-horizontal,
-    .delete-button-horizontal {
-        width: 28px;
-        height: 28px;
-        border-width: 2px;
-    }
-
-    .upload-icon {
-        width: 12px;
-        height: 12px;
-    }
-
-    .delete-button-horizontal {
-        font-size: 14px;
-    }
-
-    .profile-image-container {
-        margin-bottom: 1.5rem;
-    }
-}
-
 /* 휴대폰 번호 입력 그룹 */
-.phone-input-group {
+.profile-phone-input-group {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px; /* 컴팩트한 간격 */
     width: 100%;
 }
 
-.phone-select {
-    width: 80px;
+.profile-phone-select {
+    width: 65px;
     padding: 8px 6px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
     background-color: white;
+    height: 38px;
+    box-sizing: border-box;
 }
 
-.phone-input {
-    flex: 1;
-    padding: 8px 12px;
+.profile-phone-input {
+    width: 168px; /* 고정 너비로 컴팩트하게 */
+    padding: 8px 8px; /* 중앙 정렬을 위해 좌우 패딩 동일 */
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
     text-align: center;
     background-color: white;
+    height: 38px;
+    box-sizing: border-box;
 }
 
-.phone-dash {
+.profile-phone-dash {
     color: #666;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 14px; /* 작게 */
+    margin: 0 1px; /* 최소 마진 */
 }
 
-.phone-input:focus, .phone-select:focus {
+.profile-phone-input:focus,
+.profile-phone-select:focus {
     outline: none;
     border-color: #F76B59;
     box-shadow: 0 0 0 2px rgba(247, 107, 89, 0.1);
 }
-
-/* 이메일 입력 그룹 */
-.email-input-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    flex-wrap: wrap;
-}
-
-.email-local-input {
-    flex: 1;
-    min-width: 120px;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    background-color: white;
-}
-
-.email-at {
-    color: #666;
-    font-weight: bold;
-    font-size: 16px;
-    margin: 0 4px;
-}
-
-.email-domain-select {
-    min-width: 140px;
-    padding: 8px 6px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    background-color: white;
-}
-
-.email-custom-input {
-    flex: 1;
-    min-width: 120px;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    background-color: white;
-    margin-left: 8px;
-}
-
-.email-local-input:focus,
-.email-domain-select:focus,
-.email-custom-input:focus {
-    outline: none;
-    border-color: #F76B59;
-    box-shadow: 0 0 0 2px rgba(247, 107, 89, 0.1);
-}
-
-/* 반응형 처리 */
-@media (max-width: 768px) {
-    .email-input-group {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-    }
-
-    .email-at {
-        display: none;
-    }
-
-    .email-local-input {
-        min-width: 100%;
-    }
-
-    .email-domain-select {
-        min-width: 100%;
-    }
-
-    .email-custom-input {
-        min-width: 100%;
-        margin-left: 0;
-    }
-
-    .phone-input-group {
-        flex-wrap: wrap;
-        gap: 5px;
-    }
-}
-
-/* 로딩 및 에러 스타일 */
-.loading-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
-}
-
-.loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #F76B59;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
-}
-
-.error-section {
-    background-color: #fee;
-    border: 1px solid #fcc;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.error-message {
-    color: #c33;
-    margin-bottom: 10px;
-}
-
-.retry-button {
-    background-color: #F76B59;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.retry-button:hover {
-    background-color: #e55a48;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* MyPageProfile.css에 추가할 CSS */
 
 /* 이메일 읽기 전용 스타일 */
-.email-readonly-container {
+.profile-email-readonly-container {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.email-readonly-text {
+.profile-email-readonly-text {
     color: #2d3748;
     font-weight: 500;
     font-size: 1rem;
 }
 
-.email-readonly-notice {
+.profile-email-readonly-notice {
     color: #718096;
     font-size: 0.75rem;
     font-style: italic;
@@ -529,8 +355,193 @@
     border-left: 3px solid #F76B59;
 }
 
+/* 주소 입력 그룹 */
+.profile-address-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.profile-postcode-button {
+    padding: 8px 16px;
+    background-color: #F76B59;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s ease;
+}
+
+.profile-postcode-button:hover {
+    background-color: #e55a48;
+}
+
+/* 로딩 및 에러 스타일 */
+.profile-loading-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    width: 100%;
+}
+
+.profile-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #F76B59;
+    border-radius: 50%;
+    animation: profile-spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.profile-error-section {
+    background-color: #fee;
+    border: 1px solid #fcc;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+    width: 100%;
+}
+
+.profile-error-message {
+    color: #c33;
+    margin-bottom: 10px;
+}
+
+.profile-retry-button {
+    background-color: #F76B59;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.profile-retry-button:hover {
+    background-color: #e55a48;
+}
+
+@keyframes profile-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 태블릿 반응형 */
+@media (max-width: 1024px) {
+    .profile-image-section {
+        flex: 0 0 250px;
+        padding: 30px 20px;
+    }
+
+    .profile-image {
+        width: 120px;
+        height: 120px;
+    }
+
+    .profile-avatar-icon {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* 모바일 반응형 - 세로 배치로 변경 */
 @media (max-width: 768px) {
-    .email-readonly-notice {
+    .profile-mypage-content {
+        flex-direction: column;
+        min-height: auto;
+    }
+
+    .profile-image-section {
+        flex: none;
+        padding: 30px 20px;
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .profile-image {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profile-avatar-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .profile-image-controls-horizontal {
+        gap: 0.75rem;
+        bottom: -15px;
+    }
+
+    .profile-upload-button-horizontal,
+    .profile-delete-button-horizontal {
+        width: 32px;
+        height: 32px;
+        border-width: 2px;
+    }
+
+    .profile-upload-icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    .profile-delete-button-horizontal {
+        font-size: 16px;
+    }
+
+    .profile-info-sections {
+        padding: 20px;
+    }
+
+    .profile-phone-input-group {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .profile-phone-select,
+    .profile-phone-input {
+        height: 36px; /* 모바일에서 약간 작게 */
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-image-controls-horizontal {
+        gap: 0.5rem;
+        bottom: -12px;
+    }
+
+    .profile-upload-button-horizontal,
+    .profile-delete-button-horizontal {
+        width: 28px;
+        height: 28px;
+        border-width: 2px;
+    }
+
+    .profile-upload-icon {
+        width: 12px;
+        height: 12px;
+    }
+
+    .profile-delete-button-horizontal {
+        font-size: 14px;
+    }
+
+    .profile-image-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-info-sections {
+        padding: 15px;
+    }
+
+    .profile-email-readonly-notice {
         font-size: 0.7rem;
         padding: 0.375rem;
     }

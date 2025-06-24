@@ -1,31 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import '../../../styles/community/qna/QnaDetail.css';
+import CommentSection from "../comment/CommentSection";
 
 const QnaDetail = () => {
-    const { id } = useParams();  // 해당 문의글의 ID를 받아옵니다.
+    const { id } = useParams();
     const navigate = useNavigate();
-    const [ask, setAsk] = useState(null);  // 문의글 상태
-    const [attachments, setAttachments] = useState([]);  // 첨부파일 상태
-    const token = localStorage.getItem('accessToken');  // 로컬스토리지에서 JWT 가져오기
+    const [ask, setAsk] = useState(null);
+    const [attachments, setAttachments] = useState([]);
+    const token = localStorage.getItem('accessToken');
+
+    // 문의글 정보를 다시 불러오는 함수
+    const fetchAskData = useCallback(async () => {
+        try {
+            const res = await axios.get(`/api/asks/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const dto = res.data.data;
+            setAsk(dto);
+        } catch (err) {
+            console.error('문의글 조회 실패', err);
+        }
+    }, [id, token]);
 
     useEffect(() => {
-        // 문의글 조회 API 호출
-        const fetchQna = async () => {
-            try {
-                const res = await axios.get(`/api/asks/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }   // 인증 헤더 추가
-                });
-                const dto = res.data.data;
-                setAsk(dto);
-            } catch (err) {
-                console.error('문의글 조회 실패', err);
-            }
-        };
-        fetchQna();
-    }, [id, token]);
+        fetchAskData();
+    }, [fetchAskData]);
 
     // 첨부파일 목록 조회
     useEffect(() => {
@@ -41,6 +43,57 @@ const QnaDetail = () => {
         };
         fetchAttachments();
     }, [id, token]);
+
+    // 댓글이 추가되었을 때 호출되는 콜백 함수
+    const handleCommentAdded = useCallback(async () => {
+        console.log('댓글이 추가되었습니다. 문의글 상태를 업데이트합니다.');
+
+        try {
+            // 문의글을 답변 완료로 표시
+            await axios.post(`/api/asks/${id}/mark-answered`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            // 문의글 정보 다시 불러오기 (답변 상태 반영)
+            await fetchAskData();
+
+            // QnaList 컴포넌트의 상태도 업데이트 (전역 함수 사용)
+            if (window.updateQnaAnswerStatus) {
+                window.updateQnaAnswerStatus(parseInt(id), true);
+            }
+
+            console.log('문의글 답변 상태가 업데이트되었습니다.');
+        } catch (err) {
+            console.warn('문의글 답변 상태 업데이트 실패:', err);
+            // 에러가 발생해도 댓글은 이미 생성되었으므로 사용자에게 알리지 않음
+        }
+    }, [id, token, fetchAskData]);
+
+    // 다운로드 핸들러
+    const handleDownload = async (attachmentId, fileName) => {
+        try {
+            const res = await axios.get(
+                `/api/asks/${id}/attachments/${attachmentId}/download`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    responseType: 'blob'
+                }
+            );
+            // Blob → Object URL 생성
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            // 임시 <a> 태그로 다운로드 트리거
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('파일 다운로드 실패', err);
+            alert('다운로드에 실패했어요.');
+        }
+    };
 
     // 공유 버튼 핸들러
     const handleShare = () => {
@@ -110,13 +163,11 @@ const QnaDetail = () => {
 
     return (
         <div className="main-layout">
-
             <div className="main-content-wrapper">
-
                 <main className="main-content">
                     <h1 className="detail-title">{ask.title}</h1>
 
-                    {/* 작성자 + 날짜 */}
+                    {/* 작성자 + 날짜 + 답변 상태 */}
                     <div className="detail-meta">
                         <span className="detail-author">{ask.userName}</span>
                         <span className="detail-date">
@@ -126,6 +177,10 @@ const QnaDetail = () => {
                                 day: '2-digit',
                             })}
                         </span>
+                        {/* 답변 상태 배지 추가 */}
+                        <span className={`status-badge ${ask.answered ? 'answered' : 'pending'}`}>
+                            {ask.answered ? '답변 완료' : '답변 대기중'}
+                        </span>
                         {/* 공유 버튼 */}
                         <div className="interaction-section">
                             <button className="share-btn" onClick={handleShare}>
@@ -134,17 +189,43 @@ const QnaDetail = () => {
                         </div>
                     </div>
 
-                    {/* 첨부 이미지 갤러리 */}
+                    {/* 첨부파일 목록 (PDF, Excel 등 - 이미지 제외) */}
                     {attachments.length > 0 && (
+                        <div className="detail-files">
+                            <h3>첨부파일</h3>
+                            <ul>
+                                {attachments
+                                    .filter(att => !['png','jpg','jpeg','gif'].includes(att.extension.toLowerCase()))
+                                    .map(att => (
+                                        <li key={att.askAttachmentId}>
+                                            <a
+                                                href={`/api/asks/${id}/attachments/${att.askAttachmentId}/download`}
+                                                onClick={e => {
+                                                    e.preventDefault();
+                                                    handleDownload(att.askAttachmentId, att.fileName);
+                                                }}
+                                            >
+                                                📄 {att.fileName}
+                                            </a>
+                                        </li>
+                                    ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* 첨부 이미지 갤러리 */}
+                    {attachments.filter(att => ['png','jpg','jpeg','gif'].includes(att.extension.toLowerCase())).length > 0 && (
                         <div className="detail-images">
-                            {attachments.map(att => (
-                                <img
-                                    key={att.askAttachmentId}
-                                    src={att.logicalPath}      // 서버에 매핑된 URL (/uploads/UUID.jpg)
-                                    alt={att.fileName}
-                                    className="detail-image"
-                                />
-                            ))}
+                            {attachments
+                                .filter(att => ['png','jpg','jpeg','gif'].includes(att.extension.toLowerCase()))
+                                .map(att => (
+                                    <img
+                                        key={att.askAttachmentId}
+                                        src={att.logicalPath}
+                                        alt={att.fileName}
+                                        className="detail-image"
+                                    />
+                                ))}
                         </div>
                     )}
 
@@ -164,9 +245,15 @@ const QnaDetail = () => {
                     <button className="back-btn" onClick={() => navigate('/community/qna')}>
                         목록으로
                     </button>
+
+                    {/* 댓글 섹션 추가 - onCommentAdded 콜백 전달 */}
+                    <CommentSection
+                        parentType="ASK"
+                        parentId={id}
+                        onCommentAdded={handleCommentAdded}
+                    />
                 </main>
             </div>
-
         </div>
     );
 };

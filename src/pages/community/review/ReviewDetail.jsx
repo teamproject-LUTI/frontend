@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Eye, Share2  } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import '../../../styles/community/review/ReviewDetail.css';
 import LikeButton from '../../../components/community/review/LikeButton';
+import CommentSection from "../comment/CommentSection";
 
 const ReviewDetail = () => {
     const { id } = useParams();
@@ -12,8 +14,15 @@ const ReviewDetail = () => {
     const [attachments, setAttachments] = useState([]);
     // 로컬스토리지에 저장된 JWT 가져오기
     const token = localStorage.getItem('accessToken');
+    // 마운트 시 fetchReview가 한 번만 실행되도록 제어하는 ref 플래그
+    const hasFetched = useRef(false);
 
     useEffect(() => {
+
+        if (hasFetched.current) return;  // 이미 fetchReview가 실행된 적이 있으면 더 이상 실행하지 않음
+        hasFetched.current = true;       // 최초 실행 시 플래그를 true로 설정하여 이후엔 스킵하게 만듦
+
+
         const fetchReview = async () => {
             try {
                 const res = await axios.get(`/api/reviews/${id}`, {
@@ -42,7 +51,31 @@ const ReviewDetail = () => {
         };
         fetchAttachments();
     }, [id, token]);
-
+// 다운로드 핸들러
+    const handleDownload = async (fileNo, fileName) => {
+        try {
+            const res = await axios.get(
+                `/api/reviews/${id}/attachments/${fileNo}/download`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    responseType: 'blob'
+                }
+            );
+            // Blob → Object URL 생성
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            // 임시 <a> 태그로 다운로드 트리거
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('파일 다운로드 실패', err);
+            alert('다운로드에 실패했어요.');
+        }
+    };
     // 공유 버튼 핸들러
     const handleShare = () => {
         const url = window.location.href;
@@ -116,53 +149,78 @@ const ReviewDetail = () => {
 
                     {/* 작성자+날짜 · 공유+좋아요 */}
                     <div className="detail-meta">
-                        <span className="detail-author">{review.userName}</span>
-                        <span className="detail-date">
-                        {new Date(review.createdAt).toLocaleDateString('ko-KR', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                        })}
-                    </span>
-                        {/* 공유 + 좋아요 섹션 */}
+                        <div className="meta-left">
+                            <span className="detail-author">{review.userName}</span>
+                            <span className="detail-date">
+                                {new Date(review.createdAt).toLocaleDateString('ko-KR', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                })}
+                        </span>
+                        </div>
+                        {/* 공유 + 조회수 + 좋아요 */}
                         <div className="interaction-section">
                             <button className="share-btn" onClick={handleShare}>
+                                <Share2 className="share-icon" size={16} color="#000" />
                                 공유하기
                             </button>
+                            {/* 조회수 추가 */}
+                            <span className="detail-views">
+                                <Eye className="view-icon" size={18} color="#000" />
+                                {review.viewCount}
+                            </span>
                             <LikeButton
                                 initialLiked={review.liked}
                                 initialCount={review.likeCount}
                             />
                         </div>
                     </div>
-
-                    {/* 첨부 이미지 갤러리 */}
+                    {/* 첨부파일 목록 (PDF, Excel 등) */}
                     {attachments.length > 0 && (
-                        <div className="detail-images">
-                            {attachments.map(att => (
-                                <img
-                                    key={att.reviewAttachmentId}
-                                    src={att.logicalPath}      // 서버에 매핑된 URL (/uploads/UUID.jpg)
-                                    alt={att.fileName}
-                                    className="detail-image"
-                                />
-                            ))}
+                        <div className="detail-files">
+                            <h3>첨부파일</h3>
+                            <ul>
+                                {attachments
+                                    .filter(att => !['png','jpg','jpeg','gif'].includes(att.extension.toLowerCase()))
+                                    .map(att => (
+                                        <li key={att.fileNo}>
+                                            <a
+                                                href={`/api/reviews/${id}/attachments/${att.fileNo}/download`}
+                                                onClick={e => {
+                                                    e.preventDefault();
+                                                    handleDownload(att.fileNo, att.fileName);
+                                                }}
+                                            >
+                                                📄 {att.fileName}
+                                            </a>
+                                        </li>
+                                    ))}
+                            </ul>
                         </div>
                     )}
+                    {/* 본문 */}
                     <div
-                        className="detail-content"
+                        className="review-list-detail-content"
                         dangerouslySetInnerHTML={{ __html: review.content }}
                     ></div>
                     {/*내가 쓴 글일 때만 버튼 보이기 */}
                     {review.owner && (
-                        <div className="crud-buttons">
-                            <button className="edit-btn" onClick={handleEdit}>수정</button>
-                            <button className="delete-btn" onClick={handleDelete}>삭제</button>
+                        <div className="review-list-crud-buttons">
+                            <button className="review-list-edit-btn" onClick={handleEdit}>수정</button>
+                            <button className="review-list-delete-btn" onClick={handleDelete}>삭제</button>
                         </div>
                     )}
-                    <button className="back-btn" onClick={() => navigate('/community/review')}>
+                    <button className="review-list-back-btn" onClick={() => navigate('/community/review')}>
                         목록으로
                     </button>
+                    {/* 댓글 섹션 추가 */}
+                    <div className="comment-wrapper">
+                        <CommentSection
+                            parentType="REVIEW"
+                            parentId={id}
+                        />
+                    </div>
                 </main>
             </div>
         </div>
