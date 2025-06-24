@@ -20,21 +20,20 @@ const ReviewWrite = () => {
   const [attachments, setAttachments] = useState([]);  // 파일 객체들
   const fileInputRef = useRef(null); // 파일 선택 input 참조
 
+  // 로딩 상태 추가
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   //빈 문서로 설정(Markdown 초기화)
   useEffect(() => {
-    if (editorRef.current) {
-      editorRef.current.getInstance().setMarkdown('');
-    }
-  }, []);
+    const editorIns = editorRef.current?.getInstance();
+    if (!editorIns) return;
 
-  //
-  useEffect(() => {
-    const editor = editorRef.current?.getInstance();
-    if (!editor) return;
+    // 1) 에디터 마크다운 빈 문자열로 초기화
+    editorIns.setMarkdown('');
 
-    // 에디터 내용이 바뀔 때마다 첫 번째 <img> 태그 src 가져오기
-    editor.on('change', () => {
-      const html = editor.getHTML();
+    // 2) 에디터 내용이 바뀔 때마다 첫 번째 <img> 태그 src 가져오기
+    editorIns.on('change', () => {
+      const html = editorIns.getHTML();
       const tmp = document.createElement('div');
       tmp.innerHTML = html;
       const firstImg = tmp.querySelector('img');
@@ -96,14 +95,35 @@ const ReviewWrite = () => {
       console.error('리뷰 저장 실패:', error);
     }
   };
+  // 첨부파일 변경 핸들러
+  const handleFileChange = (e) => {
+    const files = [...e.target.files];
+
+    // 파일 개수 제한 (예: 최대 5개)
+    if (files.length > 5) {
+      alert('첨부파일은 최대 5개까지 선택할 수 있습니다.');
+      fileInputRef.current.value = '';
+      return;
+    }
+
+    // 파일 크기 사전 검증
+    const oversizedFiles = files.filter(file => file.size > 10 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+      alert(`다음 파일들의 크기가 너무 큽니다: ${oversizedFiles.map(f => f.name).join(', ')}`);
+      fileInputRef.current.value = '';
+      return;
+    }
+
+    setAttachments(files);
+  };
+
 
   return (
       <div className="main-layout">
         <div className="main-content-wrapper">
           <main className="main-content">
-            <form className="review-form" onSubmit={handleSubmit}>
+            <form className="review-write-form " onSubmit={handleSubmit}>
               <h2>리뷰 작성</h2>
-
               <div className="form-group">
                 <label>제목</label>
                 <input
@@ -187,12 +207,37 @@ const ReviewWrite = () => {
                     multiple
                     accept=".pdf,.xls,.xlsx,.doc,.docx"
                     ref={fileInputRef}
-                    onChange={(e) => setAttachments([...e.target.files])}
+                    onChange={handleFileChange}
+                    disabled={isSubmitting}
                 />
+                {attachments.length > 0 && (
+                    <div className="file-list">
+                      <p>선택된 파일: {attachments.length}개</p>
+                      {attachments.map((file, index) => (
+                          <div key={index} className="file-item">
+                            📄{file.name} ({(file.size / 1024 / 1024).toFixed(2)}MB)
+                          </div>
+                      ))}
+                    </div>
+                )}
               </div>
 
               <div className="button-group">
-                <button type="submit">저장하기</button>
+                <button
+                    type="submit"
+                    className="save-btn"
+                    disabled={isSubmitting}
+                >
+                  {isSubmitting ? '저장 중...' : '저장하기'}
+                </button>
+                <button
+                    type="button"
+                    className="cancel-btn"
+                    onClick={() => navigate('/community/review')}
+                    disabled={isSubmitting}
+                >
+                  취소
+                </button>
               </div>
             </form>
           </main>

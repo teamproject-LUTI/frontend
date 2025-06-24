@@ -53,7 +53,7 @@ const ReviewList = () => {
   return (
       <div className="review-list-main-layout">
         <div className="review-list-main-content-wrapper">
-          <main className="review-list-main-content">
+          <main className="review-list-main-content" >
             <div className="review-header">
               <h1>여행 후기</h1>
 

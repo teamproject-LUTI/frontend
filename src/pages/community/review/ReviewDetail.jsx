@@ -215,10 +215,12 @@ const ReviewDetail = () => {
                         목록으로
                     </button>
                     {/* 댓글 섹션 추가 */}
-                    <CommentSection
-                        parentType="REVIEW"
-                        parentId={id}
-                    />
+                    <div className="comment-wrapper">
+                        <CommentSection
+                            parentType="REVIEW"
+                            parentId={id}
+                        />
+                    </div>
                 </main>
             </div>
         </div>

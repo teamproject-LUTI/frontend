@@ -136,6 +136,13 @@
     border-radius: 4px;
 }
 
+.review-list-crud-buttons,
+.review-list-back-btn {
+    position: relative;
+    z-index: 2;        /* 테두리(z-index:1) 위로 */
+    margin-bottom: 8px;
+}
+
 /* 4. 버튼 영역 */
 /* 수정/삭제 버튼 묶음 왼쪽에 배치 */
 .review-list-crud-buttons {
@@ -227,4 +234,9 @@
     gap: 6px; /* 아이콘과 숫자 사이 간격을 6px로 설정 */
     font-size: 0.9rem;
     color: #666;
+}
+
+/* 댓글 영역 */
+.comment-wrapper{
+    padding-top: 40px;
 }
