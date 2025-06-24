@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import apiClient from '../../util/apiClient';
+import { useAuth } from '../../util/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Home,
@@ -24,10 +26,12 @@ import {
   KeyRound
 } from 'lucide-react';
 import '../../styles/layout/Sidebar.css';
-/* eslint-disable */
+
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [expandedItems, setExpandedItems] = useState(new Set());
   const [menuItems, setMenuItems] = useState([]);
@@ -35,9 +39,6 @@ const Sidebar = () => {
   const [activeMenuId, setActiveMenuId] = useState(null);
   const [error, setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
   // 아이콘 매핑
   const iconMap = {
@@ -46,14 +47,6 @@ const Sidebar = () => {
     'Star': Star, 'Settings': Settings, 'Shield': Shield, 'Heart': Heart, 'MapPin': MapPin,
     'CreditCard': CreditCard, 'UserMinus': UserMinus, 'MessageSquare': MessageSquare,
     'HeartPlus': HeartPlus, 'MessageCircleQuestion': MessageCircleQuestion,'UserX':UserX,'KeyRound':KeyRound
-  };
-
-  // API 요청 헤더 생성 (쿠키 기반이므로 헤더에 토큰 불필요)
-  const createRequestHeaders = () => {
-    return {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-cache'
-    };
   };
 
   // DB 메뉴를 사이드바 형식으로 변환
@@ -91,141 +84,94 @@ const Sidebar = () => {
     return dbMenus.map(menu => convertMenu(menu)).filter(Boolean);
   }, []);
 
-  // 사용자 인증 상태 확인
-  const checkUserAuth = async () => {
-    try {
-
-      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-        headers: createRequestHeaders(),
-        credentials: 'include' // 쿠키 자동 포함
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setIsAuthenticated(true);
-        const userIsAdmin = userData.userTypeId === 2;
-        setIsAdmin(userIsAdmin);
-        return { isAuthenticated: true, isAdmin: userIsAdmin };
-      } else {
-        setIsAuthenticated(false);
-        setIsAdmin(false);
-        return { isAuthenticated: false, isAdmin: false };
-      }
-    } catch (error) {
-      setIsAuthenticated(false);
-      setIsAdmin(false);
-      return { isAuthenticated: false, isAdmin: false };
-    }
-  };
-
-  // 메뉴 데이터 로드 (중복 호출 방지)
+  // 메뉴 데이터 로드
   const loadMenuData = useCallback(async () => {
     try {
       const timestamp = new Date().getTime();
-      const endpoint = `${API_BASE_URL}/api/menus/hierarchy?_t=${timestamp}`;
 
-      const response = await fetch(endpoint, {
-        headers: createRequestHeaders(),
-        credentials: 'include', // 쿠키 자동 포함
-        cache: 'no-store'
+      const response = await apiClient.get('/api/menus/hierarchy', {
+        params: { _t: timestamp }
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`❌ 응답 에러 내용:`, errorText);
-        throw new Error(`메뉴 요청 실패: ${response.status} ${response.statusText} - ${errorText}`);
+      if (response.status !== 200) {
+        console.error('응답 에러:', response.data);
+        throw new Error(`메뉴 요청 실패: ${response.status} ${response.statusText}`);
       }
 
-      const menuData = await response.json();
-
-      // SingleResponseDto 구조 처리
+      const menuData = response.data;
       const dbMenus = menuData.data || menuData || [];
-
       const convertedMenus = convertDbMenusToSidebarFormat(dbMenus);
       setMenuItems(convertedMenus);
 
       return convertedMenus;
 
     } catch (error) {
-      console.error('❌ 메뉴 데이터 로드 실패:', error);
+      console.error('메뉴 데이터 로드 실패:', error);
       throw error;
     }
-  }, [API_BASE_URL, convertDbMenusToSidebarFormat, menuItems.length]); // 의존성 추가
+  }, [convertDbMenusToSidebarFormat]);
 
-  // 사이드바 초기화 (useRef로 중복 호출 방지)
-  const initializingRef = useRef(false);
-
+  // 사이드바 초기화
   const initializeSidebar = useCallback(async () => {
-    // 이미 초기화 중이면 리턴
-    if (initializingRef.current) {
-      return;
-    }
+    if (authLoading) return; // AuthContext 로딩 중이면 대기
 
     try {
-      initializingRef.current = true;
       setLoading(true);
       setError(null);
       setMenuItems([]);
 
+      // AuthContext에서 사용자 정보 가져오기
+      if (isAuthenticated && user) {
+        setIsAdmin(user.userTypeId === 2);
+      }
 
-      // 1. 사용자 인증 상태 확인
-      const authResult = await checkUserAuth();
-
-      // 2. 메뉴 데이터 로드 (인증 여부와 관계없이 시도)
+      // 메뉴 데이터 로드
       try {
         await loadMenuData();
       } catch (menuError) {
-        console.error('❌ 메뉴 로드 실패, 인증 문제일 수 있음:', menuError);
+        console.error('메뉴 로드 실패:', menuError);
         setError(`메뉴 로드 실패: ${menuError.message}`);
       }
 
     } catch (err) {
-      console.error('❌ 사이드바 초기화 실패:', err);
+      console.error('사이드바 초기화 실패:', err);
       setError(err.message);
     } finally {
       setLoading(false);
-      initializingRef.current = false;
     }
-  }, [API_BASE_URL]);
+  }, [user, isAuthenticated, authLoading, loadMenuData]);
 
-  // 메뉴 업데이트 이벤트 리스너 (MenuManagement에서 발생하는 이벤트 수신)
+  // 메뉴 업데이트 이벤트 리스너
   useEffect(() => {
-
     const handleMenuUpdate = async (event) => {
-
-
       try {
-
         setTimeout(async () => {
           try {
             await loadMenuData();
-
           } catch (error) {
-            console.error('❌ Sidebar: 지연된 메뉴 새로고침 실패:', error);
+            console.error('Sidebar: 지연된 메뉴 새로고침 실패:', error);
           }
-        }, 100); // 100ms 지연
-
+        }, 100);
       } catch (error) {
-        console.error('❌ Sidebar: 메뉴 새로고침 실패:', error);
+        console.error('Sidebar: 메뉴 새로고침 실패:', error);
       }
     };
 
-    // window와 document 모두에 이벤트 리스너 등록
     window.addEventListener('menuUpdated', handleMenuUpdate);
     document.addEventListener('menuUpdated', handleMenuUpdate);
 
-
-    // 컴포넌트 언마운트 시 이벤트 리스너 제거
     return () => {
       window.removeEventListener('menuUpdated', handleMenuUpdate);
       document.removeEventListener('menuUpdated', handleMenuUpdate);
     };
-  }, []); // loadMenuData를 의존성에서 제거하고 직접 호출
+  }, [loadMenuData]);
 
-  // 컴포넌트 마운트 시 한 번만 초기화
+  // AuthContext 상태 변경 시 초기화
   useEffect(() => {
-    initializeSidebar();
-  }, []); // 빈 의존성 배열로 한 번만 실행
+    if (!authLoading) {
+      initializeSidebar();
+    }
+  }, [initializeSidebar, authLoading]);
 
   // 현재 경로에 따른 활성 메뉴 설정
   useEffect(() => {
@@ -289,9 +235,9 @@ const Sidebar = () => {
               >
                 <IconComponent className="nav-icon"/>
                 <span className={`nav-label ${isCollapsed ? 'hidden' : ''}`}>
-                            {item.label}
+                  {item.label}
                   {isAdmin && !item.isActive && <span className="inactive-badge">(비활성)</span>}
-                        </span>
+                </span>
                 {!isCollapsed && (isExpanded ? <ChevronUp className="nav-icon toggle-icon"/> :
                     <ChevronDown className="nav-icon toggle-icon"/>)}
               </button>
@@ -303,9 +249,9 @@ const Sidebar = () => {
               >
                 <IconComponent className="nav-icon"/>
                 <span className={`nav-label ${isCollapsed ? 'hidden' : ''}`}>
-                            {item.label}
+                  {item.label}
                   {isAdmin && !item.isActive && <span className="inactive-badge">(비활성)</span>}
-                        </span>
+                </span>
               </button>
           )}
           {item.hasChildren && isExpanded && !isCollapsed && (
@@ -318,7 +264,7 @@ const Sidebar = () => {
   };
 
   // 로딩 상태
-  if (loading) {
+  if (authLoading || loading) {
     return (
         <aside className={`sidebar ${isCollapsed ? 'collapsed' : 'expanded'}`}>
           <div className="sidebar-content">
@@ -372,7 +318,6 @@ const Sidebar = () => {
                 </div>
             )}
           </nav>
-
         </div>
       </aside>
   );
