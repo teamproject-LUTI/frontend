@@ -16,7 +16,7 @@
 }
 
 /* — form 전체를 2컬럼 그리드로 설정 — */
-.review-form {
+.review-write-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
@@ -24,24 +24,24 @@
 }
 
 /* 제목(form-group 1), 에디터(form-group 5), 버튼 그룹(.button-group)은 전체 폭 차지 */
-.review-form .form-group:nth-of-type(1),
-.review-form .form-group:nth-of-type(5),
-.review-form .button-group {
+.review-write-form .form-group:nth-of-type(1),
+.review-write-form .form-group:nth-of-type(5),
+.review-write-form .button-group {
     grid-column: 1 / -1;
 }
 
 /* — 제목 그룹(첫째) — */
-.review-form .form-group:nth-of-type(1) {
+.review-write-form .form-group:nth-of-type(1) {
     display: flex;
     align-items: center;
     margin-bottom: 16px;
 }
-.review-form .form-group:nth-of-type(1) label {
+.review-write-form .form-group:nth-of-type(1) label {
     min-width: 80px;
     white-space: nowrap;
     font-weight: 500;
 }
-.review-form .form-group:nth-of-type(1) input[type="text"] {
+.review-write-form .form-group:nth-of-type(1) input[type="text"] {
     flex: 1;
     padding: 8px;
     border: 1px solid #ccc;
@@ -49,17 +49,17 @@
 }
 
 /* — 여행지 그룹(둘째) → 왼쪽 컬럼 — */
-.review-form .form-group:nth-of-type(2) {
+.review-write-form .form-group:nth-of-type(2) {
     display: flex;
     align-items: center;
     margin-bottom: 16px;
 }
-.review-form .form-group:nth-of-type(2) label {
+.review-write-form .form-group:nth-of-type(2) label {
     min-width: 80px;
     white-space: nowrap;
     font-weight: 500;
 }
-.review-form .form-group:nth-of-type(2) input[type="text"] {
+.review-write-form .form-group:nth-of-type(2) input[type="text"] {
     flex: 1;
     padding: 8px;
     border: 1px solid #ccc;
@@ -67,42 +67,42 @@
 }
 
 /* — 여행 기간 그룹(셋째) → 오른쪽 컬럼 — */
-.review-form .form-group:nth-of-type(3) {
+.review-write-form .form-group:nth-of-type(3) {
     display: flex;
     align-items: center;
     gap: 6px;
     margin-bottom: 16px;
 }
-.review-form .form-group:nth-of-type(3) label {
+.review-write-form .form-group:nth-of-type(3) label {
     min-width: 80px;
     white-space: nowrap;
     font-weight: 500;
 }
-.review-form .form-group:nth-of-type(3) .date-range {
+.review-write-form .form-group:nth-of-type(3) .date-range {
     display: flex;
     align-items: center;
     flex: 1;
     gap: 6px;
 }
-.review-form .form-group:nth-of-type(3) .date-range input[type="date"] {
+.review-write-form .form-group:nth-of-type(3) .date-range input[type="date"] {
     flex: 1;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
-.review-form .form-group:nth-of-type(3) .date-range .separator {
+.review-write-form .form-group:nth-of-type(3) .date-range .separator {
     font-size: 1.1rem;
     line-height: 1;
 }
 
 /* — 내용(Editor) 그룹(넷째) — */
-.review-form .form-group:nth-of-type(4) {
+.review-write-form .form-group:nth-of-type(4) {
     /* Toast UI Editor 가 차지할 공간 */
     grid-column: 1 / -1;
 }
 
 /* — 버튼 그룹 — */
-.review-form .button-group {
+.review-write-form .button-group {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
@@ -110,7 +110,7 @@
 }
 
 /* “저장하기” 버튼 스타일 */
-.review-form .button-group button[type="submit"] {
+.review-write-form .button-group button[type="submit"] {
     background-color: #F76B58;
     color: #fff;
     border: none;
@@ -120,12 +120,12 @@
     cursor: pointer;
     transition: opacity 0.2s;
 }
-.review-form .button-group button[type="submit"]:hover {
+.review-write-form .button-group button[type="submit"]:hover {
     opacity: 0.9;
 }
 
 /* — 공통 input box sizing — */
-.review-form input[type="text"],
-.review-form input[type="date"] {
+.review-write-form input[type="text"],
+.review-write-form input[type="date"] {
     box-sizing: border-box;
 }
