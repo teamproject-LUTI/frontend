@@ -6,18 +6,18 @@ import '../../../styles/community/qna/QnaDetail.css';
 import CommentSection from "../comment/CommentSection";
 
 const QnaDetail = () => {
-    const { id } = useParams();  // 해당 문의글의 ID를 받아옵니다.
+    const { id } = useParams();
     const navigate = useNavigate();
-    const [ask, setAsk] = useState(null);  // 문의글 상태
-    const [attachments, setAttachments] = useState([]);  // 첨부파일 상태
-    const token = localStorage.getItem('accessToken');  // 로컬스토리지에서 JWT 가져오기
+    const [ask, setAsk] = useState(null);
+    const [attachments, setAttachments] = useState([]);
+    const token = localStorage.getItem('accessToken');
 
     useEffect(() => {
         // 문의글 조회 API 호출
         const fetchQna = async () => {
             try {
                 const res = await axios.get(`/api/asks/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }   // 인증 헤더 추가
+                    headers: { Authorization: `Bearer ${token}` }
                 });
                 const dto = res.data.data;
                 setAsk(dto);
@@ -42,6 +42,32 @@ const QnaDetail = () => {
         };
         fetchAttachments();
     }, [id, token]);
+
+    // 다운로드 핸들러
+    const handleDownload = async (attachmentId, fileName) => {
+        try {
+            const res = await axios.get(
+                `/api/asks/${id}/attachments/${attachmentId}/download`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    responseType: 'blob'
+                }
+            );
+            // Blob → Object URL 생성
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            // 임시 <a> 태그로 다운로드 트리거
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('파일 다운로드 실패', err);
+            alert('다운로드에 실패했어요.');
+        }
+    };
 
     // 공유 버튼 핸들러
     const handleShare = () => {
@@ -111,9 +137,7 @@ const QnaDetail = () => {
 
     return (
         <div className="main-layout">
-
             <div className="main-content-wrapper">
-
                 <main className="main-content">
                     <h1 className="detail-title">{ask.title}</h1>
 
@@ -135,17 +159,43 @@ const QnaDetail = () => {
                         </div>
                     </div>
 
-                    {/* 첨부 이미지 갤러리 */}
+                    {/* 첨부파일 목록 (PDF, Excel 등 - 이미지 제외) */}
                     {attachments.length > 0 && (
+                        <div className="detail-files">
+                            <h3>첨부파일</h3>
+                            <ul>
+                                {attachments
+                                    .filter(att => !['png','jpg','jpeg','gif'].includes(att.extension.toLowerCase()))
+                                    .map(att => (
+                                        <li key={att.askAttachmentId}>
+                                            <a
+                                                href={`/api/asks/${id}/attachments/${att.askAttachmentId}/download`}
+                                                onClick={e => {
+                                                    e.preventDefault();
+                                                    handleDownload(att.askAttachmentId, att.fileName);
+                                                }}
+                                            >
+                                                📄 {att.fileName}
+                                            </a>
+                                        </li>
+                                    ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* 첨부 이미지 갤러리 */}
+                    {attachments.filter(att => ['png','jpg','jpeg','gif'].includes(att.extension.toLowerCase())).length > 0 && (
                         <div className="detail-images">
-                            {attachments.map(att => (
-                                <img
-                                    key={att.askAttachmentId}
-                                    src={att.logicalPath}      // 서버에 매핑된 URL (/uploads/UUID.jpg)
-                                    alt={att.fileName}
-                                    className="detail-image"
-                                />
-                            ))}
+                            {attachments
+                                .filter(att => ['png','jpg','jpeg','gif'].includes(att.extension.toLowerCase()))
+                                .map(att => (
+                                    <img
+                                        key={att.askAttachmentId}
+                                        src={att.logicalPath}
+                                        alt={att.fileName}
+                                        className="detail-image"
+                                    />
+                                ))}
                         </div>
                     )}
 
@@ -165,6 +215,7 @@ const QnaDetail = () => {
                     <button className="back-btn" onClick={() => navigate('/community/qna')}>
                         목록으로
                     </button>
+
                     {/* 댓글 섹션 추가 */}
                     <CommentSection
                         parentType="ASK"
@@ -172,7 +223,6 @@ const QnaDetail = () => {
                     />
                 </main>
             </div>
-
         </div>
     );
 };
