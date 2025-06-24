@@ -525,7 +525,7 @@ const MyPageProfile = () => {
 
         // 2. 텍스트 정보 업데이트
         //phoneNumber 변수 정의
-        const phoneNumber = `${editForm.phonePrefix || '010'}-${editForm.phoneMiddle || ''}-${editForm.phoneLast || ''}`;
+        const phoneNumber = `${editForm.phonePrefix || '010'}${editForm.phoneMiddle || ''}${editForm.phoneLast || ''}`;
 
         // 주소 합치기
         let fullAddress = '';
