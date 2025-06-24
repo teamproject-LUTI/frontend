@@ -1,4 +1,4 @@
-.my-ask-container {
+.myask-container {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
@@ -7,7 +7,7 @@
     min-height: calc(100vh - 248px);
 }
 
-.my-ask-content {
+.myask-content {
     background-color: white;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -15,49 +15,40 @@
 }
 
 /* 헤더 섹션 */
-.my-ask-header {
+.myask-header {
     padding: 2rem;
     border-bottom: 1px solid #e5e7eb;
     background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
 }
 
-.my-ask-title {
+.myask-title {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 0.5rem;
 }
 
-.my-ask-icon {
+.myask-icon {
     width: 2rem;
     height: 2rem;
     color: #0ea5e9;
 }
 
-.my-ask-title h1 {
+.myask-title h1 {
     margin: 0;
     font-size: 1.875rem;
     font-weight: 700;
     color: #1f2937;
 }
 
-.dummy-badge {
-    background-color: #fbbf24;
-    color: #92400e;
-    font-size: 0.75rem;
-    font-weight: 500;
-    padding: 0.25rem 0.5rem;
-    border-radius: 1rem;
-}
-
-.my-ask-subtitle {
+.myask-subtitle {
     color: #6b7280;
     font-size: 0.875rem;
     margin: 0;
 }
 
 /* 통계 섹션 */
-.my-ask-stats {
+.myask-stats {
     display: flex;
     gap: 2rem;
     padding: 1.5rem 2rem;
@@ -65,47 +56,47 @@
     border-bottom: 1px solid #e5e7eb;
 }
 
-.stat-item {
+.myask-stat-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
 }
 
-.stat-number {
+.myask-stat-number {
     font-size: 1.5rem;
     font-weight: 700;
     color: #0ea5e9;
 }
 
-.stat-item.answered .stat-number {
+.myask-stat-item.answered .myask-stat-number {
     color: #059669;
 }
 
-.stat-item.pending .stat-number {
+.myask-stat-item.pending .myask-stat-number {
     color: #f59e0b;
 }
 
-.stat-label {
+.myask-stat-label {
     font-size: 0.875rem;
     color: #6b7280;
 }
 
 /* 필터 섹션 */
-.my-ask-filters {
+.myask-filters {
     padding: 1.5rem 2rem;
     border-bottom: 1px solid #e5e7eb;
     display: flex;
     gap: 2rem;
 }
 
-.filter-group {
+.myask-filter-group {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
 
-.filter-select {
+.myask-filter-select {
     padding: 0.5rem 1rem;
     border: 1px solid #d1d5db;
     border-radius: 6px;
@@ -115,25 +106,25 @@
     cursor: pointer;
 }
 
-.filter-select:focus {
+.myask-filter-select:focus {
     outline: none;
     border-color: #0ea5e9;
     box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
 }
 
 /* QnA 리스트 섹션 */
-.my-ask-list {
+.myask-list {
     padding: 2rem;
 }
 
-.ask-grid {
+.myask-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 1.5rem;
 }
 
 /* QnA 카드 */
-.ask-card {
+.myask-card {
     background: white;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
@@ -144,24 +135,20 @@
     overflow: hidden;
 }
 
-.ask-card:hover {
+.myask-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     border-color: #0ea5e9;
 }
 
-.ask-card.dummy-card {
-    border-left: 4px solid #fbbf24;
-}
-
-.ask-card-header {
+.myask-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1rem;
 }
 
-.ask-title {
+.myask-card-title {
     font-size: 1.125rem;
     font-weight: 600;
     color: #1f2937;
@@ -171,12 +158,12 @@
     margin-right: 1rem;
 }
 
-.ask-status {
+.myask-status {
     display: flex;
     align-items: center;
 }
 
-.status-badge {
+.myask-status-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
@@ -187,17 +174,17 @@
     white-space: nowrap;
 }
 
-.status-badge.answered {
+.myask-status-badge.answered {
     background-color: #d1fae5;
     color: #065f46;
 }
 
-.status-badge.pending {
+.myask-status-badge.pending {
     background-color: #fef3c7;
     color: #92400e;
 }
 
-.ask-content {
+.myask-card-content {
     color: #4b5563;
     font-size: 0.875rem;
     line-height: 1.6;
@@ -208,7 +195,7 @@
     overflow: hidden;
 }
 
-.ask-date {
+.myask-date {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
@@ -217,7 +204,7 @@
     margin-bottom: 1rem;
 }
 
-.ask-meta {
+.myask-meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -225,12 +212,12 @@
     border-top: 1px solid #f3f4f6;
 }
 
-.ask-stats {
+.myask-card-stats {
     display: flex;
     gap: 1rem;
 }
 
-.stat-badge {
+.myask-stat-badge {
     display: flex;
     align-items: center;
     gap: 0.25rem;
@@ -238,17 +225,17 @@
     color: #6b7280;
 }
 
-.stat-icon {
+.myask-stat-icon {
     width: 0.875rem;
     height: 0.875rem;
 }
 
-.ask-actions {
+.myask-actions {
     display: flex;
     gap: 0.5rem;
 }
 
-.action-button {
+.myask-action-button {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
@@ -262,57 +249,57 @@
     transition: all 0.2s;
 }
 
-.action-button:hover {
+.myask-action-button:hover {
     background-color: #f9fafb;
     border-color: #9ca3af;
 }
 
-.action-button.edit {
+.myask-action-button.edit {
     color: #059669;
     border-color: #059669;
 }
 
-.action-button.edit:hover {
+.myask-action-button.edit:hover {
     background-color: #ecfdf5;
 }
 
-.action-button.delete {
+.myask-action-button.delete {
     color: #dc2626;
     border-color: #dc2626;
 }
 
-.action-button.delete:hover {
+.myask-action-button.delete:hover {
     background-color: #fef2f2;
 }
 
 /* 빈 상태 */
-.empty-state {
+.myask-empty-state {
     text-align: center;
     padding: 4rem 2rem;
     color: #6b7280;
 }
 
-.empty-icon {
+.myask-empty-icon {
     width: 4rem;
     height: 4rem;
     margin: 0 auto 1rem;
     color: #d1d5db;
 }
 
-.empty-title {
+.myask-empty-title {
     font-size: 1.125rem;
     font-weight: 600;
     color: #374151;
     margin: 0 0 0.5rem 0;
 }
 
-.empty-description {
+.myask-empty-description {
     font-size: 0.875rem;
     color: #6b7280;
     margin: 0 0 1.5rem 0;
 }
 
-.write-ask-button {
+.myask-write-button {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -327,13 +314,13 @@
     transition: all 0.2s;
 }
 
-.write-ask-button:hover {
+.myask-write-button:hover {
     background-color: #0284c7;
     transform: translateY(-1px);
 }
 
 /* 로딩 상태 */
-.loading-section {
+.myask-loading-section {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -341,39 +328,39 @@
     padding: 4rem 2rem;
 }
 
-.loading-spinner {
+.myask-loading-spinner {
     width: 2.5rem;
     height: 2.5rem;
     border: 3px solid #f3f3f3;
     border-top: 3px solid #0ea5e9;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: myask-spin 1s linear infinite;
     margin-bottom: 1rem;
 }
 
-.loading-text {
+.myask-loading-text {
     color: #6b7280;
     font-size: 0.875rem;
 }
 
-@keyframes spin {
+@keyframes myask-spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
 /* 에러 상태 */
-.error-section {
+.myask-error-section {
     padding: 2rem;
     text-align: center;
 }
 
-.error-message {
+.myask-error-message {
     color: #dc2626;
     font-size: 0.875rem;
     margin-bottom: 1rem;
 }
 
-.retry-button {
+.myask-retry-button {
     padding: 0.5rem 1rem;
     background-color: #0ea5e9;
     color: white;
@@ -384,163 +371,69 @@
     transition: background-color 0.2s;
 }
 
-.retry-button:hover {
+.myask-retry-button:hover {
     background-color: #0284c7;
 }
 
-/* 페이지네이션 */
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 2rem;
-    border-top: 1px solid #e5e7eb;
-}
-
-.pagination-button {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    background-color: white;
-    color: #374151;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.pagination-button:hover:not(:disabled) {
-    background-color: #f9fafb;
-    border-color: #9ca3af;
-}
-
-.pagination-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.pagination-button.active {
-    background-color: #0ea5e9;
-    color: white;
-    border-color: #0ea5e9;
-}
-
-.pagination-info {
-    font-size: 0.875rem;
-    color: #6b7280;
-    margin: 0 1rem;
-}
+/* 페이지네이션 - 공통 컴포넌트 사용으로 제거 */
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
-    .my-ask-container {
+    .myask-container {
         padding: 1rem;
     }
 
-    .my-ask-header {
+    .myask-header {
         padding: 1.5rem;
     }
 
-    .my-ask-title h1 {
+    .myask-title h1 {
         font-size: 1.5rem;
     }
 
-    .my-ask-stats {
+    .myask-stats {
         flex-wrap: wrap;
         gap: 1rem;
         padding: 1rem 1.5rem;
         justify-content: space-around;
     }
 
-    .my-ask-filters {
+    .myask-filters {
         flex-wrap: wrap;
         gap: 1rem;
         padding: 1rem 1.5rem;
     }
 
-    .filter-group {
+    .myask-filter-group {
         flex-wrap: wrap;
     }
 
-    .my-ask-list {
+    .myask-list {
         padding: 1.5rem;
     }
 
-    .ask-grid {
+    .myask-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
 
-    .ask-card {
+    .myask-card {
         padding: 1rem;
     }
 
-    .ask-card-header {
+    .myask-card-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
     }
 
-    .ask-title {
+    .myask-card-title {
         margin-right: 0;
     }
 
-    .ask-meta {
+    .myask-meta {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
-    }
-
-    .pagination {
-        flex-wrap: wrap;
-        gap: 0.25rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .my-ask-container {
-        padding: 0.5rem;
-    }
-
-    .my-ask-header {
-        padding: 1rem;
-    }
-
-    .my-ask-title {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-
-    .my-ask-title h1 {
-        font-size: 1.25rem;
-    }
-
-    .my-ask-stats {
-        justify-content: space-around;
-        padding: 1rem;
-    }
-
-    .my-ask-filters,
-    .my-ask-list {
-        padding: 1rem;
-    }
-
-    .ask-card {
-        padding: 0.875rem;
-    }
-
-    .ask-actions {
-        justify-content: flex-end;
-    }
-
-    .action-button {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.6875rem;
-    }
-
-    .status-badge {
-        font-size: 0.6875rem;
-        padding: 0.2rem 0.5rem;
     }
 }
