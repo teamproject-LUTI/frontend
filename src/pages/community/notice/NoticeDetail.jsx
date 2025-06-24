@@ -181,10 +181,12 @@ const NoticeDetail = () => {
                     </button>
 
                     {/* 댓글 섹션 추가 */}
-                    <CommentSection
-                        parentType="NOTICE"
-                        parentId={id}
-                    />
+                    <div className="comment-wrapper">
+                        <CommentSection
+                            parentType="NOTICE"
+                            parentId={id}
+                        />
+                    </div>
                 </main>
             </div>
         </div>
