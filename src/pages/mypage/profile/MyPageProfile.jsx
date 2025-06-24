@@ -109,6 +109,21 @@ const MyPageProfile = () => {
     }).open();
   };
 
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+// 120년 전 날짜를 계산하는 함수 (최소 날짜)
+  const getMinDate = () => {
+    const today = new Date();
+    const minYear = today.getFullYear() - 120;
+    return `${minYear}-01-01`;
+  };
+
   // 소셜 로그인 여부 체크 함수
   const isSocialLogin = () => {
     if (!user || loading) return true;
@@ -847,6 +862,8 @@ const MyPageProfile = () => {
                             onChange={(e) => handleInputChange('birthDate', e.target.value)}
                             className="profile-edit-input"
                             placeholder="생년월일을(를) 입력하세요"
+                            max={getTodayDate()}
+                            min={getMinDate()}
                         />
                     ) : (
                         <span>{userInfo.birthDate}</span>
