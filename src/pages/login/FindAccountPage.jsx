@@ -100,6 +100,10 @@ const FindAccountPage = () => {
                 Swal.fire({
                     icon: 'success',
                     text: result.message || '임시 비밀번호가 이메일로 전송되었습니다.'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/login';
+                    }
                 });
             } else {
                 Swal.fire({
@@ -241,15 +245,13 @@ const FindAccountPage = () => {
                                 placeholder="이름"
                                 value={pwForm.name}
                                 onChange={(e) => setPwForm({...pwForm, name: e.target.value})}
-                                required
                             />
                             <div className="email-verification-group">
                                 <input
-                                    type="email"
+                                    type="text"
                                     placeholder="가입 이메일"
                                     value={pwForm.email}
                                     onChange={(e) => setPwForm({...pwForm, email: e.target.value})}
-                                    required
                                 />
                                 <button
                                     type="button"
