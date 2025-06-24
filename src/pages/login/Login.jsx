@@ -5,6 +5,7 @@ import KakaoLoginButton from '../login/KakaoLoginButton';
 import { authUtils } from '../../util/authUtils';
 import '../../styles/login/Login.css';
 import { useAuth } from "../../util/AuthContext";
+import Swal from 'sweetalert2';
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -84,11 +85,19 @@ const Login = () => {
           window.location.href = '/main';
         }
       } else {
-        alert(result.error || '로그인 실패');
+        Swal.fire({
+          icon: 'error',
+          title: '로그인 실패',
+          text: result.error || '이메일 또는 비밀번호가 일치하지 않습니다.'
+        });
       }
     } catch (error) {
       console.error('로그인 중 오류:', error);
-      alert('로그인 중 오류가 발생했습니다.');
+      Swal.fire({
+        icon: 'error',
+        title: '오류 발생',
+        text: '로그인 중 문제가 발생했습니다. 다시 시도해주세요.'
+      });
     } finally {
       setIsLoading(false);
       setLoadingProvider(null);
@@ -97,8 +106,13 @@ const Login = () => {
 
   // 회원가입 페이지로 이동
   const handleSignup = () => {
-    window.location.href = '/membership';
-  };
+    navigate('/membership');
+  }
+
+  // 아이디 비밀번호 찾기 페이지로 이동
+  const handleFindAccount = () => {
+    navigate('/account/find');
+  }
 
   return (
       <div className="login-container">
@@ -154,7 +168,7 @@ const Login = () => {
 
           {/* Forgot Password Link */}
           <div className="forgot-password">
-            <button className="forgot-link" disabled={isLoading}>
+            <button className="forgot-link" disabled={isLoading} onClick={handleFindAccount}>
               아이디/패스워드 찾기
             </button>
           </div>

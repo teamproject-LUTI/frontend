@@ -5,6 +5,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import '../../../styles/community/review/ReviewDetail.css';
 import LikeButton from '../../../components/community/review/LikeButton';
+import CommentSection from "../comment/CommentSection";
 
 const ReviewDetail = () => {
     const { id } = useParams();
@@ -179,6 +180,11 @@ const ReviewDetail = () => {
                     <button className="review-list-back-btn" onClick={() => navigate('/community/review')}>
                         목록으로
                     </button>
+                    {/* 댓글 섹션 추가 */}
+                    <CommentSection
+                        parentType="REVIEW"
+                        parentId={id}
+                    />
                 </main>
             </div>
         </div>

@@ -525,7 +525,7 @@ const MyPageProfile = () => {
 
         // 2. 텍스트 정보 업데이트
         //phoneNumber 변수 정의
-        const phoneNumber = `${editForm.phonePrefix || '010'}-${editForm.phoneMiddle || ''}-${editForm.phoneLast || ''}`;
+        const phoneNumber = `${editForm.phonePrefix || '010'}${editForm.phoneMiddle || ''}${editForm.phoneLast || ''}`;
 
         // 주소 합치기
         let fullAddress = '';
@@ -695,337 +695,327 @@ const MyPageProfile = () => {
   // 로딩 중일 때
   if (loading) {
     return (
-          <div className="mypage-container">
-            <div className="mypage-content">
-              <div className="loading-section">
-                <div className="loading-spinner"></div>
-                <p>프로필 정보를 불러오는 중...</p>
-              </div>
+        <div className="profile-mypage-container">
+          <div className="profile-mypage-content">
+            <div className="profile-loading-section">
+              <div className="profile-loading-spinner"></div>
+              <p>프로필 정보를 불러오는 중...</p>
             </div>
           </div>
+        </div>
     );
   }
 
   return (
-        <div className="mypage-container">
-          <div className="mypage-content">
-            {/* 에러 메시지 표시 */}
-            {error && (
-                <div className="error-section">
-                  <p className="error-message">⚠️ {error}</p>
-                  <button onClick={fetchUserProfile} className="retry-button">
-                    다시 시도
-                  </button>
-                </div>
-            )}
+      <div className="profile-mypage-container">
+        <div className="profile-mypage-content">
+          {/* 에러 메시지 표시 */}
+          {error && (
+              <div className="profile-error-section">
+                <p className="profile-error-message">⚠️ {error}</p>
+                <button onClick={fetchUserProfile} className="profile-retry-button">
+                  다시 시도
+                </button>
+              </div>
+          )}
 
-            {/* 프로필 이미지 섹션 */}
-            <div className="profile-image-section">
-              <div className="profile-image-container">
-                <div className="profile-image">
-                  {(editForm.profileImage || userInfo.profileImage) ? (
-                      <img
-                          src={editForm.profileImage || userInfo.profileImage}
-                          alt="프로필"
-                          onError={(e) => {
-                            console.log('프로필 이미지 로드 실패:', editForm.profileImage || userInfo.profileImage);
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
+          {/* 프로필 이미지 섹션 */}
+          <div className="profile-image-section">
+            <div className="profile-image-container">
+              <div className="profile-image">
+                {(editForm.profileImage || userInfo.profileImage) ? (
+                    <img
+                        src={editForm.profileImage || userInfo.profileImage}
+                        alt="프로필"
+                        onError={(e) => {
+                          console.log('프로필 이미지 로드 실패:', editForm.profileImage || userInfo.profileImage);
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                    />
+                ) : null}
+                <div className="profile-default-avatar" style={{
+                  display: (editForm.profileImage || userInfo.profileImage) ? 'none' : 'flex'
+                }}>
+                  <User className="profile-avatar-icon"/>
+                </div>
+              </div>
+
+              {/* 일반 로그인 사용자만 프로필 이미지 편집 가능 */}
+              {!isSocialLogin() && (
+                  <div className="profile-image-controls-horizontal">
+                    {/* 이미지 업로드 버튼 (왼쪽) */}
+                    <div className="profile-image-upload-horizontal">
+                      <input
+                          type="file"
+                          id="profileImage"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          style={{ display: 'none' }}
+                          disabled={imageUploadLoading}
                       />
-                  ) : null}
-                  <div className="default-avatar" style={{
-                    display: (editForm.profileImage || userInfo.profileImage) ? 'none' : 'flex'
-                  }}>
-                    <User className="avatar-icon"/>
+                      <label htmlFor="profileImage" className="profile-upload-button-horizontal" title="이미지 업로드">
+                        {imageUploadLoading ? (
+                            <div className="profile-loading-spinner" style={{ width: '16px', height: '16px' }}></div>
+                        ) : (
+                            <Edit2 className="profile-upload-icon"/>
+                        )}
+                      </label>
+                    </div>
+
+                    {/* 이미지 삭제 버튼 (오른쪽) - 프로필 이미지가 있을 때만 */}
+                    {(userInfo.profileImage || editForm.profileImage) && !selectedImageFile && (
+                        <div className="profile-image-delete-horizontal">
+                          <button
+                              onClick={handleDeleteProfileImage}
+                              className="profile-delete-button-horizontal"
+                              disabled={imageUploadLoading}
+                              title="이미지 삭제"
+                          >
+                            ×
+                          </button>
+                        </div>
+                    )}
+                  </div>
+              )}
+            </div>
+          </div>
+
+          {/* 정보 섹션들 */}
+          <div className="profile-info-sections">
+            {/* 기본 정보 섹션 */}
+            <div className="profile-info-section">
+              <div className="profile-section-header">
+                <h2>기본 정보</h2>
+                <div className="profile-section-actions">
+                  <div className="profile-edit-actions">
+                    <button
+                        onClick={handleSaveClick}
+                        className="profile-save-button"
+                        disabled={imageUploadLoading}
+                    >
+                      {imageUploadLoading ? '저장 중...' : '저장'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="profile-info-content">
+                {/* 이름 - 수정 불가 */}
+                <div className="profile-info-row">
+                  <div className="profile-info-label">
+                    <User className="profile-info-icon"/>
+                    <span>이름</span>
+                  </div>
+                  <div className="profile-info-value">
+                    <span>{userInfo.name}</span>
                   </div>
                 </div>
 
-                {/* 일반 로그인 사용자만 프로필 이미지 편집 가능 */}
-                {!isSocialLogin() && (
-                    <div className="image-controls-horizontal">
-                      {/* 이미지 업로드 버튼 (왼쪽) */}
-                      <div className="image-upload-horizontal">
+                {/* 닉네임 - 수정 가능 */}
+                <div className="profile-info-row">
+                  <div className="profile-info-label">
+                    <User className="profile-info-icon"/>
+                    <span>닉네임</span>
+                  </div>
+                  <div className="profile-info-value">
+                    {isEditingBasic ? (
                         <input
-                            type="file"
-                            id="profileImage"
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                            style={{ display: 'none' }}
-                            disabled={imageUploadLoading}
+                            type="text"
+                            value={editForm.nickname || ''}
+                            onChange={(e) => handleInputChange('nickname', e.target.value)}
+                            className="profile-edit-input"
+                            placeholder="닉네임을(를) 입력하세요"
                         />
-                        <label htmlFor="profileImage" className="upload-button-horizontal" title="이미지 업로드">
-                          {imageUploadLoading ? (
-                              <div className="loading-spinner" style={{ width: '16px', height: '16px' }}></div>
-                          ) : (
-                              <Edit2 className="upload-icon"/>
-                          )}
-                        </label>
-                      </div>
+                    ) : (
+                        <span>{userInfo.nickname}</span>
+                    )}
+                  </div>
+                </div>
 
-                      {/* 이미지 삭제 버튼 (오른쪽) - 프로필 이미지가 있을 때만 */}
-                      {(userInfo.profileImage || editForm.profileImage) && !selectedImageFile && (
-                          <div className="image-delete-horizontal">
-                            <button
-                                onClick={handleDeleteProfileImage}
-                                className="delete-button-horizontal"
-                                disabled={imageUploadLoading}
-                                title="이미지 삭제"
-                            >
-                              ×
-                            </button>
-                          </div>
-                      )}
-                    </div>
-                )}
+                {/* 생년월일 - 소셜 로그인만 수정 가능 */}
+                <div className="profile-info-row">
+                  <div className="profile-info-label">
+                    <Calendar className="profile-info-icon"/>
+                    <span>생년월일</span>
+                  </div>
+                  <div className="profile-info-value">
+                    {isEditingBasic && isSocialLogin() ? (
+                        <input
+                            type="date"
+                            value={editForm.birthDate || ''}
+                            onChange={(e) => handleInputChange('birthDate', e.target.value)}
+                            className="profile-edit-input"
+                            placeholder="생년월일을(를) 입력하세요"
+                        />
+                    ) : (
+                        <span>{userInfo.birthDate}</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* 성별 - 수정 가능 */}
+                <div className="profile-info-row">
+                  <div className="profile-info-label">
+                    <User className="profile-info-icon"/>
+                    <span>성별</span>
+                  </div>
+                  <div className="profile-info-value">
+                    {isEditingBasic ? (
+                        <select
+                            value={editForm.gender || ''}
+                            onChange={(e) => handleInputChange('gender', e.target.value)}
+                            className="profile-edit-input"
+                        >
+                          <option value="">성별 선택</option>
+                          <option value="남성">남성</option>
+                          <option value="여성">여성</option>
+                        </select>
+                    ) : (
+                        <span>{userInfo.gender}</span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* 정보 섹션들 */}
-            <div className="info-sections">
-              {/* 기본 정보 섹션 */}
-              <div className="info-section">
-                <div className="section-header">
-                  <h2>기본 정보</h2>
-                  <div className="section-actions">
-                    <div className="edit-actions">
-                      <button
-                          onClick={handleSaveClick}
-                          className="save-button"
-                          disabled={imageUploadLoading}
-                      >
-                        {imageUploadLoading ? '저장 중...' : '저장'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="info-content">
-                  {/* 이름 - 수정 불가 */}
-                  <div className="info-row">
-                    <div className="info-label">
-                      <User className="info-icon"/>
-                      <span>이름</span>
-                    </div>
-                    <div className="info-value">
-                      <span>{userInfo.name}</span>
-                    </div>
-                  </div>
-
-                  {/* 닉네임 - 수정 가능 */}
-                  <div className="info-row">
-                    <div className="info-label">
-                      <User className="info-icon"/>
-                      <span>닉네임</span>
-                    </div>
-                    <div className="info-value">
-                      {isEditingBasic ? (
-                          <input
-                              type="text"
-                              value={editForm.nickname || ''}
-                              onChange={(e) => handleInputChange('nickname', e.target.value)}
-                              className="edit-input"
-                              placeholder="닉네임을(를) 입력하세요"
-                          />
-                      ) : (
-                          <span>{userInfo.nickname}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* 생년월일 - 소셜 로그인만 수정 가능 */}
-                  <div className="info-row">
-                    <div className="info-label">
-                      <Calendar className="info-icon"/>
-                      <span>생년월일</span>
-                    </div>
-                    <div className="info-value">
-                      {isEditingBasic && isSocialLogin() ? (
-                          <input
-                              type="date"
-                              value={editForm.birthDate || ''}
-                              onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                              className="edit-input"
-                              placeholder="생년월일을(를) 입력하세요"
-                          />
-                      ) : (
-                          <span>{userInfo.birthDate}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* 성별 - 수정 가능 */}
-                  <div className="info-row">
-                    <div className="info-label">
-                      <User className="info-icon"/>
-                      <span>성별</span>
-                    </div>
-                    <div className="info-value">
-                      {isEditingBasic ? (
-                          <select
-                              value={editForm.gender || ''}
-                              onChange={(e) => handleInputChange('gender', e.target.value)}
-                              className="edit-input"
-                          >
-                            <option value="">성별 선택</option>
-                            <option value="남성">남성</option>
-                            <option value="여성">여성</option>
-                          </select>
-                      ) : (
-                          <span>{userInfo.gender}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+            {/* 연락처 정보 섹션 */}
+            <div className="profile-info-section">
+              <div className="profile-section-header">
+                <h2>연락처 정보</h2>
               </div>
 
-              {/* 연락처 정보 섹션 */}
-              <div className="info-section">
-                <div className="section-header">
-                  <h2>연락처 정보</h2>
+              <div className="profile-info-content">
+                {/* 휴대폰 - 수정 가능 */}
+                <div className="profile-info-row">
+                  <div className="profile-info-label">
+                    <Phone className="profile-info-icon"/>
+                    <span>휴대폰</span>
+                  </div>
+                  <div className="profile-info-value">
+                    {isEditingContact ? (
+                        <div className="profile-phone-input-group">
+                          <select
+                              value={editForm.phonePrefix || '010'}
+                              onChange={(e) => handleInputChange('phonePrefix', e.target.value)}
+                              className="profile-phone-select"
+                          >
+                            <option value="010">010</option>
+                            <option value="011">011</option>
+                            <option value="016">016</option>
+                            <option value="017">017</option>
+                            <option value="018">018</option>
+                            <option value="019">019</option>
+                          </select>
+                          <span className="profile-phone-dash">-</span>
+                          <input
+                              type="text"
+                              value={editForm.phoneMiddle || ''}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                handleInputChange('phoneMiddle', value);
+                              }}
+                              className="profile-phone-input"
+                              maxLength="4"
+                          />
+                          <span className="profile-phone-dash">-</span>
+                          <input
+                              type="text"
+                              value={editForm.phoneLast || ''}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                handleInputChange('phoneLast', value);
+                              }}
+                              className="profile-phone-input"
+                              maxLength="4"
+                          />
+                        </div>
+                    ) : (
+                        <span>{userInfo.phone}</span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="info-content">
-                  {/* 휴대폰 - 수정 가능 */}
-                  <div className="info-row">
-                    <div className="info-label">
-                      <Phone className="info-icon"/>
-                      <span>휴대폰</span>
-                    </div>
-                    <div className="info-value">
-                      {isEditingContact ? (
-                          <div className="phone-input-group">
-                            <select
-                                value={editForm.phonePrefix || '010'}
-                                onChange={(e) => handleInputChange('phonePrefix', e.target.value)}
-                                className="phone-select"
-                            >
-                              <option value="010">010</option>
-                              <option value="011">011</option>
-                              <option value="016">016</option>
-                              <option value="017">017</option>
-                              <option value="018">018</option>
-                              <option value="019">019</option>
-                            </select>
-                            <span className="phone-dash">-</span>
-                            <input
-                                type="text"
-                                value={editForm.phoneMiddle || ''}
-                                onChange={(e) => {
-                                  const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-                                  handleInputChange('phoneMiddle', value);
-                                }}
-                                className="phone-input"
-                                maxLength="4"
-                            />
-                            <span className="phone-dash">-</span>
-                            <input
-                                type="text"
-                                value={editForm.phoneLast || ''}
-                                onChange={(e) => {
-                                  const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-                                  handleInputChange('phoneLast', value);
-                                }}
-                                className="phone-input"
-                                maxLength="4"
-                            />
-                          </div>
-                      ) : (
-                          <span>{userInfo.phone}</span>
-                      )}
+                {/* 이메일 - 읽기 전용 */}
+                <div className="profile-info-row">
+                  <div className="profile-info-label">
+                    <Mail className="profile-info-icon"/>
+                    <span>이메일</span>
+                  </div>
+                  <div className="profile-info-value">
+                    <div className="profile-email-readonly-container">
+                      <span className="profile-email-readonly-text">{userInfo.email}</span>
                     </div>
                   </div>
+                </div>
 
-                  {/* 이메일 - 읽기 전용 */}
-                  <div className="info-row">
-                    <div className="info-label">
-                      <Mail className="info-icon"/>
-                      <span>이메일</span>
-                    </div>
-                    <div className="info-value">
-                      <div className="email-readonly-container">
-                        <span className="email-readonly-text">{userInfo.email}</span>
-                      </div>
-                    </div>
+                {/* 주소 - Daum API 사용하여 수정 가능 */}
+                <div className="profile-info-row">
+                  <div className="profile-info-label">
+                    <MapPin className="profile-info-icon"/>
+                    <span>주소</span>
                   </div>
-
-                  {/* 주소 - Daum API 사용하여 수정 가능 */}
-                  <div className="info-row">
-                    <div className="info-label">
-                      <MapPin className="info-icon"/>
-                      <span>주소</span>
-                    </div>
-                    <div className="info-value">
-                      {isEditingContact ? (
-                          <div className="address-input-group">
-                            {/* 우편번호 + 검색 버튼 */}
-                            <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
-                              <input
-                                  type="text"
-                                  value={postalCode}
-                                  readOnly
-                                  placeholder="우편번호"
-                                  className="edit-input"
-                                  style={{ width: "120px" }}
-                              />
-                              <button
-                                  type="button"
-                                  onClick={handlePostcodeSearch}
-                                  className="btn"
-                                  style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: '#F76B59',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    fontSize: '12px',
-                                    cursor: 'pointer',
-                                    whiteSpace: 'nowrap'
-                                  }}
-                              >
-                                우편번호 찾기
-                              </button>
-                            </div>
-
-                            {/* 기본 주소 */}
+                  <div className="profile-info-value">
+                    {isEditingContact ? (
+                        <div className="profile-address-input-group">
+                          {/* 우편번호 + 검색 버튼 */}
+                          <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
                             <input
                                 type="text"
-                                value={address}
+                                value={postalCode}
                                 readOnly
-                                placeholder="주소"
-                                className="edit-input"
-                                style={{ marginBottom: "8px" }}
+                                placeholder="우편번호"
+                                className="profile-edit-input"
+                                style={{ width: "120px" }}
                             />
-
-                            {/* 상세주소 + 참고항목 */}
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                              <input
-                                  type="text"
-                                  id="detailAddressInput"
-                                  value={detailAddress}
-                                  onChange={(e) => setDetailAddress(e.target.value)}
-                                  placeholder="상세주소"
-                                  className="edit-input"
-                              />
-                              <input
-                                  type="text"
-                                  value={extraAddress}
-                                  readOnly
-                                  placeholder="참고항목"
-                                  className="edit-input"
-                              />
-                            </div>
+                            <button
+                                type="button"
+                                onClick={handlePostcodeSearch}
+                                className="profile-postcode-button"
+                            >
+                              우편번호 찾기
+                            </button>
                           </div>
-                      ) : (
-                          <span>{userInfo.address}</span>
-                      )}
-                    </div>
+
+                          {/* 기본 주소 */}
+                          <input
+                              type="text"
+                              value={address}
+                              readOnly
+                              placeholder="주소"
+                              className="profile-edit-input"
+                              style={{ marginBottom: "8px" }}
+                          />
+
+                          {/* 상세주소 + 참고항목 */}
+                          <div style={{ display: 'flex', gap: '10px' }}>
+                            <input
+                                type="text"
+                                id="detailAddressInput"
+                                value={detailAddress}
+                                onChange={(e) => setDetailAddress(e.target.value)}
+                                placeholder="상세주소"
+                                className="profile-edit-input"
+                            />
+                            <input
+                                type="text"
+                                value={extraAddress}
+                                readOnly
+                                placeholder="참고항목"
+                                className="profile-edit-input"
+                            />
+                          </div>
+                        </div>
+                    ) : (
+                        <span>{userInfo.address}</span>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
   );
 };
 
