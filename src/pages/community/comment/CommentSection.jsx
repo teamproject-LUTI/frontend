@@ -3,7 +3,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import '../../../styles/community/comment/CommentSection.css';
 
-const CommentSection = ({ parentType, parentId }) => {
+const CommentSection = ({ parentType, parentId, onCommentAdded }) => {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
     const [editingId, setEditingId] = useState(null);
@@ -61,12 +61,19 @@ const CommentSection = ({ parentType, parentId }) => {
         }
 
         try {
+            // 댓글 등록 API 호출
             await axios.post(`/api/comments/${parentType}/${parentId}`, {
                 content: newComment.trim()
             });
 
             setNewComment('');
             await fetchComments(); // 댓글 목록 새로고침
+
+            // 부모 컴포넌트에 댓글 추가 알림 (문의글 답변 상태 업데이트용)
+            if (onCommentAdded && typeof onCommentAdded === 'function') {
+                console.log('onCommentAdded 콜백 호출');
+                onCommentAdded();
+            }
 
             await Swal.fire({
                 title: '성공',
@@ -235,46 +242,42 @@ const CommentSection = ({ parentType, parentId }) => {
                                         {formatDate(comment.createdAt)}
                                     </span>
                                 </div>
-                                {/* 임시로 모든 댓글에 수정/삭제 버튼 표시 (디버깅용) */}
-                                <div className="comment-actions">
-                                    {editingId === comment.commentId ? (
-                                        <>
-                                            <button
-                                                onClick={() => handleUpdateComment(comment.commentId)}
-                                                className="comment-action-btn save"
-                                            >
-                                                저장
-                                            </button>
-                                            <button
-                                                onClick={handleCancelEdit}
-                                                className="comment-action-btn cancel"
-                                            >
-                                                취소
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button
-                                                onClick={() => handleStartEdit(comment)}
-                                                className="comment-action-btn edit"
-                                            >
-                                                수정
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteComment(comment.commentId)}
-                                                className="comment-action-btn delete"
-                                            >
-                                                삭제
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
-                                {/*/!* 디버깅 정보 표시 *!/*/}
-                                {/*<div style={{fontSize: '10px', color: '#666', marginTop: '5px'}}>*/}
-                                {/*    isOwner: {comment.isOwner?.toString()},*/}
-                                {/*    userId: {comment.userId},*/}
-                                {/*    userName: {comment.userName}*/}
-                                {/*</div>*/}
+                                {/* 소유자인 경우에만 수정/삭제 버튼 표시 */}
+                                {comment.isOwner && (
+                                    <div className="comment-actions">
+                                        {editingId === comment.commentId ? (
+                                            <>
+                                                <button
+                                                    onClick={() => handleUpdateComment(comment.commentId)}
+                                                    className="comment-action-btn save"
+                                                >
+                                                    저장
+                                                </button>
+                                                <button
+                                                    onClick={handleCancelEdit}
+                                                    className="comment-action-btn cancel"
+                                                >
+                                                    취소
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    onClick={() => handleStartEdit(comment)}
+                                                    className="comment-action-btn edit"
+                                                >
+                                                    수정
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteComment(comment.commentId)}
+                                                    className="comment-action-btn delete"
+                                                >
+                                                    삭제
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="comment-content">
