@@ -46,7 +46,7 @@ const QnaEdit = () => {
         const html = editorRef.current.getInstance().getHTML();
 
         try {
-            await axios.put(
+            await axios.patch(
                 `/api/asks/${id}`,
                 { title, content: html },
                 {
