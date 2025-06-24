@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { Eye, Share2 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -79,6 +80,28 @@ const NoticeDetail = () => {
         }
     };
 
+    // 공유 버튼 핸들러
+    const handleShare = () => {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url)
+            .then(() => {
+                Swal.fire({
+                    title: 'URL 복사됨!',
+                    text: '현재 페이지 주소가 클립보드에 복사되었습니다.',
+                    icon: 'success',
+                    confirmButtonColor: '#F76B59',
+                });
+            })
+            .catch(() => {
+                Swal.fire({
+                    title: '복사 실패',
+                    text: 'URL 복사에 실패했어요. 직접 복사해주세요.',
+                    icon: 'error',
+                    confirmButtonColor: '#F76B59',
+                });
+            });
+    };
+
     // 수정 버튼 핸들러
     const handleEdit = () => {
         navigate(`/community/notice/edit/${id}`);
@@ -129,15 +152,30 @@ const NoticeDetail = () => {
                 <main className="main-content">
                     <h1 className="detail-title">{notice.title}</h1>
 
+                    {/* 작성자 + 날짜 + 공유/조회수 */}
                     <div className="detail-meta">
-                        <span className="detail-author">{notice.userName}</span>
-                        <span className="detail-date">
-                            {new Date(notice.createdAt).toLocaleDateString('ko-KR', {
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit',
-                            })}
-                        </span>
+                        <div className="meta-left">
+                            <span className="detail-author">{notice.userName}</span>
+                            <span className="detail-date">
+                                {new Date(notice.createdAt).toLocaleDateString('ko-KR', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                })}
+                            </span>
+                        </div>
+                        {/* 공유 + 조회수 */}
+                        <div className="interaction-section">
+                            <button className="share-btn" onClick={handleShare}>
+                                <Share2 className="share-icon" size={16} color="#000" />
+                                공유하기
+                            </button>
+                            {/* 조회수 추가 */}
+                            <span className="detail-views">
+                                <Eye className="view-icon" size={18} color="#000" />
+                                {notice.viewCount || 0}
+                            </span>
+                        </div>
                     </div>
 
                     {/* 첨부파일 목록 (PDF, Excel 등) */}
