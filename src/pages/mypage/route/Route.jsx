@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '../../../components/layout/Layout';
 import { Heart, Trash2, MapPin, Calendar, Users, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import '../../../styles/MyPage/Route.css';
@@ -226,22 +225,19 @@ const Route = () => {
 
     if (loading) {
         return (
-            <Layout>
                 <div className="route-container">
                     <div className="loading-section">
                         <div className="loading-spinner"></div>
                         <p>즐겨찾기 루트를 불러오는 중...</p>
                     </div>
                 </div>
-            </Layout>
         );
     }
 
     return (
-        <Layout>
             <div className="route-container">
                 <div className="route-header">
-                    <h1>💖 즐겨찾기 루트</h1>
+                    <h1>🧡 즐겨찾기 루트</h1>
                     <p>저장한 여행 루트를 확인하고 관리하세요</p>
                 </div>
 
@@ -276,7 +272,6 @@ const Route = () => {
                     )}
                 </div>
             </div>
-        </Layout>
     );
 };
 
