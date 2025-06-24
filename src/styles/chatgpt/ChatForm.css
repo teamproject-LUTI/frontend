@@ -204,7 +204,6 @@
     border-radius: 50%;
     border: 2px solid #F76B59;
     flex-shrink: 0;
-    /* display: flex 관련 속성들 제거해도 됨 */
 }
 
 .bot-message .message-content {
@@ -271,7 +270,7 @@
 .chat-send-btn {
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #F76B59, #FFB399);
     color: white;
     border: none;
     border-radius: 50%;
@@ -416,15 +415,58 @@
     flex: 1;
 }
 
+/* ==================== 가격 정보 개선 스타일 ==================== */
 .route-price-info {
     text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .route-price {
-    font-size: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.total-budget {
+    font-size: 1.3rem;
     font-weight: 800;
+    color: #808080;
+    line-height: 1;
+}
+
+.price-label {
+    font-size: 0.8rem;
+    color: #555555;
+    order: -1; /* 라벨을 위로 올림 */
+}
+
+.actual-payment {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    padding: 10px 12px;
+    background: #fff5f5;
+    border-radius: 8px;
+    border: 1px solid #ffebee;
+    box-shadow: 0 1px 3px rgba(231, 76, 60, 0.1);
+}
+
+.payment-amount {
+    font-size: 1.2rem;
+    font-weight: 700;
     color: #e74c3c;
     line-height: 1;
+}
+
+.payment-label {
+    font-size: 0.9rem;
+    color: #e74c3c;
+    font-weight: 500;
+    order: -1; /* 라벨을 위로 올림 */
 }
 
 .route-meta {
@@ -434,6 +476,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    justify-content: flex-end;
 }
 
 .day-trip-badge {
@@ -684,37 +727,60 @@
     box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
 }
 
-/* ==================== 플로팅 예약 버튼 ==================== */
-.floating-booking-btn {
+/* ==================== 플로팅 버튼들 (새로 추가된 부분) ==================== */
+.floating-booking-btns {
     position: fixed;
     bottom: 100px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
+    display: flex;
+    gap: 16px;
     animation: slideUpFade 0.3s ease-out;
 }
 
-.floating-travel-btn {
-    padding: 16px 32px;
-    background: linear-gradient(135deg, #F76B59, #FFB088);
-    color: white;
+.floating-favorite-btn, .floating-book-btn {
+    padding: 16px 24px;
     border: none;
     border-radius: 50px;
     font-size: 1.1rem;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 8px 32px rgba(247, 107, 89, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
     white-space: nowrap;
-    max-width: 90vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    min-width: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.floating-travel-btn:hover {
+.floating-favorite-btn {
+    background: linear-gradient(135deg, #ff6b9d, #ff8e9b);
+    color: white;
+}
+
+.floating-favorite-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #e55a8a, #ff6b9d);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(255, 107, 157, 0.5);
+}
+
+.floating-book-btn {
+    background: linear-gradient(135deg, #F76B59, #FFB088);
+    color: white;
+}
+
+.floating-book-btn:hover:not(:disabled) {
     background: linear-gradient(135deg, #e55b47, #f76b59);
     transform: translateY(-3px);
     box-shadow: 0 12px 40px rgba(247, 107, 89, 0.5);
+}
+
+.floating-favorite-btn:disabled, .floating-book-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
 @keyframes slideUpFade {
@@ -776,6 +842,14 @@
         text-align: left;
     }
 
+    .actual-payment {
+        align-items: flex-start;
+    }
+
+    .route-meta {
+        justify-content: flex-start;
+    }
+
     .day-activity {
         flex-direction: column;
     }
@@ -788,6 +862,24 @@
     .search-info {
         flex-direction: column;
         gap: 10px;
+    }
+
+    .total-budget, .payment-amount {
+        font-size: 1.2rem;
+    }
+
+    /* 플로팅 버튼들 모바일 반응형 */
+    .floating-booking-btns {
+        flex-direction: column;
+        bottom: 20px;
+        gap: 12px;
+        max-width: 90vw;
+    }
+
+    .floating-favorite-btn, .floating-book-btn {
+        padding: 14px 20px;
+        font-size: 1rem;
+        min-width: 120px;
     }
 }
 
@@ -818,17 +910,23 @@
         font-size: 1.2rem;
     }
 
-    .route-price {
-        font-size: 1.3rem;
+    .total-budget {
+        font-size: 1.1rem;
     }
 
-    /* 플로팅 버튼 모바일 반응형 */
-    .floating-travel-btn {
-        padding: 14px 24px;
+    .payment-amount {
         font-size: 1rem;
     }
 
-    .floating-booking-btn {
+    /* 플로팅 버튼들 모바일 반응형 */
+    .floating-booking-btns {
         bottom: 20px;
+        gap: 8px;
+    }
+
+    .floating-favorite-btn, .floating-book-btn {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        min-width: 100px;
     }
 }
