@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback} from 'react';
-import { authUtils } from './authUtils';
+import apiClient from './apiClient';
 import { useLocation } from 'react-router-dom';
 
 const AuthContext = createContext();
@@ -15,10 +15,10 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const location = useLocation();
 
-  // 로그인이 필요 없는 경로
   const publicPaths = [
-    "/", "/login", "/membership", "/auth/error", "/account/restore",
-    "/login/oauth2/code/kakao", "/login/oauth2/code/google"
+    "/", "/login", "/membership", "/auth/error",
+    "/login/oauth2/code/kakao", "/login/oauth2/code/google",
+    "/account/find"
   ];
 
   const [authState, setAuthState] = useState({
@@ -32,10 +32,10 @@ export const AuthProvider = ({ children }) => {
   const isCheckingRef = useRef(false);
   const checkTimeoutRef = useRef(null);
 
-  // 인증 상태 확인 함수
   const checkAuth = useCallback(async () => {
+    const isRestorePage = location.pathname === '/account/restore';
+
     if (publicPaths.includes(location.pathname)) {
-      console.log('공개 경로 - 인증 확인 생략:', location.pathname);
       setAuthState(prev => ({
         ...prev,
         isAuthenticated: false,
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       return false;
     }
 
-    if (authState.hasChecked && authState.isAuthenticated !== null) {
+    if (authState.hasChecked && authState.isAuthenticated !== null && !isRestorePage) {
       console.log('인증 상태 이미 확인됨 - 스킵');
       return authState.isAuthenticated;
     }
@@ -61,22 +61,12 @@ export const AuthProvider = ({ children }) => {
 
       setAuthState(prev => ({ ...prev, isLoading: true }));
 
-      const isAuth = await authUtils.isAuthenticated();
+      // apiClient 사용으로 변경
+      const response = await apiClient.get('/api/auth/me');
 
-      if (isAuth) {
+      if (response.status === 200 && response.data.success) {
         console.log('서버 인증 성공');
-
-        let userData = null;
-        try {
-          const apiResponse = await authUtils.getUserInfo();
-
-          if (apiResponse && apiResponse.success && apiResponse.user) {
-            userData = apiResponse.user;
-          }
-        } catch (userError) {
-          console.warn('사용자 정보 조회 실패:', userError);
-          userData = null;
-        }
+        const userData = response.data.user;
 
         setAuthState({
           isAuthenticated: true,
@@ -99,6 +89,19 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('인증 확인 중 오류:', error);
+
+      // 복구 페이지에서는 인증 실패를 허용
+      if (isRestorePage) {
+        console.log('복구 페이지 - 인증 실패 허용');
+        setAuthState({
+          isAuthenticated: false,
+          isLoading: false,
+          user: null,
+          hasChecked: true
+        });
+        return false;
+      }
+
       setAuthState({
         isAuthenticated: false,
         isLoading: false,
@@ -151,16 +154,16 @@ export const AuthProvider = ({ children }) => {
     }
   }, [authState.user]);
 
-  // 사용자 정보 새로고침 함수
+  // 사용자 정보 새로고침 함수 - apiClient 사용으로 수정
   const refreshUser = useCallback(async () => {
     try {
       console.log('사용자 정보 새로고침 시작...');
 
-      const userData = await authUtils.getUserInfo();
-      if (userData && userData.success && userData.user) {
+      const response = await apiClient.get('/api/auth/me');
+      if (response.status === 200 && response.data.success && response.data.user) {
         setAuthState(prev => ({
           ...prev,
-          user: userData.user
+          user: response.data.user
         }));
         console.log('사용자 정보 새로고침 완료');
         return true;
@@ -172,18 +175,29 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // 로그아웃 함수
+  // 로그아웃 함수 - apiClient 사용으로 수정
   const logout = async () => {
     try {
-      await authUtils.logout();
+      await apiClient.post('/api/auth/logout');
       setAuthState({
         isAuthenticated: false,
         isLoading: false,
         user: null,
         hasChecked: true
       });
+
+      // 로그인 페이지로 리다이렉트
+      window.location.href = '/';
     } catch (error) {
       console.error('로그아웃 중 오류:', error);
+      // 에러가 발생해도 로컬 상태는 초기화
+      setAuthState({
+        isAuthenticated: false,
+        isLoading: false,
+        user: null,
+        hasChecked: true
+      });
+      window.location.href = '/';
     }
   };
 
@@ -196,17 +210,11 @@ export const AuthProvider = ({ children }) => {
       clearTimeout(checkTimeoutRef.current);
     }
 
-    try {
-      authUtils.refreshCache();
-    } catch (error) {
-      console.warn('authUtils 캐시 정리 중 오류:', error);
-    }
-
     setAuthState({
       isAuthenticated: false,
       isLoading: false,
       user: null,
-      hasChecked: true
+      hasChecked: false // 리셋 시 hasChecked도 false로
     });
 
     console.log('AuthContext 상태 리셋 완료');
@@ -216,8 +224,7 @@ export const AuthProvider = ({ children }) => {
   const forceCheckAuth = useCallback(async () => {
     console.log('강제 인증 재확인 시작...');
 
-    // 캐시 및 상태 초기화
-    authUtils.refreshCache();
+    // 상태 초기화
     setAuthState(prev => ({
       ...prev,
       hasChecked: false,

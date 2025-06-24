@@ -102,9 +102,79 @@
     box-sizing: border-box;
 }
 
+/* 기존 첨부파일 전체 컨테이너 */
+.edit-attachments-container {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* 기존 첨부파일 섹션 */
+.edit-attachments {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+/* '기존 첨부파일' 텍스트 */
+.edit-attachments-label {
+    font-weight: bold;
+    white-space: nowrap;
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+/* 기존 첨부파일 리스트 */
+.edit-attachments-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* 각각의 파일 아이템 */
+.edit-attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #f4f4f4;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #333;
+}
+
+/* 삭제 버튼 */
+.edit-attachment-remove {
+    all: unset;
+    display: inline-flex;        /* ✅ 텍스트와 수평 정렬 유지 */
+    align-items: center;         /* ✅ 수직 중앙 정렬 */
+    justify-content: center;
+    cursor: pointer;
+    color: #515151;
+    margin-left: 4px;
+    vertical-align: middle;      /* ✅ 세로 정렬 미세 조정 */
+    line-height: 1;
+}
+
+.edit-attachment-remove:hover {
+    color: #e63946;
+}
+
+/* 첨부파일 추가 input은 아래에 위치 */
+.edit-attachment-upload {
+    margin-left: 80px;
+}
+
+.edit-attachments-list a{
+    text-decoration: none;
+    color: #333;
+}
 
 /* “수정 완료” 버튼 스타일 */
-
 .review-form.edit-form .button-group button[type="submit"] {
     background-color: #F76B58;
     color: #fff;
