@@ -19,6 +19,8 @@ import './styles/MyPage/PasswordChangePage.css'
 import '@toast-ui/editor/dist/toastui-editor.css';
 import './styles/MyPage/Route.css';
 import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
+import Layout from "./components/layout/Layout";
 import Main from "./pages/Main";
 import Login from "./pages/login/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -28,11 +30,14 @@ import ReviewList from './pages/community/review/ReviewList';
 import ReviewDetail from './pages/community/review/ReviewDetail';
 import ReviewWrite from './pages/community/review/ReviewWrite';
 import ReviewEdit from './pages/community/review/ReviewEdit';
-import NoticeList from './pages/community/notice/NoticeList';
 import QnaList from './pages/community/qna/QnaList';
 import QnaWrite from './pages/community/qna/QnaWrite';
 import QnaDetail from './pages/community/qna/QnaDetail';
 import QnaEdit from './pages/community/qna/QnaEdit';
+import NoticeList from './pages/community/notice/NoticeList';
+import NoticeWrite from './pages/community/notice/NoticeWrite';
+import NoticeDetail from './pages/community/notice/NoticeDetail';
+import NoticeEdit  from './pages/community/notice/NoticeEdit';
 import MyPage from "./pages/mypage/MyPage"
 import MyPageProfile from "./pages/mypage/profile/MyPageProfile"
 import WithdrawPage from "./pages/mypage/withdraw/WithdrawPage";
@@ -46,186 +51,195 @@ import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
 import LikeReview from "./pages/mypage/likereview/LikeReview";
 import MenuManagement from "./pages/management/MenuManagement";
-import AuthMAnagement from "./pages/management/AuthManagement"
+import FindAccountPage from './pages/login/FindAccountPage';
+import AuthMAnagement from "./pages/management/AuthManagement";
+
 import PasswordChangePage from "./pages/mypage/password/PasswordChangePage";
 import PaymentManagement from "./pages/management/PaymentManagement";
 import RouteMark from "./pages/mypage/route/Route";
+import OAuth2CallbackHandler from "./pages/login/OAuth2CallbackHandler";
 
 const App = () => {
-  return (
-      <AuthProvider>
-        <div id='app'>
-          <Routes>
-            {/*로그인 페이지 - 보호 안함 */}
-            <Route path='/' element={<Login/>}/>
-            <Route path='/login' element={<Login/>}/>
+    const location = useLocation();
 
-            {/* OAuth2 관련 페이지 */}
-            <Route path='/auth/error' element={<OAuth2ErrorPage/>}/>
+    // 레이아웃이 필요 없는 페이지들 (로그인, 회원가입 등)
+    const noLayoutPaths = ['/', '/login', '/membership', '/auth/error', '/account/restore', '/account/find'];
+    const needsLayout = !noLayoutPaths.includes(location.pathname);
 
-            {/* 계정 복구 페이지 - 인증 필요하지만 탈퇴한 사용자도 접근 가능 */}
-            <Route path='/account/restore' element={<AccountRestorePage/>}/>
+    return (
+        <AuthProvider>
+            <div id='app'>
+                {needsLayout ? (
+                    // Layout 컴포넌트 사용 (Sidebar 한 번만 렌더링)
+                    <Layout>
+                        <Routes>
+                            {/* 메인 페이지 */}
+                            <Route path='/main' element={
+                                <ProtectedRoute>
+                                    <Main/>
+                                </ProtectedRoute>
+                            }/>
 
-            <Route path='/membership' element={<Membership/>}/>
+                            {/* 커뮤니티 - 리뷰 */}
+                            <Route path='/community/review' element={
+                                <ProtectedRoute>
+                                    <ReviewList />
+                                </ProtectedRoute>
+                            } />
 
-            {/*메인 페이지*/}
-            <Route path='/main' element={
-              <ProtectedRoute>
-                <Main/>
-              </ProtectedRoute>
-            }/>
+                            <Route path='/community/review/:id' element={
+                                <ProtectedRoute>
+                                    <ReviewDetail />
+                                </ProtectedRoute>
+                            } />
 
-            {/*gpt 페이지*/}
-            <Route path='travel/chatform' element={
-              <ProtectedRoute>
-                <ChatForm/>
-              </ProtectedRoute>
-            } />
+                            <Route path='/community/review/write' element={
+                                <ProtectedRoute>
+                                    <ReviewWrite />
+                                </ProtectedRoute>
+                            } />
 
-            {/*멤버쉽 페이지*/}
+                            <Route path='/community/review/edit/:id' element={
+                                <ProtectedRoute>
+                                    <ReviewEdit  />
+                                </ProtectedRoute>
+                            } />
 
-            <Route path='/membership' element={<Membership/>}/>
+                            {/* 커뮤니티 - QnA */}
+                            <Route path='/community/qna' element={
+                                <ProtectedRoute>
+                                    <QnaList />
+                                </ProtectedRoute>
+                            } />
 
-              {/*리뷰 목록 페이지*/}
+                            <Route path='/community/qna/write' element={
+                                <ProtectedRoute>
+                                    <QnaWrite />
+                                </ProtectedRoute>
+                            } />
 
-              <Route path='/community/review' element={
-                  <ProtectedRoute>
-                      <ReviewList />
-                  </ProtectedRoute>
-              } />
+                            {/*QnA 상세보기 페이지*/}
+                            <Route path='/community/qna/:id' element={
+                                <ProtectedRoute>
+                                    <QnaDetail />
+                                </ProtectedRoute>
+                            } />
 
-              {/*리뷰 상세보기 페이지*/}
-              <Route path='/community/review/:id' element={
-                  <ProtectedRoute>
-                      <ReviewDetail />
-                  </ProtectedRoute>
-              } />
+                            {/*QnA 수정 페이지*/}
+                            <Route path='/community/qna/edit/:id' element={
+                                <ProtectedRoute>
+                                    <QnaEdit />
+                                </ProtectedRoute>
+                            } />
 
-              {/*리뷰 글쓰기 페이지*/}
-              <Route path='/community/review/write' element={
-                  <ProtectedRoute>
-                      <ReviewWrite />
-                  </ProtectedRoute>
-              } />
+                            {/* 공지사항 목록 */}
+                            <Route path='/community/notice' element={
+                                <ProtectedRoute>
+                                    <NoticeList/>
+                                </ProtectedRoute>
+                            }/>
 
-              {/*리뷰 내가 쓴 글 수정 페이지*/}
-              <Route path='/community/review/edit/:id' element={
-                  <ProtectedRoute>
-                      <ReviewEdit  />
-                  </ProtectedRoute>
-              } />
+                            {/* 공지사항 글쓰기 */}
+                            <Route path='/community/notice/write' element={
+                                <ProtectedRoute>
+                                    <NoticeWrite/>
+                                </ProtectedRoute>
+                            }/>
 
+                            {/* 공지사항 상세보기 */}
+                            <Route path='/community/notice/:id' element={
+                                <ProtectedRoute>
+                                    <NoticeDetail/>
+                                </ProtectedRoute>
+                            }/>
 
+                            {/* 공지사항 수정 */}
+                            <Route path='/community/notice/edit/:id' element={
+                                <ProtectedRoute>
+                                    <NoticeEdit/>
+                                </ProtectedRoute>
+                            }/>
 
-              {/*공지사항 목록 페이지*/}
-              <Route path='/community/notice' element={
-                  <ProtectedRoute>
-                      <NoticeList />
-                  </ProtectedRoute>
-              } />
+                            {/* 마이페이지 - 개별 Routes로 변경 */}
+                            <Route path='/mypage' element={
+                                <ProtectedRoute>
+                                    <MyPage/>
+                                </ProtectedRoute>
+                            }/>
+                            <Route path='/mypage/profile' element={
+                                <ProtectedRoute>
+                                    <MyPageProfile/>
+                                </ProtectedRoute>
+                            }/>
+                            <Route path='/mypage/withdraw/confirm' element={
+                                <ProtectedRoute>
+                                    <PasswordConfirmPage/>
+                                </ProtectedRoute>
+                            }/>
+                            <Route path='/mypage/withdraw' element={
+                                <ProtectedRoute>
+                                    <WithdrawPage/>
+                                </ProtectedRoute>
+                            }/>
+                            <Route path='/mypage/myreview' element={
+                                <ProtectedRoute>
+                                    <MyReview/>
+                                </ProtectedRoute>
+                            }/>
+                            <Route path='/mypage/myask' element={
+                                <ProtectedRoute>
+                                    <MyAsk/>
+                                </ProtectedRoute>
+                            }/>
+                            <Route path='/mypage/likereview' element={
+                                <ProtectedRoute>
+                                    <LikeReview/>
+                                </ProtectedRoute>
+                            }/>
+                            <Route path='/mypage/payments' element={
+                                <ProtectedRoute>
+                                    <Payment/>
+                                </ProtectedRoute>
+                            }/>
+                            <Route path='/mypage/password' element={
+                                <ProtectedRoute>
+                                    <PasswordChangePage/>
+                                </ProtectedRoute>
+                            }/>
 
-              {/*QnA 목록 페이지*/}
-              <Route path='/community/qna' element={
-                  <ProtectedRoute>
-                      <QnaList />
-                  </ProtectedRoute>
-              } />
-
-            {/* 마이페이지*/}
-            <Route path='/mypage' element={<ProtectedRoute/>}>
-              <Route index element={<MyPage/>}/>
-              <Route path='profile' element={<MyPageProfile/>}/>
-              <Route path='withdraw/confirm' element={<PasswordConfirmPage/>}/>
-              <Route path='withdraw' element={<WithdrawPage/>}/>
-              <Route path='myreview' element={<MyReview/>}/>
-              <Route path='myask' element={<MyAsk/>}/>
-              <Route path='likereview' element={<LikeReview/>}/>
-              <Route path='payments' element={<Payment/>}/>
-              <Route path='password' element={<PasswordChangePage/>}/>
-              <Route path='routes' element={<RouteMark/>}/>
-            </Route>
-
-              {/*리뷰 목록 페이지*/}
-              <Route path='/community/review' element={
-                  <ProtectedRoute>
-                      <ReviewList />
-                  </ProtectedRoute>
-              } />
-
-              {/*리뷰 상세보기 페이지*/}
-              <Route path='/community/review/:id' element={
-                  <ProtectedRoute>
-                      <ReviewDetail />
-                  </ProtectedRoute>
-              } />
-
-              {/*리뷰 글쓰기 페이지*/}
-              <Route path='/community/review/write' element={
-                  <ProtectedRoute>
-                      <ReviewWrite />
-                  </ProtectedRoute>
-              } />
-
-              {/*리뷰 내가 쓴 글 수정 페이지*/}
-              <Route path='/community/review/edit/:id' element={
-                  <ProtectedRoute>
-                      <ReviewEdit  />
-                  </ProtectedRoute>
-              } />
-
-              {/*공지사항 목록 페이지*/}
-              <Route path='/community/notice' element={
-                  <ProtectedRoute>
-                      <NoticeList />
-                  </ProtectedRoute>
-              } />
-
-              {/*QnA 목록 페이지*/}
-              <Route path='/community/qna' element={
-                  <ProtectedRoute>
-                      <QnaList />
-                  </ProtectedRoute>
-              } />
-
-              {/*QnA 글쓰기 페이지*/}
-              <Route path='/community/qna/write' element={
-                  <ProtectedRoute>
-                    <QnaWrite />
-                  </ProtectedRoute>
-              } />
-
-
-              {/*QnA 상세보기 페이지*/}
-              <Route path='/community/qna/:id' element={
-                  <ProtectedRoute>
-                      <QnaDetail />
-                  </ProtectedRoute>
-              } />
-
-              {/*QnA 수정 페이지*/}
-              <Route path='/community/qna/edit/:id' element={
-                <ProtectedRoute>
-                    <QnaEdit />
-                </ProtectedRoute>
-              } />
-
-            {/*리뷰 페이지*/}
-            <Route path='/community/review' element={
-              <ProtectedRoute>
-                <Review/>
-              </ProtectedRoute>
-            }/>
-
-            {/* 관리자 페이지 */}
-            <Route path='/admin' element={<ProtectedRoute />}>
-              <Route path='menus' element={<MenuManagement />} />
-              <Route path='permissions' element={<AuthMAnagement />} />
-              <Route path='payments' element={<PaymentManagement />} />
-            </Route>
-          </Routes>
-        </div>
-      </AuthProvider>
-  );
+                            {/* 관리자 페이지 - 개별 Routes로 변경 */}
+                            <Route path='/admin/menus' element={
+                                <ProtectedRoute>
+                                    <MenuManagement />
+                                </ProtectedRoute>
+                            } />
+                            <Route path='/admin/permissions' element={
+                                <ProtectedRoute>
+                                    <AuthMAnagement />
+                                </ProtectedRoute>
+                            } />
+                            <Route path='/admin/payments' element={
+                                <ProtectedRoute>
+                                    <PaymentManagement />
+                                </ProtectedRoute>
+                            } />
+                        </Routes>
+                    </Layout>
+                ) : (
+                    //  레이아웃이 필요 없는 페이지들 (로그인 등)
+                    <Routes>
+                        <Route path='/' element={<Login/>}/>
+                        <Route path='/login' element={<Login/>}/>
+                        <Route path='/membership' element={<Membership/>}/>
+                        <Route path='/auth/error' element={<OAuth2ErrorPage/>}/>
+                        <Route path='/account/restore' element={<AccountRestorePage/>}/>
+                        <Route path='/login/OAuth2CallbackHandler' element={<OAuth2CallbackHandler/>}/>
+                        <Route path='/account/find' element={<FindAccountPage/>}/>
+                    </Routes>
+                )}
+            </div>
+        </AuthProvider>
+    );
 }
 
 export default App;

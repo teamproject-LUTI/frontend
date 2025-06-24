@@ -1,350 +1,187 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 /**
- * OAuth2 로그인 실패 시 표시되는 에러 페이지
+ * OAuth2 로그인 실패 시 모달로 간단하게 처리하는 컴포넌트
  */
 const OAuth2ErrorPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(5);
 
+  // URL 파라미터에서 에러 정보 추출
   const errorCode = searchParams.get('error');
   const errorMessage = searchParams.get('message');
+  const provider = searchParams.get('provider') || 'social';
 
-  // 자동 리다이렉트 카운트다운
+  console.log('OAuth2ErrorPage - 파라미터:', { errorCode, errorMessage, provider });
+
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          navigate('/', { replace: true });
-          return 0;
+    const showErrorModal = async () => {
+      // 제공자별 이름 매핑
+      const getProviderName = (providerCode) => {
+        switch (providerCode?.toLowerCase()) {
+          case 'google':
+            return '구글';
+          case 'kakao':
+            return '카카오';
+          case 'naver':
+            return '네이버';
+          default:
+            return '소셜';
         }
-        return prev - 1;
-      });
-    }, 1000);
+      };
 
-    return () => clearInterval(timer);
-  }, [navigate]);
+      // 이메일 중복 에러 감지
+      const isEmailDuplicateError = errorCode && (
+          errorCode.includes('이미') ||
+          errorCode.includes('가입') ||
+          errorCode.includes('email') ||
+          errorCode.includes('duplicate') ||
+          errorCode === 'email_already_exists' ||
+          errorCode.includes('계정이 있습니다')
+      );
 
-  const handleRetryLogin = () => {
-    navigate('/', { replace: true });
-  };
+      const providerName = getProviderName(provider);
 
-  const handleContactSupport = () => {
-    // 고객 지원 페이지로 이동 또는 이메일 링크
-    window.location.href = 'mailto:support@luti.com?subject=소셜 로그인 오류 문의';
-  };
-
-  // 에러 코드에 따른 상세 메시지 및 해결 방법 제공
-  const getErrorDetails = (code) => {
-    switch (code) {
-      case 'access_denied':
-        return {
-          title: '로그인이 취소되었습니다',
-          description: '구글 로그인 과정에서 권한 승인을 거부하셨습니다.',
-          solution: '다시 시도하시고, 구글 계정 접근 권한을 허용해주세요.'
-        };
-      case 'email_already_exists':
-        return {
+      if (isEmailDuplicateError) {
+        // 이메일 중복 에러 - 상세 안내 모달
+        const result = await Swal.fire({
           title: '이미 가입된 이메일입니다',
-          description: '해당 이메일로 이미 계정이 존재합니다.',
-          solution: '기존 계정으로 로그인하시거나, 다른 이메일을 사용해주세요.'
-        };
-      case 'server_error':
-        return {
-          title: '서버 오류가 발생했습니다',
-          description: '일시적인 서버 문제로 로그인에 실패했습니다.',
-          solution: '잠시 후 다시 시도해주세요. 문제가 지속되면 고객지원에 문의해주세요.'
-        };
-      case 'invalid_request':
-        return {
-          title: '잘못된 요청입니다',
-          description: '로그인 요청에 문제가 있습니다.',
-          solution: '페이지를 새로고침하고 다시 시도해주세요.'
-        };
-      case 'system_configuration_error':
-        return {
-          title: '시스템 설정 오류',
-          description: '서비스 설정에 문제가 있습니다.',
-          solution: '관리자에게 문의해주세요.'
-        };
-      default:
-        return {
-          title: '소셜 로그인 오류',
-          description: '로그인 중 알 수 없는 오류가 발생했습니다.',
-          solution: '다시 시도해주시고, 문제가 지속되면 고객지원에 문의해주세요.'
-        };
-    }
-  };
-
-  const errorDetails = getErrorDetails(errorCode);
-  const decodedMessage = errorMessage ? decodeURIComponent(errorMessage) : errorDetails.description;
-
-  return (
-      <div className="oauth-error-container">
-        <div className="oauth-error-content">
-          {/* 에러 아이콘 */}
-          <div className="error-icon-container">
-            <div className="error-icon">⚠️</div>
-          </div>
-
-          {/* 에러 제목 */}
-          <h1 className="error-title">{errorDetails.title}</h1>
-
-          {/* 에러 메시지 */}
-          <div className="error-message">
-            <p className="error-description">{decodedMessage}</p>
-            {errorDetails.solution && (
-                <p className="error-solution">💡 {errorDetails.solution}</p>
-            )}
-          </div>
-
-          {/* 에러 코드 (개발자용) */}
-          {errorCode && (
-              <div className="error-code-container">
-                <span className="error-code">오류 코드: {errorCode}</span>
-              </div>
-          )}
-
-          {/* 액션 버튼들 */}
-          <div className="error-actions">
-            <button onClick={handleRetryLogin} className="retry-button primary">
-              다시 로그인하기
-            </button>
-
-            <button onClick={handleContactSupport} className="support-button secondary">
-              고객지원 문의
-            </button>
-          </div>
-
-          {/* 자동 리다이렉트 안내 */}
-          <div className="auto-redirect">
-            <p>
-              {countdown}초 후 자동으로 로그인 페이지로 이동합니다.
-            </p>
-          </div>
-
-          {/* 추가 도움말 */}
-          <div className="help-section">
-            <details>
-              <summary>자주 발생하는 문제 해결 방법</summary>
-              <div className="help-content">
-                <ul>
-                  <li><strong>팝업 차단:</strong> 브라우저의 팝업 차단을 해제해주세요.</li>
-                  <li><strong>쿠키 설정:</strong> 브라우저에서 쿠키를 허용해주세요.</li>
-                  <li><strong>캐시 문제:</strong> 브라우저 캐시를 삭제하고 다시 시도해주세요.</li>
-                  <li><strong>다른 브라우저:</strong> 다른 브라우저나 시크릿 모드를 시도해보세요.</li>
+          html: `
+            <div style="text-align: left; line-height: 1.6;">
+              <p style="margin-bottom: 15px;">
+                <strong>${providerName} 계정의 이메일로 이미 가입된 계정이 있습니다.</strong>
+              </p>
+              
+              <div style="background-color: #f0f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid #0ea5e9; margin: 15px 0;">
+                <h4 style="margin: 0 0 10px 0; color: #0c4a6e; font-size: 14px;">💡 해결 방법</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #075985; font-size: 13px;">
+                  <li><strong>기존 계정으로 로그인:</strong> 이메일과 비밀번호로 일반 로그인을 사용하세요</li>
+                  <li><strong>다른 계정 사용:</strong> 다른 ${providerName} 계정으로 로그인하세요</li>
+                  <li><strong>계정 연동 문의:</strong> 고객지원에 문의하여 계정 연동을 요청하세요</li>
                 </ul>
               </div>
-            </details>
-          </div>
+              
+              <p style="font-size: 12px; color: #6b7280; margin-top: 15px;">
+                보안상의 이유로 하나의 이메일 주소는 하나의 계정에만 연결될 수 있습니다.
+              </p>
+            </div>
+          `,
+          icon: 'warning',
+          confirmButtonText: '로그인 페이지로',
+          confirmButtonColor: '#F76B59',
+          showCancelButton: true,
+          cancelButtonText: '고객지원 문의',
+          cancelButtonColor: '#6b7280',
+          width: '500px',
+          customClass: {
+            popup: 'swal-custom-popup',
+            title: 'swal-custom-title',
+            htmlContainer: 'swal-custom-html'
+          }
+        });
+
+        if (result.isConfirmed) {
+          // 로그인 페이지로 이동
+          navigate('/', { replace: true });
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          // 고객지원 문의
+          window.location.href = 'mailto:support@luti.com?subject=소셜 로그인 계정 연동 문의';
+          // 이메일 열고 나서 로그인 페이지로 이동
+          setTimeout(() => {
+            navigate('/', { replace: true });
+          }, 1000);
+        } else {
+          // ESC 키나 X 버튼으로 닫은 경우
+          navigate('/', { replace: true });
+        }
+      } else {
+        // 일반적인 OAuth2 에러 - 간단한 알림 모달
+        let title = '로그인 오류';
+        let message = '소셜 로그인 중 오류가 발생했습니다.';
+
+        if (errorCode) {
+          if (errorCode.includes('access_denied')) {
+            title = '로그인이 취소되었습니다';
+            message = `${providerName} 로그인 과정에서 권한 승인을 거부하셨습니다.`;
+          } else if (errorCode.includes('server_error')) {
+            title = '서버 오류';
+            message = '일시적인 서버 문제로 로그인에 실패했습니다. 잠시 후 다시 시도해주세요.';
+          } else if (errorCode.includes('invalid_request')) {
+            title = '잘못된 요청';
+            message = '로그인 요청에 문제가 있습니다. 페이지를 새로고침하고 다시 시도해주세요.';
+          } else {
+            message = errorMessage ? decodeURIComponent(errorMessage) : errorCode;
+          }
+        }
+
+        await Swal.fire({
+          title: title,
+          text: message,
+          icon: 'error',
+          confirmButtonText: '다시 로그인하기',
+          confirmButtonColor: '#F76B59',
+          allowOutsideClick: false,
+          allowEscapeKey: true
+        });
+
+        // 로그인 페이지로 이동
+        navigate('/', { replace: true });
+      }
+    };
+
+    // 컴포넌트 마운트 후 모달 표시
+    showErrorModal();
+  }, [errorCode, errorMessage, provider, navigate]);
+
+  // 모달이 표시되는 동안 보여줄 로딩 화면
+  return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#f8fafc',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}>
+        <div style={{
+          textAlign: 'center',
+          padding: '40px',
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            border: '4px solid #f3f3f3',
+            borderTop: '4px solid #F76B59',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 20px'
+          }}></div>
+          <p style={{ color: '#6b7280', margin: 0 }}>처리 중...</p>
         </div>
 
-        <style jsx>{`
-        .oauth-error-container {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          min-height: 100vh;
-          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-          padding: 20px;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
-
-        .oauth-error-content {
-          background: white;
-          border-radius: 16px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-          padding: 40px;
-          max-width: 500px;
-          width: 100%;
-          text-align: center;
-          position: relative;
+        
+        .swal-custom-popup {
+          border-radius: 12px !important;
         }
-
-        .error-icon-container {
-          margin-bottom: 24px;
+        
+        .swal-custom-title {
+          font-size: 18px !important;
+          font-weight: 600 !important;
         }
-
-        .error-icon {
-          font-size: 64px;
-          display: inline-block;
-          animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% {
-            transform: translateY(0);
-          }
-          40% {
-            transform: translateY(-10px);
-          }
-          60% {
-            transform: translateY(-5px);
-          }
-        }
-
-        .error-title {
-          color: #2d3748;
-          font-size: 24px;
-          font-weight: 600;
-          margin: 0 0 20px 0;
-          line-height: 1.3;
-        }
-
-        .error-message {
-          margin-bottom: 24px;
-        }
-
-        .error-description {
-          color: #4a5568;
-          font-size: 16px;
-          line-height: 1.6;
-          margin: 0 0 12px 0;
-        }
-
-        .error-solution {
-          color: #38a169;
-          font-size: 14px;
-          line-height: 1.5;
-          margin: 0;
-          padding: 12px;
-          background-color: #f0fff4;
-          border-radius: 8px;
-          border-left: 4px solid #38a169;
-        }
-
-        .error-code-container {
-          margin-bottom: 24px;
-        }
-
-        .error-code {
-          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-          background-color: #f7fafc;
-          color: #e53e3e;
-          padding: 8px 12px;
-          border-radius: 6px;
-          font-size: 12px;
-          border: 1px solid #fed7d7;
-        }
-
-        .error-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          margin-bottom: 24px;
-        }
-
-        .retry-button, .support-button {
-          padding: 12px 24px;
-          border-radius: 8px;
-          font-size: 14px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          border: none;
-          text-decoration: none;
-        }
-
-        .retry-button.primary {
-          background-color: #F76B59;
-          color: white;
-        }
-
-        .retry-button.primary:hover {
-          background-color: #e55a48;
-          transform: translateY(-1px);
-        }
-
-        .support-button.secondary {
-          background-color: #edf2f7;
-          color: #4a5568;
-          border: 1px solid #e2e8f0;
-        }
-
-        .support-button.secondary:hover {
-          background-color: #e2e8f0;
-          transform: translateY(-1px);
-        }
-
-        .auto-redirect {
-          margin-bottom: 20px;
-          padding: 12px;
-          background-color: #ebf8ff;
-          border-radius: 8px;
-          border: 1px solid #bee3f8;
-        }
-
-        .auto-redirect p {
-          color: #2b6cb0;
-          font-size: 13px;
-          margin: 0;
-        }
-
-        .help-section {
-          margin-top: 20px;
-        }
-
-        .help-section details {
-          text-align: left;
-        }
-
-        .help-section summary {
-          color: #4a5568;
-          font-size: 14px;
-          cursor: pointer;
-          padding: 8px 0;
-          border-bottom: 1px solid #e2e8f0;
-        }
-
-        .help-section summary:hover {
-          color: #2d3748;
-        }
-
-        .help-content {
-          padding: 16px 0 0 0;
-        }
-
-        .help-content ul {
-          margin: 0;
-          padding-left: 20px;
-        }
-
-        .help-content li {
-          color: #4a5568;
-          font-size: 13px;
-          line-height: 1.6;
-          margin-bottom: 8px;
-        }
-
-        .help-content strong {
-          color: #2d3748;
-        }
-
-        /* 모바일 반응형 */
-        @media (max-width: 480px) {
-          .oauth-error-content {
-            padding: 30px 20px;
-            margin: 10px;
-          }
-
-          .error-title {
-            font-size: 20px;
-          }
-
-          .error-description {
-            font-size: 14px;
-          }
-
-          .error-actions {
-            flex-direction: column;
-          }
-
-          .retry-button, .support-button {
-            width: 100%;
-          }
+        
+        .swal-custom-html {
+          font-size: 14px !important;
+          line-height: 1.5 !important;
         }
       `}</style>
       </div>

@@ -1,8 +1,5 @@
 import React, {useState, useEffect} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
-import Topbar from '../../../components/layout/Topbar';
-import Sidebar from '../../../components/layout/Sidebar';
-import Footer from '../../../components/layout/Footer';
 import '../../../styles/community/review/ReviewList.css';
 import axios from "axios";
 
@@ -43,9 +40,7 @@ const ReviewList = () => {
     }, []);
 
     return (<div className="main-layout">
-        <Topbar/>
         <div className="main-content-wrapper">
-            <Sidebar/>
             <main className="main-content">
                 <div className="review-header">
                     <h1>내가 쓴 리뷰</h1>
@@ -126,7 +121,6 @@ const ReviewList = () => {
                 </div>
             </main>
         </div>
-        <Footer/>
     </div>);
 };
 

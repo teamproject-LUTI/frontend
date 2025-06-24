@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/Main.css';
 import Swal from 'sweetalert2';
-import ChatForm from '../components/chatgpt/ChatForm';
+import ChatForm from "../components/chatgpt/ChatForm";
 
 const Main = ({ children }) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -21,9 +21,7 @@ const Main = ({ children }) => {
 
     return (
         <div className="main-layout">
-
             <div className="main-content-wrapper">
-
                 <main className="main-content">
                     {/* GPT 여행 검색창 삽입 */}
                     <ChatForm />
@@ -80,8 +78,6 @@ const Main = ({ children }) => {
                     </div>
                 </main>
             </div>
-
-
         </div>
     );
 };

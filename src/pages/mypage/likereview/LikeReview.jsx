@@ -13,12 +13,10 @@ import {
   Eye,
   ImageIcon
 } from 'lucide-react';
-import Layout from '../../../components/layout/Layout';
 import apiClient from '../../../util/apiClient';
 import Swal from 'sweetalert2';
 import '../../../styles/MyPage/LikeReview.css';
 import { useAuth } from "../../../util/AuthContext";
-
 
 const LikeReview = () => {
   const navigate = useNavigate();
@@ -32,42 +30,21 @@ const LikeReview = () => {
     totalLikedReviews: 0
   });
 
-  // 페이지네이션
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [pageSize] = useState(12); // 한 페이지에 12개씩
+  // 페이지네이션 (백엔드 기반)
+  const [currentPage, setCurrentPage] = useState(0); // 백엔드는 0부터 시작
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [pageSize] = useState(10); // 한 페이지에 10개씩
 
-  // 필터링 및 검색
-  const [sortBy, setSortBy] = useState('latest'); // latest, oldest, popular
-  const [searchTerm, setSearchTerm] = useState('');
-  const [regionFilter, setRegionFilter] = useState('all');
+  // 검색 상태 분리 (수동 검색)
+  const [searchInput, setSearchInput] = useState(''); // 입력 중인 검색어
+  const [searchType, setSearchType] = useState(''); // '', 'title', 'content', 'author'
+  const [sortBy, setSortBy] = useState('latest'); // 'latest', 'oldest'
 
-  // 더미 데이터 사용 여부 (개발/테스트용)
-  const [useDummyData] = useState(false);
-
-  // 날짜 포맷팅 함수
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 1) {
-      return '오늘';
-    } else if (diffDays === 2) {
-      return '어제';
-    } else if (diffDays <= 7) {
-      return `${diffDays - 1}일 전`;
-    } else {
-      return date.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    }
-  };
+  // 실제 검색된 조건들 (API 호출에 사용)
+  const [actualKeyword, setActualKeyword] = useState('');
+  const [actualSearchType, setActualSearchType] = useState('');
+  const [actualSortBy, setActualSortBy] = useState('latest');
 
   // 이미지 URL 처리 함수
   const getImageUrl = (imagePath) => {
@@ -84,14 +61,11 @@ const LikeReview = () => {
     return `${API_BASE_URL}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
   };
 
-  // 좋아요한 리뷰 목록 조회
+  // 좋아요한 리뷰 목록 조회 (백엔드 페이지네이션 사용)
   const fetchLikedReviews = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-
-      console.log('현재 user 상태:', user);
-      console.log('user.userId:', user?.userId);
 
       if (!user || !user.userId) {
         console.log('사용자 정보 없음 - API 호출 건너뜀');
@@ -99,20 +73,37 @@ const LikeReview = () => {
         return;
       }
 
-      console.log('좋아요한 리뷰 목록 조회 시작...', { userId: user.userId });
+      console.log('좋아요한 리뷰 목록 조회 시작...', {
+        userId: user.userId,
+        searchType: actualSearchType,
+        keyword: actualKeyword,
+        sortBy: actualSortBy,
+        page: currentPage,
+        size: pageSize
+      });
 
-      const response = await apiClient.get(`/api/likes/user/${user.userId}`);
+      // 백엔드 페이지네이션 API 호출
+      const response = await apiClient.get(`/api/likes/user/${user.userId}/search`, {
+        params: {
+          searchType: actualSearchType,
+          keyword: actualKeyword,
+          sortBy: actualSortBy,
+          page: currentPage,
+          size: pageSize
+        }
+      });
 
       if (response.status === 200) {
-        const reviews = response.data || [];
+        const data = response.data;
 
-        setLikedReviews(reviews);
-        setTotalPages(1);
+        setLikedReviews(data.data || []);
+        setTotalPages(data.pageInfo?.totalPages || 0);
+        setTotalElements(data.pageInfo?.totalElements || 0);
         setStats({
-          totalLikedReviews: reviews.length
+          totalLikedReviews: data.pageInfo?.totalElements || 0
         });
 
-        console.log('좋아요한 리뷰 목록 조회 성공:', reviews);
+        console.log('좋아요한 리뷰 목록 조회 성공:', data);
       }
 
     } catch (error) {
@@ -129,7 +120,7 @@ const LikeReview = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.userId]); // user?.id를 user?.userId로 변경
+  }, [user?.userId, actualSearchType, actualKeyword, actualSortBy, currentPage, pageSize]);
 
   // 컴포넌트 마운트 시 데이터 로드
   useEffect(() => {
@@ -138,19 +129,32 @@ const LikeReview = () => {
     }
   }, [fetchLikedReviews, user]);
 
-  // 검색어 변경 시 첫 페이지로 이동 (디바운스 적용)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentPage(1);
-    }, 300);
+  // 검색 실행 (버튼 클릭 또는 엔터키)
+  const handleSearch = () => {
+    setActualKeyword(searchInput.trim());
+    setActualSearchType(searchType);
+    setActualSortBy(sortBy);
+    setCurrentPage(0); // 검색 시에만 첫 페이지로 이동
+  };
 
-    return () => clearTimeout(timer);
-  }, [searchTerm, regionFilter]);
+  // 엔터키 검색
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
-  // 정렬 변경 시 첫 페이지로 이동
+  // 검색 타입 변경 (검색 실행 안 함)
+  const handleSearchTypeChange = (newSearchType) => {
+    setSearchType(newSearchType);
+    // 검색은 실행하지 않음
+  };
+
+  // 정렬 변경 (즉시 적용)
   const handleSortChange = (newSortBy) => {
     setSortBy(newSortBy);
-    setCurrentPage(1);
+    setActualSortBy(newSortBy);
+    // 정렬은 즉시 적용 (검색어가 있든 없든)
   };
 
   // 페이지 변경
@@ -232,11 +236,11 @@ const LikeReview = () => {
     const buttons = [];
     const maxButtons = 5;
 
-    let start = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-    let end = Math.min(totalPages, start + maxButtons - 1);
+    let start = Math.max(0, currentPage - Math.floor(maxButtons / 2));
+    let end = Math.min(totalPages - 1, start + maxButtons - 1);
 
     if (end - start + 1 < maxButtons) {
-      start = Math.max(1, end - maxButtons + 1);
+      start = Math.max(0, end - maxButtons + 1);
     }
 
     for (let i = start; i <= end; i++) {
@@ -246,7 +250,7 @@ const LikeReview = () => {
               onClick={() => handlePageChange(i)}
               className={`pagination-button ${i === currentPage ? 'active' : ''}`}
           >
-            {i}
+            {i + 1}
           </button>
       );
     }
@@ -254,11 +258,7 @@ const LikeReview = () => {
     return buttons;
   };
 
-  // 지역 목록 (더미 데이터에서 추출했지만, 실제로는 백엔드에서 받아와야 함)
-  const regions = ['all', '제주도', '부산', '경주', '강릉', '서울', '경기', '인천', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '울산', '대전', '대구', '광주', '세종'];
-
   return (
-      <Layout>
         <div className="like-review-container">
           <div className="like-review-content">
             {/* 헤더 */}
@@ -266,9 +266,6 @@ const LikeReview = () => {
               <div className="like-review-title">
                 <Heart className="like-review-icon" />
                 <h1>찜한 리뷰</h1>
-                {useDummyData && (
-                    <span className="dummy-badge">더미 데이터</span>
-                )}
               </div>
               <p className="like-review-subtitle">
                 내가 좋아요를 누른 여행 후기 목록입니다.
@@ -284,47 +281,76 @@ const LikeReview = () => {
               </div>
             </div>
 
-            {/* 검색 및 필터 */}
-            <div className="like-review-filters">
-              <div className="search-group">
-                <div className="search-wrapper">
-                  <Search className="search-icon" />
+            <div className="like-review-filters mylike-review-filters">
+              {/* 통합 검색 그룹 */}
+              <div className="mylike-integrated-search-group">
+                <div className="mylike-integrated-search-wrapper">
+                  {/* 검색 타입 선택 */}
+                  <select
+                      value={searchType}
+                      onChange={(e) => handleSearchTypeChange(e.target.value)}
+                      className="mylike-search-type-select"
+                  >
+                    <option value="">전체</option>
+                    <option value="title">제목</option>
+                    <option value="content">내용</option>
+                    <option value="author">작성자</option>
+                  </select>
+
+                  {/* 검색 입력창 */}
                   <input
                       type="text"
-                      placeholder="제목이나 작성자로 검색..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="search-input"
+                      placeholder="검색어를 입력하세요..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      className="mylike-integrated-search-input"
                   />
+
+                  {/* 검색 버튼 */}
+                  <button
+                      onClick={handleSearch}
+                      className="mylike-integrated-search-button"
+                      title="검색"
+                  >
+                    <Search size={18} />
+                  </button>
                 </div>
               </div>
 
-              <div className="filter-group">
-                <Filter className="filter-icon" />
-                <select
-                    value={regionFilter}
-                    onChange={(e) => setRegionFilter(e.target.value)}
-                    className="filter-select"
-                >
-                  <option value="all">전체 지역</option>
-                  {regions.slice(1).map(region => (
-                      <option key={region} value={region}>{region}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="sort-group">
+              {/* 정렬 그룹 */}
+              <div className="mylike-sort-group">
                 <select
                     value={sortBy}
                     onChange={(e) => handleSortChange(e.target.value)}
-                    className="sort-select"
+                    className="mylike-sort-select"
                 >
                   <option value="latest">최근 좋아요순</option>
                   <option value="oldest">오래된 좋아요순</option>
-                  <option value="popular">인기순</option>
                 </select>
               </div>
             </div>
+
+            {/* 검색 결과 정보 */}
+            {actualKeyword && !loading && (
+                <div className="search-result-info mylike-search-result-info">
+                  <p>
+                    {actualSearchType ? (
+                        <>
+                          <strong>
+                            {actualSearchType === 'title' ? '제목' :
+                                actualSearchType === 'content' ? '내용' :
+                                    actualSearchType === 'author' ? '작성자' : '전체'}
+                          </strong>에서 "<strong>{actualKeyword}</strong>" 검색 결과: <strong>{totalElements}</strong>개
+                        </>
+                    ) : (
+                        <>
+                          "<strong>{actualKeyword}</strong>" 검색 결과: <strong>{totalElements}</strong>개
+                        </>
+                    )}
+                  </p>
+                </div>
+            )}
 
             {/* 리뷰 리스트 */}
             <div className="like-review-list">
@@ -341,18 +367,22 @@ const LikeReview = () => {
                     </button>
                   </div>
               ) : likedReviews.length === 0 ? (
-                  <div className="empty-state">
+                  <div className="empty-state mylike-empty-state">
                     <Heart className="empty-icon" />
-                    <h3 className="empty-title">좋아요한 리뷰가 없습니다</h3>
+                    <h3 className="empty-title">
+                      {actualKeyword ? '검색 결과가 없습니다' : '좋아요한 리뷰가 없습니다'}
+                    </h3>
                     <p className="empty-description">
-                      마음에 드는 리뷰에 좋아요를 눌러보세요!
+                      {actualKeyword ? '다른 검색어로 시도해보세요.' : '마음에 드는 리뷰에 좋아요를 눌러보세요!'}
                     </p>
-                    <button
-                        onClick={handleExploreReviews}
-                        className="explore-button"
-                    >
-                      리뷰 탐색하기
-                    </button>
+                    {!actualKeyword && (
+                        <button
+                            onClick={handleExploreReviews}
+                            className="explore-button"
+                        >
+                          리뷰 탐색하기
+                        </button>
+                    )}
                   </div>
               ) : (
                   <>
@@ -445,7 +475,7 @@ const LikeReview = () => {
                         <div className="pagination">
                           <button
                               onClick={() => handlePageChange(currentPage - 1)}
-                              disabled={currentPage === 1}
+                              disabled={currentPage === 0}
                               className="pagination-button"
                           >
                             <ChevronLeft size={16} />
@@ -455,15 +485,12 @@ const LikeReview = () => {
 
                           <button
                               onClick={() => handlePageChange(currentPage + 1)}
-                              disabled={currentPage === totalPages}
+                              disabled={currentPage >= totalPages - 1}
                               className="pagination-button"
                           >
                             <ChevronRight size={16} />
                           </button>
 
-                          <div className="pagination-info">
-                            {currentPage} / {totalPages} 페이지
-                          </div>
                         </div>
                     )}
                   </>
@@ -471,7 +498,6 @@ const LikeReview = () => {
             </div>
           </div>
         </div>
-      </Layout>
   );
 };
 
