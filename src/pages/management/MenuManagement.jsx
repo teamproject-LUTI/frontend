@@ -65,9 +65,11 @@ const MenuManagement = () => {
 
     // Axios 인스턴스 생성
     const api = axios.create({
+        //
         baseURL: process.env.NODE_ENV === 'development'
-            ? process.env.REACT_APP_API_URL || 'http://localhost:8080'
+            ? process.env.REACT_APP_API_URL
             : '',
+        // 쿠키와 인증 정보를 자동으로 포함 할 것인지
         withCredentials: true,
         timeout: 10000,
         headers: {
@@ -75,8 +77,15 @@ const MenuManagement = () => {
         }
     });
 
-    // 요청 인터셉터 - 타임스탬프 자동 추가
-    api.interceptors.request.use(
+    /**
+     * 모든 API 요청에 현재시간을 타임 스탬프로 추가
+     * GET 요청의 캐시 특성으로
+     * POST, PUT, DELETE는 기본적으로 캐시되지 않음
+     * GET 요청은 적극적으로 캐시됨
+     * 메뉴는 항상 최신 데이터를 받아야 함
+     */
+
+     api.interceptors.request.use(
         config => {
             const separator = config.url.includes('?') ? '&' : '?';
             config.url += `${separator}_t=${new Date().getTime()}`;
@@ -139,10 +148,9 @@ const MenuManagement = () => {
 
             // 응답 데이터 처리
             let menuData;
+
             if (Array.isArray(response.data)) {
                 menuData = response.data;
-            } else if (response.data?.data && Array.isArray(response.data.data)) {
-                menuData = response.data.data;
             } else {
                 console.error('예상하지 못한 데이터 구조:', response.data);
                 menuData = [];
@@ -152,9 +160,12 @@ const MenuManagement = () => {
 
             // 상위 메뉴들을 기본으로 펼쳐놓기
             const topLevelMenus = menuData.filter(menu => {
-                const isTopLevel = menu.parentId === null || menu.parentId === undefined || menu.parentId === 0;
+                // dto 설정에서 (JsonInclude.Include.NON_NULL) 로 null 값은 보내지 않음
+                const isTopLevel = menu.parentId === undefined;
                 return isTopLevel && menu.hasChildren;
             });
+
+            // 메뉴 객체 배열에서 ID만 추출
             setExpandedItems(new Set(topLevelMenus.map(menu => menu.navigationMenuId)));
 
         } catch (error) {
@@ -188,7 +199,7 @@ const MenuManagement = () => {
     // 사이드바 메뉴 새로고침 함수
     const triggerSidebarRefresh = () => {
 
-        // 커스텀 이벤트 발생시켜 사이드바에 메뉴 변경 알림
+        // 이벤트 발생시켜 사이드바에 메뉴 변경 알림
         const event = new CustomEvent('menuUpdated', {
             detail: {
                 timestamp: new Date().getTime(),
@@ -199,10 +210,7 @@ const MenuManagement = () => {
             cancelable: true
         });
 
-        const dispatched = window.dispatchEvent(event);
-
-        // 추가로 document에도 이벤트 발생 (혹시 모를 경우를 대비)
-        document.dispatchEvent(event);
+        window.dispatchEvent(event);
     };
 
     // 메뉴 저장
@@ -213,11 +221,13 @@ const MenuManagement = () => {
                 title: '입력 오류',
                 text: '메뉴명을 입력해주세요.'
             });
+
             return;
         }
 
         try {
-            const menuData = {
+            const menuData
+                = {
                 name: formData.name,
                 description: formData.description,
                 url: formData.url,
@@ -268,7 +278,7 @@ const MenuManagement = () => {
 
     // 메뉴 삭제
     const handleDeleteMenu = async (menuId) => {
-        const menuToDelete = menus.find(m => m.navigationMenuId === menuId);
+        // 하위 메뉴 존재 여부 확인 some(): 조건에 맞는 항목이 하나라도 있으면 true
         const hasChildren = menus.some(m => m.parentId === menuId);
 
         let confirmMessage = '정말로 삭제하시겠습니까?';

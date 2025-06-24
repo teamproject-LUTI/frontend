@@ -42,11 +42,6 @@ const Pagination = ({
 
     return (
         <div className="pagination-container">
-            {showInfo && (
-                <div className="pagination-info">
-                    <strong>{startItem}-{endItem}</strong> of <strong>{totalElements}</strong> items
-                </div>
-            )}
 
             <div className="pagination">
                 {/* 첫 페이지 버튼 */}
