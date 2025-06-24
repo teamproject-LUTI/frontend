@@ -89,8 +89,8 @@
     color: #6b7280;
 }
 
-/* 필터 섹션 */
-.like-review-filters {
+/* mylike 검색 및 필터 섹션 개선 */
+.mylike-review-filters {
     padding: 1.5rem 2rem;
     border-bottom: 1px solid #e5e7eb;
     display: flex;
@@ -99,72 +99,165 @@
     flex-wrap: wrap;
 }
 
-.search-group {
+/* mylike 통합 검색 그룹 */
+.mylike-integrated-search-group {
     flex: 1;
-    min-width: 250px;
+    min-width: 350px;
+    position: relative;
 }
 
-.search-wrapper {
-    position: relative;
+.mylike-integrated-search-wrapper {
+    display: flex;
+    background-color: white;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.mylike-integrated-search-wrapper:focus-within {
+    border-color: #F76B59;
+    box-shadow: 0 0 0 3px rgba(247, 107, 89, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* mylike 검색 타입 선택기 */
+.mylike-search-type-select {
+    background-color: #f8fafc;
+    border: none;
+    border-right: 1px solid #e5e7eb;
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    color: #374151;
+    cursor: pointer;
+    min-width: 90px;
+    outline: none;
+    transition: background-color 0.2s ease;
+}
+
+.mylike-search-type-select:hover {
+    background-color: #f1f5f9;
+}
+
+.mylike-search-type-select:focus {
+    background-color: #fef2f2;
+    color: #F76B59;
+}
+
+/* mylike 검색 입력창 */
+.mylike-integrated-search-input {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    border: none;
+    background-color: white;
+    font-size: 0.875rem;
+    color: #374151;
+    outline: none;
+    min-width: 200px;
+}
+
+.mylike-integrated-search-input::placeholder {
+    color: #9ca3af;
+}
+
+/* mylike 검색 버튼 */
+.mylike-integrated-search-button {
+    background: linear-gradient(135deg, #F76B59 0%, #e55a48 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    position: relative;
+    overflow: hidden;
 }
 
-.search-icon {
+.mylike-integrated-search-button::before {
+    content: '';
     position: absolute;
-    left: 0.75rem;
-    width: 1rem;
-    height: 1rem;
-    color: #6b7280;
-    pointer-events: none;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
 }
 
-.search-input {
-    width: 100%;
-    padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+.mylike-integrated-search-button:hover {
+    background: linear-gradient(135deg, #e55a48 0%, #dc2626 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(247, 107, 89, 0.3);
+}
+
+.mylike-integrated-search-button:hover::before {
+    left: 100%;
+}
+
+.mylike-integrated-search-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(247, 107, 89, 0.2);
+}
+
+.mylike-integrated-search-button svg {
+    transition: transform 0.2s ease;
+}
+
+.mylike-integrated-search-button:hover svg {
+    transform: scale(1.1);
+}
+
+/* mylike 정렬 그룹 */
+.mylike-sort-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 160px;
+}
+
+.mylike-sort-select {
+    padding: 0.875rem 1rem;
     border: 1px solid #d1d5db;
     border-radius: 8px;
     background-color: white;
     font-size: 0.875rem;
     color: #374151;
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: #F76B59;
-    box-shadow: 0 0 0 3px rgba(247, 107, 89, 0.1);
-}
-
-.filter-group,
-.sort-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.filter-icon {
-    width: 1rem;
-    height: 1rem;
-    color: #6b7280;
-}
-
-.filter-select,
-.sort-select {
-    padding: 0.75rem 1rem;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    background-color: white;
-    font-size: 0.875rem;
-    color: #374151;
     cursor: pointer;
-    min-width: 120px;
+    min-width: 140px;
+    transition: all 0.2s ease;
 }
 
-.filter-select:focus,
-.sort-select:focus {
+.mylike-sort-select:focus {
     outline: none;
     border-color: #F76B59;
     box-shadow: 0 0 0 3px rgba(247, 107, 89, 0.1);
+}
+
+.mylike-sort-select:hover {
+    border-color: #9ca3af;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* 검색 결과 정보 섹션 */
+.mylike-search-result-info {
+    padding: 1rem 2rem;
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    border-top: 1px solid #e5e7eb;
+}
+
+.mylike-search-result-info p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+.mylike-search-result-info strong {
+    color: #1f2937;
+    font-weight: 600;
 }
 
 /* 리뷰 리스트 섹션 */
@@ -413,6 +506,21 @@
     transform: translateY(-1px);
 }
 
+/* 빈 상태 메시지 개선 */
+.mylike-empty-state .empty-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 0.5rem 0;
+}
+
+.mylike-empty-state .empty-description {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+}
+
 /* 로딩 상태 */
 .loading-section {
     display: flex;
@@ -512,7 +620,15 @@
     margin: 0 1rem;
 }
 
-/* 반응형 디자인 */
+/* 페이지네이션 정보 개선 */
+.mylike-pagination-info {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0 1rem;
+    white-space: nowrap;
+}
+
+/* mylike 반응형 디자인 */
 @media (max-width: 768px) {
     .like-review-container {
         padding: 1rem;
@@ -534,20 +650,48 @@
         font-size: 1.5rem;
     }
 
-    .like-review-filters {
+    .mylike-review-filters {
         flex-direction: column;
         align-items: stretch;
         gap: 1rem;
         padding: 1rem 1.5rem;
     }
 
-    .search-group {
+    .mylike-integrated-search-group {
         min-width: auto;
     }
 
-    .filter-group,
-    .sort-group {
+    .mylike-integrated-search-wrapper {
+        flex-direction: column;
+        border-radius: 8px;
+    }
+
+    .mylike-search-type-select {
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+        border-radius: 0;
+        min-width: auto;
+    }
+
+    .mylike-integrated-search-input {
+        min-width: auto;
+    }
+
+    .mylike-integrated-search-button {
+        border-radius: 0;
+        justify-content: center;
+        min-width: auto;
+        padding: 0.75rem;
+    }
+
+    .mylike-sort-group {
         justify-content: flex-start;
+        min-width: auto;
+    }
+
+    .mylike-sort-select {
+        min-width: auto;
+        width: 100%;
     }
 
     .like-review-list {
@@ -588,9 +732,18 @@
         gap: 0.25rem;
     }
 
-    .filter-select,
-    .sort-select {
-        min-width: auto;
+    .mylike-search-result-info {
+        padding: 0.75rem 1.5rem;
+    }
+
+    .mylike-search-result-info p {
+        font-size: 0.8125rem;
+    }
+
+    .mylike-pagination-info {
+        font-size: 0.8125rem;
+        margin: 0.5rem 0;
+        text-align: center;
         width: 100%;
     }
 }
@@ -618,7 +771,26 @@
         padding: 1rem;
     }
 
-    .like-review-filters,
+    .mylike-review-filters {
+        padding: 1rem;
+    }
+
+    .mylike-integrated-search-wrapper {
+        border-radius: 6px;
+    }
+
+    .mylike-search-type-select,
+    .mylike-integrated-search-input,
+    .mylike-integrated-search-button {
+        padding: 0.75rem;
+        font-size: 0.8125rem;
+    }
+
+    .mylike-sort-select {
+        padding: 0.75rem;
+        font-size: 0.8125rem;
+    }
+
     .like-review-list {
         padding: 1rem;
     }
@@ -653,5 +825,9 @@
 
     .liked-date {
         font-size: 0.6875rem;
+    }
+
+    .mylike-search-result-info {
+        padding: 0.75rem 1rem;
     }
 }

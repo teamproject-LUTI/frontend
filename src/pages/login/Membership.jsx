@@ -1,8 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import '../../styles/login/Membership.css';
-import Layout from '../../components/layout/Layout';
+import '../../components/layout/Topbar'
 import Swal from 'sweetalert2';
 import EmailVerification from '../../components/login/EmailVerification';
+import Topbar from "../../components/layout/Topbar";
 
 const Membership = () => {
     const [formData, setFormData] = useState({
@@ -84,11 +85,14 @@ const Membership = () => {
             return;
         }
 
-        fetch("http://localhost:8080/api/signup/email", {
+        fetch("http://localhost:8080/api/account/email/code", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             credentials: 'include',
-            body: JSON.stringify({ email: formData.email })
+            body: JSON.stringify({
+                email: formData.email,
+                checkType: "DUPLICATE"
+            })
         })
             .then(async res => {
                 const msg = await res.text();
@@ -111,7 +115,7 @@ const Membership = () => {
     const handleCodeChange = (e) => setVerificationCode(e.target.value);
 
     const handleCodeVerify = () => {
-        fetch(`http://localhost:8080/api/signup/verify-code?code=${verificationCode}`, {
+        fetch(`http://localhost:8080/api/account/email/verify?code=${verificationCode}`, {
             method: "GET",
             credentials: 'include',
         })
@@ -252,7 +256,7 @@ const Membership = () => {
             address: `${address} ${detailAddress} ${extraAddress}`.trim()
         };
 
-        fetch("http://localhost:8080/api/signup", {
+        fetch("http://localhost:8080/api/account/signup", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -296,8 +300,10 @@ const Membership = () => {
 
 
     return (
-        <Layout hideSidebar={true}>
+        <div>
+            <Topbar />
             <div className="membershipContainer">
+
                 <div className="membershipFormWrapper">
                     <div className="membershipHeader">
                         <h2 className="tagline">회원가입</h2>
@@ -570,6 +576,7 @@ const Membership = () => {
                         </a>
                     </div>
                 </div>
+
             </div>
 
             <EmailVerification
@@ -580,7 +587,9 @@ const Membership = () => {
                 onCodeChange={handleCodeChange}
                 errorMessage={verificationError}
             />
-        </Layout>
+        </div>
+
+
     );
 };
 

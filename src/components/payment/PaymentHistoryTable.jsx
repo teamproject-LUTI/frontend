@@ -9,7 +9,6 @@ import {
   fetchPaymentsByDateRange
 } from "../../services/PaymentService";
 import axios from "axios";
-import { getPaymentMethodName } from "../../util/paymentMethodMap";
 import "../../styles/payment/PaymentHistoryTable.css";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
@@ -27,7 +26,8 @@ const PaymentHistoryTable = () => {
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
-  const [sortOption, setSortOption] = useState("date-desc"); // 기본값: 최신순
+  const [sortOption, setSortOption] = useState("date-desc");
+  const [searchDate, setSearchDate] = useState("");
 
   const fetchUser = async () => {
     try {
@@ -66,18 +66,16 @@ const PaymentHistoryTable = () => {
         data = await fetchPaymentsByUser(uid);
       }
 
-      // 정렬 처리
+      if (searchDate !== "") {
+        data = data.filter(p => dayjs(p.paymentDate).format("YYYY-MM-DD") === searchDate);
+      }
+
       if (sortOption === "price-asc") {
         data.sort((a, b) => a.totalPrice - b.totalPrice);
       } else if (sortOption === "price-desc") {
         data.sort((a, b) => b.totalPrice - a.totalPrice);
       } else {
-        data.sort((a, b) => {
-          const dateA = dayjs(a.paymentDate);
-          const dateB = dayjs(b.paymentDate);
-          if (!dateA.isValid() || !dateB.isValid()) return 0;
-          return dateB.valueOf() - dateA.valueOf();
-        });
+        data.sort((a, b) => dayjs(b.paymentDate) - dayjs(a.paymentDate));
       }
 
       setPayments(data);
@@ -100,7 +98,7 @@ const PaymentHistoryTable = () => {
     return () => {
       window.addNewPayment = null;
     };
-  }, [userId, statusFilter, dateFilter, sortOption]);
+  }, [userId, statusFilter, dateFilter, sortOption, searchDate]);
 
   const handleCancel = async (paymentId) => {
     if (!window.confirm("정말 이 결제를 환불 처리하시겠습니까?")) return;
@@ -118,6 +116,7 @@ const PaymentHistoryTable = () => {
     setStatusFilter("all");
     setDateFilter("all");
     setSortOption("date-desc");
+    setSearchDate("");
     fetchData(userId);
   };
 
@@ -128,7 +127,7 @@ const PaymentHistoryTable = () => {
 
   return (
       <div>
-        <div style={{ marginBottom: "1rem", display: "flex", gap: "1rem", alignItems: "center" }}>
+        <div className="payment-filters">
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="all">전체 상태</option>
             <option value="0">결제 완료</option>
@@ -147,7 +146,9 @@ const PaymentHistoryTable = () => {
             <option value="price-asc">금액 낮은 순</option>
           </select>
 
-          <button onClick={handleResetFilters}>초기화</button>
+          <input type="date" value={searchDate} onChange={(e) => setSearchDate(e.target.value)} className="payment-date-input" />
+
+          <button className="payment-reset-button" onClick={handleResetFilters}>초기화</button>
         </div>
 
         <table className="payment-table">
