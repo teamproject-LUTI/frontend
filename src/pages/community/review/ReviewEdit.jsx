@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Trash2 } from 'lucide-react';
 import axios from 'axios';
 import '../../../styles/community/review/ReviewEdit.css';
 import { Editor } from '@toast-ui/react-editor';
@@ -16,6 +17,13 @@ const ReviewEdit = () => {
     const editorRef = useRef(null);
     // 서버에서 받아온 HTML을 담는 초기 컨텐츠 상태
     const [initialContent, setInitialContent] = useState('');
+
+    // 첨부파일 관련 상태
+    const [existingFiles, setExistingFiles] = useState([]); // 서버에 저장된 파일 목록
+    const [toDeleteIds, setToDeleteIds] = useState([]); // 삭제 대기 ID들
+    const [newFiles, setNewFiles] = useState([]);  // 새로 선택한 파일들
+    const fileInputRef = useRef(null);
+
 
     // 여행기간 문자열 조립
     const travelPeriod = startDate && endDate ? `${startDate} ~ ${endDate}` : '';
@@ -44,6 +52,12 @@ const ReviewEdit = () => {
                     setStartDate('');
                     setEndDate('');
                 }
+            //  기존 첨부파일 목록도 같이 불러오기
+                const attachRes = await axios.get(
+                    `/api/reviews/${id}/attachments`,
+                    { headers: { Authorization: `Bearer ${token}` } });
+                setExistingFiles(attachRes.data.data || []);
+
             } catch (err) {
                 console.error('데이터 조회 실패', err);
             }
@@ -85,6 +99,25 @@ const ReviewEdit = () => {
                         }
                 }
             );
+
+            // 3) 삭제 요청 보낼 ID들
+            await Promise.all(toDeleteIds.map(fileNo =>
+                axios.delete(
+                    `/api/reviews/${id}/attachments/${fileNo}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                    )
+                ));
+
+                // 새로 추가된 파일 업로드
+                if (newFiles.length > 0) {
+                const formData = new FormData();
+                newFiles.forEach(f => formData.append('files', f));
+                    await axios.post(
+                    `/api/reviews/${id}/attachments`,
+                    formData, { headers: { Authorization: `Bearer ${token}` } }
+                    );
+               }
+
             // 완료 후 상세 페이지로 이동
             navigate(`/community/review/${id}`);
         } catch (err) {
@@ -163,6 +196,42 @@ const ReviewEdit = () => {
                                         callback(res.data.url, '업로드된 이미지');
                                     }
                                 }}
+                            />
+                        </div>
+                        {/* 5) 기존 첨부파일 목록 */}
+                        {existingFiles.length > 0 && (
+                            <div className="edit-attachments">
+                                <span className="edit-attachments-label">기존 첨부파일</span>
+                                <ul className="edit-attachments-list">
+                                    {existingFiles.map(att => (
+                                        <li key={att.fileNo}>
+                                            <span className="edit-attachment-name">
+                                                📄 {att.fileName}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                className="edit-attachment-remove"
+                                                onClick={() => {
+                                                    setToDeleteIds(ids => [...ids, att.fileNo]);
+                                                    setExistingFiles(files => files.filter(f => f.fileNo !== att.fileNo));
+                                                }}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                        {/* 6) 첨부파일 추가 */}
+                        <div className="form-group edit-attachment-upload">
+                            <label>첨부파일 추가</label>
+                            <input
+                                type="file"
+                                multiple
+                                accept=".pdf,.xls,.xlsx,.doc,.docx"
+                                ref={fileInputRef}
+                                onChange={e => setNewFiles([...e.target.files])}
                             />
                         </div>
 

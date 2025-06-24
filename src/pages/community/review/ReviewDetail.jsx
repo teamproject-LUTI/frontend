@@ -50,7 +50,31 @@ const ReviewDetail = () => {
         };
         fetchAttachments();
     }, [id, token]);
-
+// 다운로드 핸들러
+    const handleDownload = async (fileNo, fileName) => {
+        try {
+            const res = await axios.get(
+                `/api/reviews/${id}/attachments/${fileNo}/download`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    responseType: 'blob'
+                }
+            );
+            // Blob → Object URL 생성
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            // 임시 <a> 태그로 다운로드 트리거
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('파일 다운로드 실패', err);
+            alert('다운로드에 실패했어요.');
+        }
+    };
     // 공유 버튼 핸들러
     const handleShare = () => {
         const url = window.location.href;
@@ -151,22 +175,32 @@ const ReviewDetail = () => {
                             />
                         </div>
                     </div>
-
-                    {/* 첨부 이미지 갤러리 */}
+                    {/* 첨부파일 목록 (PDF, Excel 등) */}
                     {attachments.length > 0 && (
-                        <div className="detail-images">
-                            {attachments.map(att => (
-                                <img
-                                    key={att.reviewAttachmentId}
-                                    src={att.logicalPath}      // 서버에 매핑된 URL (/uploads/UUID.jpg)
-                                    alt={att.fileName}
-                                    className="detail-image"
-                                />
-                            ))}
+                        <div className="detail-files">
+                            <h3>첨부파일</h3>
+                            <ul>
+                                {attachments
+                                    .filter(att => !['png','jpg','jpeg','gif'].includes(att.extension.toLowerCase()))
+                                    .map(att => (
+                                        <li key={att.fileNo}>
+                                            <a
+                                                href={`/api/reviews/${id}/attachments/${att.fileNo}/download`}
+                                                onClick={e => {
+                                                    e.preventDefault();
+                                                    handleDownload(att.fileNo, att.fileName);
+                                                }}
+                                            >
+                                                📄 {att.fileName}
+                                            </a>
+                                        </li>
+                                    ))}
+                            </ul>
                         </div>
                     )}
+                    {/* 본문 */}
                     <div
-                        className="detail-content"
+                        className="review-list-detail-content"
                         dangerouslySetInnerHTML={{ __html: review.content }}
                     ></div>
                     {/*내가 쓴 글일 때만 버튼 보이기 */}

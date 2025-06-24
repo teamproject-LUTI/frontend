@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect  } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../../styles/community/review/ReviewWrite.css'
-import axios from "axios";
 import { Editor } from '@toast-ui/react-editor';
-import apiClient from "../../../util/apiClient";
+import axios from "axios";
 
 const ReviewWrite = () => {
   const navigate = useNavigate();
@@ -17,6 +16,9 @@ const ReviewWrite = () => {
   //기본 썸네일(이미지 없을 경우)
   const [thumbnailPreview, setThumbnailPreview] = useState('');
   const defaultThumbnail = '/images/no_Image.png';
+
+  const [attachments, setAttachments] = useState([]);  // 파일 객체들
+  const fileInputRef = useRef(null); // 파일 선택 input 참조
 
   //빈 문서로 설정(Markdown 초기화)
   useEffect(() => {
@@ -55,18 +57,40 @@ const ReviewWrite = () => {
         travelRegion: destination,
         content: html,  //에디터에서 가져온 본문(HTML)
         travelPeriod,
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
       });
-
+      console.log('✏️ reviewRes.data =', reviewRes.data);
 
       // reviewId 꺼내기
-      const reviewId = reviewRes.data;
+      const reviewId = reviewRes.data.data;
       if (!reviewId) {
         console.error('reviewId가 없습니다!', reviewRes.data);
         return;
       }
 
+      // (디버그) URL 확인
+      console.log(`▶ 업로드 URL = /api/reviews/${reviewId}/attachments`);
+
+      // 첨부파일 업로드 (있을 경우에만)
+      if (attachments.length > 0) {
+        const formData = new FormData();
+
+        attachments.forEach(file => formData.append('files', file));
+
+        await axios.post(`/api/reviews/${reviewId}/attachments`, formData, {
+          headers: {
+            //'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        });
+      }
+
       // 저장하기 버튼 누르면 리뷰 목록 페이지로 이동
       navigate('/community/review');
+
     } catch (error) {
       alert('리뷰 저장 실패!\n' + (error?.response?.data?.message || error.message));
       console.error('리뷰 저장 실패:', error);
@@ -77,7 +101,7 @@ const ReviewWrite = () => {
       <div className="main-layout">
         <div className="main-content-wrapper">
           <main className="main-content">
-            <form className="review-write-form" onSubmit={handleSubmit}>
+            <form className="review-form" onSubmit={handleSubmit}>
               <h2>리뷰 작성</h2>
 
               <div className="form-group">
@@ -156,6 +180,16 @@ const ReviewWrite = () => {
                     }}
                 />
               </div>
+              <div className="form-group">
+                <label>첨부파일</label>
+                <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.xls,.xlsx,.doc,.docx"
+                    ref={fileInputRef}
+                    onChange={(e) => setAttachments([...e.target.files])}
+                />
+              </div>
 
               <div className="button-group">
                 <button type="submit">저장하기</button>
@@ -168,3 +202,4 @@ const ReviewWrite = () => {
 };
 
 export default ReviewWrite;
+
