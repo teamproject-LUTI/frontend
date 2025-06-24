@@ -17,6 +17,7 @@ import './styles/common/LutiModal.css';
 import './styles/common/theme-override.css';
 import './styles/MyPage/PasswordChangePage.css'
 import '@toast-ui/editor/dist/toastui-editor.css';
+import './styles/MyPage/Route.css';
 import { Route, Routes } from "react-router-dom";
 import Main from "./pages/Main";
 import Login from "./pages/login/Login";
@@ -39,7 +40,7 @@ import AccountRestorePage from "./pages/mypage/withdraw/AccountRestorePage";
 import PasswordConfirmPage from "./pages/mypage/PasswordConfirmPage";
 import { AuthProvider } from "./util/AuthContext";
 import Review from './pages/community/Review';
-import ChatForm from "./pages/travel/ChatForm";
+import ChatForm from "./components/chatgpt/ChatForm";
 import Payment from './pages/mypage/Payment';
 import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
@@ -48,6 +49,7 @@ import MenuManagement from "./pages/management/MenuManagement";
 import AuthMAnagement from "./pages/management/AuthManagement"
 import PasswordChangePage from "./pages/mypage/password/PasswordChangePage";
 import PaymentManagement from "./pages/management/PaymentManagement";
+import RouteMark from "./pages/mypage/route/Route";
 
 const App = () => {
   return (
@@ -140,6 +142,7 @@ const App = () => {
               <Route path='likereview' element={<LikeReview/>}/>
               <Route path='payments' element={<Payment/>}/>
               <Route path='password' element={<PasswordChangePage/>}/>
+              <Route path='routes' element={<RouteMark/>}/>
             </Route>
 
               {/*리뷰 목록 페이지*/}

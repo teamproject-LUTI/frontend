@@ -1,17 +1,24 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Search, MapPin, Calendar, Users, Loader2, Send} from "lucide-react";
 import '../../styles/chatgpt/ChatForm.css';
 
 /* ────────── 추천 여행 루트 카드 ────────── */
-const TravelRouteCard = ({route, isSelected, onSelect, loading}) => {
+const TravelRouteCard = ({route, isSelected, onSelect, loading, searchInfo}) => {
 
-    // 당일치기 여행 여부 확인(체크인/아웃 날짜가 같거나 일정이 1일만 있는 경우)
-    // 수정 - 더 정확한 당일치기 판단
-    const isDayTrip = route.title?.toLowerCase().includes('당일치기') ||
+    // 당일치기 여행 여부 확인 - 더 정확한 판단 로직
+    const isDayTrip =
+        // 1. 제목에 당일치기 키워드가 있는 경우
+        route.title?.toLowerCase().includes('당일치기') ||
         route.title?.toLowerCase().includes('데이트리') ||
         route.title?.toLowerCase().includes('일일') ||
-        (route.itinerary && route.itinerary.length === 1) ||
-        !route.hotel; // 호텔 정보가 없으면 당일치기
+        route.title?.toLowerCase().includes('하루') ||
+        // 2. 호텔 정보가 없는 경우
+        !route.hotel ||
+        // 3. 체크인/체크아웃 날짜가 같은 경우 (searchInfo에서 확인)
+        (searchInfo &&
+            searchInfo.checkInDate === searchInfo.checkOutDate) ||
+        // 4. 일정이 1일만 있고 호텔이 없는 경우
+        (route.itinerary && route.itinerary.length === 1 && !route.hotel);
 
     // 유효한 일정만 필터링(activities가 있고 비어있지 않은 것만)
     const validItinerary = route.itinerary?.filter(day =>
@@ -27,9 +34,20 @@ const TravelRouteCard = ({route, isSelected, onSelect, loading}) => {
             <div className="route-header">
                 <h3 className="route-title">{route.title}</h3>
                 <div className="route-price-info">
+                    {/* 총 예상 비용 */}
                     <div className="route-price">
-                        {route.totalPrice}{route.currency}
+                        <span className="price-label">총 예상 여행비용 : </span>
+                        <span className="total-budget">💰 {route.totalPrice}{route.currency}</span>
                     </div>
+
+                    {/* 실제 결제 금액 (숙박비만) - 당일치기가 아닌 경우만 */}
+                    {!isDayTrip && route.hotel && (
+                        <div className="actual-payment">
+                            <span className="payment-label">LUTI에서 결제금액(숙박비) : </span>
+                            <span className="payment-amount">🏨 {route.hotel.pricePerNight} KRW</span>
+                        </div>
+                    )}
+
                     <div className="route-meta">
                         {route.priceRange} • {route.theme}
                         {isDayTrip && <span className="day-trip-badge">당일치기</span>}
@@ -118,11 +136,13 @@ const TravelRouteCard = ({route, isSelected, onSelect, loading}) => {
                 className={`select-route-btn ${isSelected ? 'selected' : ''}`}
                 disabled={loading}
             >
-                {isSelected ? '✓ 선택됨' : '이 루트 선택하기'}
+                {isSelected ? '✓ 선택됨' : '이 루트로 여행떠나기🐾'}
             </button>
         </div>
     )
 };
+
+
 
 /* ────────── 메시지 컴포넌트 ────────── */
 const ChatMessage = ({type, content, searchInfo, routes, onSelectRoute, selectedRoute, loading}) => {
@@ -177,6 +197,7 @@ const ChatMessage = ({type, content, searchInfo, routes, onSelectRoute, selected
                                         isSelected={selectedRoute?.packageId === route.packageId}
                                         onSelect={onSelectRoute}
                                         loading={loading}
+                                        searchInfo={searchInfo}
                                     />
                                 ))}
                             </div>
@@ -190,9 +211,8 @@ const ChatMessage = ({type, content, searchInfo, routes, onSelectRoute, selected
                                 ✅ {selectedRoute.title} 루트가 선택되었습니다!
                             </h4>
                             <p className="selected-description">
-                                하단의 버튼으로 예약을 진행하면 돼요, 냥❣️.
+                                하단의 버튼으로 즐겨찾기 저장 또는 예약을 진행하면 돼요, 냥❣️
                             </p>
-                            {/* 기존 travel-start-btn 제거 */}
                         </div>
                     )}
                 </div>
@@ -212,6 +232,79 @@ const ChatForm = () => {
     const [currentSearchInfo, setCurrentSearchInfo] = useState(null);
     const [selectedRoute, setSelectedRoute] = useState(null);
     const [hasSearched, setHasSearched] = useState(false);
+
+    // 즐겨찾기 저장 처리
+    const saveToFavorites = async (selectedRoute) => {
+        if (loading) return;
+
+        setLoading(true);
+
+        try {
+            const saveData = {
+                routeTitle: selectedRoute.title,
+                routeContent: {
+                    searchInfo: currentSearchInfo,
+                    selectedPackage: selectedRoute,
+                    savedAt: new Date().toISOString()
+                }
+            };
+
+            const res = await fetch('http://localhost:8080/api/routes/save', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
+                body: JSON.stringify(saveData),
+            });
+
+            if (!res.ok) {
+                throw new Error(`서버 오류: ${res.status}`);
+            }
+
+            const data = await res.json();
+
+            if (data.success) {
+                alert('💖 즐겨찾기에 저장되었습니다!');
+                console.log('즐겨찾기 저장 완료:', data);
+            } else {
+                throw new Error(data.message || '즐겨찾기 저장에 실패했습니다.');
+            }
+
+        } catch (error) {
+            console.error('즐겨찾기 저장 실패:', error);
+            alert('즐겨찾기 저장 중 오류가 발생했습니다: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 숙소 예약 처리
+    const bookHotel = async (selectedRoute) => {
+        if (loading) return;
+
+        // 당일치기 여행인지 확인
+        const isDayTrip = !selectedRoute.hotel ||
+            (currentSearchInfo && currentSearchInfo.checkInDate === currentSearchInfo.checkOutDate);
+
+        if (isDayTrip) {
+            alert('당일치기 여행은 숙소 예약이 필요하지 않습니다! 😊');
+            return;
+        }
+
+        if (!selectedRoute.hotel) {
+            alert('선택된 루트에 호텔 정보가 없습니다.');
+            return;
+        }
+
+        // 실제 예약 로직은 나중에 구현
+        alert(`🏨 ${selectedRoute.hotel.name} 예약 페이지로 이동합니다!\n(숙소 예약 기능 구현 예정)`);
+
+        // TODO: 실제 호텔 예약 API 호출
+        console.log('호텔 예약 데이터:', {
+            hotel: selectedRoute.hotel,
+            searchInfo: currentSearchInfo,
+            selectedRoute: selectedRoute
+        });
+    };
 
     // 추천 여행 루트 생성
     const generateTravelRoutes = async () => {
@@ -317,6 +410,10 @@ const ChatForm = () => {
         }
     };
 
+    useEffect(() => {
+        console.log('selectedRoute changed:', selectedRoute);
+    }, [selectedRoute]);
+
     // 폼 제출 처리
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -392,7 +489,6 @@ const ChatForm = () => {
                         </button>
                     </div>
 
-
                     {/* 메시지 목록 */}
                     <div className="chat-messages">
                         {messages.map((message, index) => (
@@ -425,19 +521,24 @@ const ChatForm = () => {
                         )}
                     </div>
 
-
                     {/* 하단 입력창 */}
                     <div>
-                        {/* 👇 플로팅 예약 버튼 - selectedRoute가 있을 때만 표시 */}
+                        {/* 👇 플로팅 버튼들 - selectedRoute가 있을 때만 표시 */}
                         {selectedRoute && (
-                            <div className="floating-booking-btn">
+                            <div className="floating-booking-btns">
                                 <button
-                                    className="floating-travel-btn"
-                                    onClick={() => {
-                                        alert('예약 페이지로 이동합니다 (구현 예정)');
-                                    }}
+                                    className="floating-favorite-btn"
+                                    onClick={() => saveToFavorites(selectedRoute)}
+                                    disabled={loading}
                                 >
-                                    🧳 {selectedRoute.title} 예약하기
+                                    💖 즐겨찾기
+                                </button>
+                                <button
+                                    className="floating-book-btn"
+                                    onClick={() => bookHotel(selectedRoute)}
+                                    disabled={loading}
+                                >
+                                    🏨 숙소 예약하기
                                 </button>
                             </div>
                         )}
@@ -462,17 +563,13 @@ const ChatForm = () => {
                             </form>
                         </div>
                     </div>
-                        {error && (
-                            <div className="error-message">
-                                {error}
-                            </div>
-                        )}
-
-                    </div>
-
+                    {error && (
+                        <div className="error-message">
+                            {error}
+                        </div>
+                    )}
+                </div>
             )}
-
-
         </div>
     );
 };
