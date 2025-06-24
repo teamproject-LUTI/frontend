@@ -1,12 +1,5 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
-// 인증 상태 캐시
-let authCache = {
-  isAuthenticated: null,
-  lastChecked: null,
-  cacheTimeout: 5 * 60 * 1000 // 5분
-};
-
 export const authUtils = {
   /**
    * 구글 소셜 로그인 시작
@@ -97,19 +90,15 @@ export const authUtils = {
         const data = await response.json();
         if (data.success) {
           console.log('로그아웃 성공');
-          // 캐시 초기화
-          this.refreshCache();
-          // 로그인 페이지로 리다이렉트
-          window.location.href = '/';
-          return true;
+          return { success: true, message: data.message };
         }
       }
 
       console.warn('로그아웃 실패:', response.status);
-      return false;
+      return { success: false, error: '로그아웃 처리 중 오류가 발생했습니다.' };
     } catch (error) {
       console.error('로그아웃 중 오류:', error);
-      return false;
+      return { success: false, error: '로그아웃 처리 중 오류가 발생했습니다.' };
     }
   },
 
@@ -130,10 +119,6 @@ export const authUtils = {
         const data = await response.json();
         if (data.success) {
           console.log('모든 디바이스 로그아웃 성공');
-          // 캐시 초기화
-          this.refreshCache();
-          // 로그인 페이지로 리다이렉트
-          window.location.href = '/';
           return true;
         }
       }
@@ -172,36 +157,20 @@ export const authUtils = {
   },
 
   /**
-   * 간단한 인증 상태 확인 (캐시 포함)
+   * 간단한 인증 상태 확인 (캐시 제거됨)
    */
   async isAuthenticated() {
     try {
-      // 캐시 확인
-      const now = Date.now();
-      if (authCache.isAuthenticated !== null &&
-          authCache.lastChecked &&
-          (now - authCache.lastChecked) < authCache.cacheTimeout) {
-        console.log('인증 상태 캐시 사용:', authCache.isAuthenticated);
-        return authCache.isAuthenticated;
-      }
+      console.log('서버에서 실시간 인증 상태 확인 시작...');
 
-      // 서버에서 인증 상태 확인
+      // 서버에서 인증 상태 확인 (캐시 없이 직접 호출)
       const userInfo = await this.getUserInfo();
       const isAuth = !!(userInfo && userInfo.success && userInfo.user);
 
-      // 캐시 업데이트
-      authCache.isAuthenticated = isAuth;
-      authCache.lastChecked = now;
-
-      console.log('서버에서 인증 상태 확인:', isAuth);
+      console.log('서버에서 인증 상태 확인 완료:', isAuth);
       return isAuth;
     } catch (error) {
       console.error('인증 상태 확인 중 오류:', error);
-
-      // 오류 시 캐시 초기화
-      authCache.isAuthenticated = false;
-      let now;
-      authCache.lastChecked = now;
       return false;
     }
   },
@@ -231,15 +200,6 @@ export const authUtils = {
       console.error('인증 상태 확인 중 오류:', error);
       return { isAuthenticated: false, user: null };
     }
-  },
-
-  /**
-   * 캐시 새로고침
-   */
-  refreshCache() {
-    authCache.isAuthenticated = null;
-    authCache.lastChecked = null;
-    console.log('인증 캐시 초기화됨');
   },
 
   /**
