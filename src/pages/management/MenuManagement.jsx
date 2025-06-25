@@ -333,13 +333,17 @@ const MenuManagement = () => {
 
     // 드래그 앤 드롭 시작
     const handleDragStart = (e, menu) => {
-        e.stopPropagation(); // 이벤트 버블링 방지
+        //부모 요소로 이벤트가 전파되는 것을 막음(이벤트 버블링 방지)
+        e.stopPropagation();
+        // react state 에 저장
         setDraggedItem(menu);
+        //ref: 리렌더링 없이 빠른 접근용
         dragItemRef.current = menu;
+        //드래그되는 요소의 HTML을 저장 드롭 시점에서 이 데이터를 받아서 처리
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/html', e.target);
 
-        // 드래그 중 스타일 적용
+        // 드래그 중 스타일 요소를 주어 시각적으로 표시
         e.target.style.opacity = '0.5';
 
     };
@@ -348,21 +352,26 @@ const MenuManagement = () => {
     const handleDragEnd = (e) => {
         e.stopPropagation();
         e.target.style.opacity = '1';
+        // 드래그 중인 아이템 상태 리셋
         setDraggedItem(null);
+        // 드래그 오버된 아이템 상태 리셋
         setDragOverItem(null);
+        // 참조 값 모두 초기화
         dragItemRef.current = null;
         dragOverItemRef.current = null;
 
     };
 
-    // 드래그 오버
+    // 드래그 오버 드롭 가능한 영역 표시
     const handleDragOver = (e) => {
+        // 기본 동작 차단 (드롭 허용을 위해 필수)
         e.preventDefault();
         e.stopPropagation();
+        // 커서 모양 '이동' 아이콘
         e.dataTransfer.dropEffect = 'move';
     };
 
-    // 드래그 엔터
+    // 드래그 된 아이템이 어떤 메뉴 위로 왔는 추적
     const handleDragEnter = (e, menu) => {
         e.preventDefault();
         e.stopPropagation();
@@ -389,13 +398,14 @@ const MenuManagement = () => {
         const draggedMenu = dragItemRef.current;
         const targetMenuData = targetMenu;
 
+        // 잘못된 드롭 무시
         if (!draggedMenu || !targetMenuData || draggedMenu.navigationMenuId === targetMenuData.navigationMenuId) {
             return;
         }
 
-        // 부모 ID 비교 함수 (null, undefined, 0을 모두 같은 것으로 처리)
+        // 부모 ID 비교 함수
         const normalizeParentId = (parentId) => {
-            return parentId === null || parentId === undefined || parentId === 0 ? null : parentId;
+            return  parentId === undefined ? null : parentId;
         };
 
         const draggedParentId = normalizeParentId(draggedMenu.parentId);
