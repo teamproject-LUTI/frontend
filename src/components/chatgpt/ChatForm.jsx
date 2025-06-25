@@ -1,9 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {Search, MapPin, Calendar, Users, Loader2, Send} from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 import '../../styles/chatgpt/ChatForm.css';
 
 /* ────────── 추천 여행 루트 카드 ────────── */
 const TravelRouteCard = ({route, isSelected, onSelect, loading, searchInfo}) => {
+    const navigate = useNavigate();
 
     // 당일치기 여행 여부 확인 - 더 정확한 판단 로직
     const isDayTrip =
@@ -24,6 +26,21 @@ const TravelRouteCard = ({route, isSelected, onSelect, loading, searchInfo}) => 
     const validItinerary = route.itinerary?.filter(day =>
         day.activities && day.activities.length > 0
     ) || [];
+
+    // 숙소 예약 페이지로 이동
+    const handleBookingClick = () => {
+        if (isDayTrip) {
+            alert('당일치기 여행은 숙소 예약이 필요하지 않습니다! 😊');
+            return;
+        }
+
+        navigate('/hotels/booking', {
+            state: {
+                selectedRoute: route,
+                searchInfo: searchInfo
+            }
+        });
+    };
 
     return (
         <div
@@ -135,6 +152,10 @@ const TravelRouteCard = ({route, isSelected, onSelect, loading, searchInfo}) => 
             <button
                 className={`select-route-btn ${isSelected ? 'selected' : ''}`}
                 disabled={loading}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect(route);
+                }}
             >
                 {isSelected ? '✓ 선택됨' : '이 루트로 여행떠나기🐾'}
             </button>
@@ -223,6 +244,8 @@ const ChatMessage = ({type, content, searchInfo, routes, onSelectRoute, selected
 
 /* ────────── 메인 컴포넌트 ────────── */
 const ChatForm = () => {
+    const navigate = useNavigate();
+
     // 상태
     const [prompt, setPrompt] = useState('');
     const [loading, setLoading] = useState(false);
@@ -277,7 +300,7 @@ const ChatForm = () => {
         }
     };
 
-    // 숙소 예약 처리
+    // 숙소 예약 처리 - 이제 예약 페이지로 이동
     const bookHotel = async (selectedRoute) => {
         if (loading) return;
 
@@ -295,14 +318,12 @@ const ChatForm = () => {
             return;
         }
 
-        // 실제 예약 로직은 나중에 구현
-        alert(`🏨 ${selectedRoute.hotel.name} 예약 페이지로 이동합니다!\n(숙소 예약 기능 구현 예정)`);
-
-        // TODO: 실제 호텔 예약 API 호출
-        console.log('호텔 예약 데이터:', {
-            hotel: selectedRoute.hotel,
-            searchInfo: currentSearchInfo,
-            selectedRoute: selectedRoute
+        // 예약 페이지로 이동
+        navigate('/hotels/booking', {
+            state: {
+                selectedRoute: selectedRoute,
+                searchInfo: currentSearchInfo
+            }
         });
     };
 
