@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import PaymentButtonCom from "../../components/payment/PaymentButtonCom";
 import PaymentHistoryTable from "../../components/payment/PaymentHistoryTable";
 import axios from 'axios';
 
@@ -35,13 +34,6 @@ const Payment = () => {
         <main className="main-content">
           <h1>💳 결제 내역 페이지</h1>
 
-          {userInfo && (
-            <PaymentButtonCom
-              userInfo={userInfo}
-              paymentMethod="card"
-              onPaymentComplete={() => console.log("결제 완료")}
-            />
-          )}
 
           <div className="payment-history-section">
             <h2>📋 결제 내역</h2>

@@ -11,7 +11,7 @@ const HotelBooking = () => {
     const [bookingData, setBookingData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [showPayment, setShowPayment] = useState(false); // 결제 버튼 표시 상태 추가
+    const [showPayment, setShowPayment] = useState(false);
 
     // 예약 정보 상태
     const [reservationInfo, setReservationInfo] = useState({
@@ -70,6 +70,40 @@ const HotelBooking = () => {
         }
     }, [reservationInfo.checkInDate, reservationInfo.checkOutDate, pricePerNight]);
 
+    // 페이지 벗어날 때 정리 작업 (브라우저 이벤트 감지)
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+            // 결제 진행 중이면 경고 메시지 표시
+            if (showPayment) {
+                event.preventDefault();
+                event.returnValue = '결제를 진행하지 않으면 예약 정보가 삭제됩니다. 정말 나가시겠습니까?';
+                return event.returnValue;
+            }
+        };
+
+        const handlePopState = () => {
+            // 뒤로가기 등으로 페이지를 벗어날 때
+            if (showPayment) {
+                const confirmLeave = window.confirm('결제를 진행하지 않으면 예약 정보가 삭제됩니다. 정말 나가시겠습니까?');
+                if (!confirmLeave) {
+                    // 뒤로가기 취소 (현재 페이지 유지)
+                    window.history.pushState(null, '', window.location.pathname);
+                    return;
+                }
+            }
+        };
+
+        // 이벤트 리스너 등록
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        window.addEventListener('popstate', handlePopState);
+
+        // 정리 함수
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [showPayment]);
+
     // 입력값 변경 핸들러
     const handleInputChange = (field, value) => {
         setReservationInfo(prev => ({
@@ -108,7 +142,7 @@ const HotelBooking = () => {
         }
     };
 
-    // 예약 및 결제 진행 (수정된 함수)
+    // 예약 및 결제 진행 (수정됨 - DB 저장 로직 제거)
     const proceedToPayment = () => {
         // 필수 정보 검증
         if (!reservationInfo.guestName || !reservationInfo.guestPhone || !reservationInfo.guestEmail) {
@@ -118,6 +152,11 @@ const HotelBooking = () => {
 
         if (!reservationInfo.checkInDate || !reservationInfo.checkOutDate) {
             alert('숙박 날짜를 선택해주세요.');
+            return;
+        }
+
+        if (nights <= 0) {
+            alert('올바른 숙박 기간을 선택해주세요.');
             return;
         }
 
@@ -157,6 +196,25 @@ const HotelBooking = () => {
     }
 
     const { selectedRoute, searchInfo } = bookingData;
+
+    // PaymentButtonCom에 전달할 예약 정보 구성
+    const paymentBookingInfo = {
+        hotelName: selectedRoute.hotel.name,
+        hotelLocation: selectedRoute.hotel.location,
+        hotelCategory: selectedRoute.hotel.category,
+        roomType: '스탠다드',
+        checkInDate: reservationInfo.checkInDate,
+        checkOutDate: reservationInfo.checkOutDate,
+        nights: nights,
+        adults: reservationInfo.adults,
+        pricePerNight: pricePerNight,
+        guestName: reservationInfo.guestName,
+        guestPhone: reservationInfo.guestPhone,
+        guestEmail: reservationInfo.guestEmail,
+        specialRequests: reservationInfo.specialRequests,
+        packageId: selectedRoute.packageId,
+        packageTitle: selectedRoute.title
+    };
 
     return (
         <div className="booking-container">
@@ -297,7 +355,7 @@ const HotelBooking = () => {
                     </div>
                 </div>
 
-                {/* 결제 버튼 (수정된 부분) */}
+                {/* 결제 버튼 */}
                 <div className="booking-actions">
                     {!showPayment ? (
                         <button
@@ -312,6 +370,8 @@ const HotelBooking = () => {
                         <PaymentButtonCom
                             paymentMethod="card"
                             onPaymentComplete={handlePaymentComplete}
+                            bookingInfo={paymentBookingInfo}
+                            totalAmount={totalPrice}
                         />
                     )}
                 </div>
