@@ -1,0 +1,364 @@
+/* HotelBooking.css */
+.booking-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* 헤더 */
+.booking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 16px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.booking-header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.back-button:hover {
+    background: #f8f9fa;
+    border-color: #bbb;
+}
+
+.favorite-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #fff;
+    border: 1px solid #F76B59;
+    border-radius: 8px;
+    color: #F76B59;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.favorite-button:hover {
+    background: #F76B59;
+    color: white;
+}
+
+.favorite-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 카드 공통 스타일 */
+.hotel-summary-card,
+.booking-form-card,
+.price-summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* 숙소 정보 요약 */
+.hotel-summary-card {
+    border-left: 4px solid #F76B59;
+}
+
+.hotel-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 12px;
+}
+
+.hotel-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.hotel-category {
+    background: #e9ecef;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.hotel-location {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.price-info {
+    text-align: right;
+}
+
+.price-per-night {
+    font-size: 18px;
+    font-weight: 600;
+    color: #F76B59;
+}
+
+/* 예약 폼 */
+.booking-form-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 8px;
+}
+
+.form-section {
+    margin-bottom: 24px;
+}
+
+.form-section h4 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 12px;
+}
+
+/* 날짜 입력 */
+.date-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.date-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.date-input-group label {
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.date-input-group input[type="date"] {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.date-input-group input[type="date"]:focus {
+    outline: none;
+    border-color: #F76B59;
+    box-shadow: 0 0 0 3px rgba(247, 107, 89, 0.1);
+}
+
+/* 투숙 인원 */
+.guests-input {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    width: fit-content;
+}
+
+.guests-input select {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #495057;
+    background: transparent;
+    cursor: pointer;
+}
+
+/* 예약자 정보 */
+.guest-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.guest-inputs input,
+.guest-inputs textarea {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.guest-inputs input:focus,
+.guest-inputs textarea:focus {
+    outline: none;
+    border-color: #F76B59;
+    box-shadow: 0 0 0 3px rgba(247, 107, 89, 0.1);
+}
+
+.guest-inputs textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* 가격 요약 */
+.price-summary-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 16px;
+}
+
+.price-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.price-row.total {
+    border-top: 1px solid #e9ecef;
+    padding-top: 16px;
+    margin-top: 8px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.total-amount {
+    color: #F76B59;
+    font-size: 18px;
+}
+
+/* 결제 버튼 */
+.booking-actions {
+    margin-top: 24px;
+}
+
+.payment-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: #F76B59;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.payment-button:hover:not(:disabled) {
+    background: #e55a43;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(247, 107, 89, 0.3);
+}
+
+.payment-button:disabled {
+    background: #adb5bd;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 에러 섹션 */
+.error-section {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* 로딩 섹션 */
+.loading-section {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #F76B59;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .booking-container {
+        padding: 16px;
+    }
+
+    .booking-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .booking-header h1 {
+        text-align: center;
+    }
+
+    .date-inputs {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .hotel-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .hotel-summary-card,
+    .booking-form-card,
+    .price-summary-card {
+        padding: 16px;
+    }
+}

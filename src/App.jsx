@@ -18,6 +18,7 @@ import './styles/common/theme-override.css';
 import './styles/MyPage/PasswordChangePage.css'
 import '@toast-ui/editor/dist/toastui-editor.css';
 import './styles/MyPage/Route.css';
+import './styles/accomodation/HotelBooking.css';
 import { Route, Routes, useLocation } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import Main from "./pages/Main";
@@ -44,6 +45,7 @@ import AccountRestorePage from "./pages/mypage/withdraw/AccountRestorePage";
 import PasswordConfirmPage from "./pages/mypage/PasswordConfirmPage";
 import { AuthProvider } from "./util/AuthContext";
 import ChatForm from "./components/chatgpt/ChatForm";
+import HotelBooking from "./pages/accomodation/HotelBooking";
 import Payment from './pages/mypage/Payment';
 import MyReview from "./pages/mypage/myreview/MyReview";
 import MyAsk from "./pages/mypage/myask/MyAsk";
@@ -232,6 +234,13 @@ const App = () => {
                             <Route path='travel/chatform' element={
                                 <ProtectedRoute>
                                     <ChatForm/>
+                                </ProtectedRoute>
+                            } />
+
+                            {/*  숙소 예약 */}
+                            <Route path='/hotels/booking' element={
+                                <ProtectedRoute>
+                                    <HotelBooking/>
                                 </ProtectedRoute>
                             } />
 
