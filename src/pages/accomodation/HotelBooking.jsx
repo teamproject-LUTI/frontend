@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Calendar, Users, MapPin, Heart, CreditCard, ArrowLeft, Calculator } from 'lucide-react';
 import axios from 'axios';
 import '../../styles/accomodation/HotelBooking.css';
+import PaymentButtonCom from '../../components/payment/PaymentButtonCom';
 
 const HotelBooking = () => {
     const location = useLocation();
@@ -10,6 +11,7 @@ const HotelBooking = () => {
     const [bookingData, setBookingData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [showPayment, setShowPayment] = useState(false); // 결제 버튼 표시 상태 추가
 
     // 예약 정보 상태
     const [reservationInfo, setReservationInfo] = useState({
@@ -106,8 +108,8 @@ const HotelBooking = () => {
         }
     };
 
-    // 예약 및 결제 진행
-    const proceedToPayment = async () => {
+    // 예약 및 결제 진행 (수정된 함수)
+    const proceedToPayment = () => {
         // 필수 정보 검증
         if (!reservationInfo.guestName || !reservationInfo.guestPhone || !reservationInfo.guestEmail) {
             alert('예약자 정보를 모두 입력해주세요.');
@@ -119,67 +121,14 @@ const HotelBooking = () => {
             return;
         }
 
-        setLoading(true);
-        try {
-            // 1. 예약 정보를 DB에 임시 저장
-            const bookingRequest = {
-                // 숙소 정보
-                hotelName: bookingData.selectedRoute.hotel.name,
-                hotelLocation: bookingData.selectedRoute.hotel.location,
-                hotelCategory: bookingData.selectedRoute.hotel.category,
-                roomType: '스탠다드', // 기본값, 필요시 선택 옵션 추가
+        // 결제 버튼 표시
+        setShowPayment(true);
+    };
 
-                // 예약 기간
-                checkInDate: reservationInfo.checkInDate,
-                checkOutDate: reservationInfo.checkOutDate,
-                nights: nights,
-                adults: reservationInfo.adults,
-
-                // 가격 정보
-                pricePerNight: pricePerNight,
-                totalPrice: totalPrice,
-                currency: 'KRW',
-
-                // 예약자 정보
-                guestName: reservationInfo.guestName,
-                guestPhone: reservationInfo.guestPhone,
-                guestEmail: reservationInfo.guestEmail,
-                specialRequests: reservationInfo.specialRequests,
-
-                // 여행 패키지 정보
-                packageId: bookingData.selectedRoute.packageId,
-                packageTitle: bookingData.selectedRoute.title
-            };
-
-            // 예약 정보 임시 저장 API 호출
-            const response = await axios.post(`${API_BASE_URL}/api/hotels/create-booking`, bookingRequest, {
-                withCredentials: true
-            });
-
-            if (response.data.success) {
-                const bookingId = response.data.bookingId;
-
-                // 결제 페이지로 이동 (결제 정보와 함께)
-                navigate('/payment/hotel', {
-                    state: {
-                        bookingId: bookingId,
-                        paymentInfo: {
-                            itemName: `${bookingData.selectedRoute.hotel.name} (${nights}박)`,
-                            totalAmount: totalPrice,
-                            currency: 'KRW',
-                            bookingDetails: bookingRequest
-                        }
-                    }
-                });
-            } else {
-                throw new Error(response.data.message || '예약 처리 중 오류가 발생했습니다.');
-            }
-        } catch (error) {
-            console.error('예약 처리 실패:', error);
-            setError('예약 처리 중 오류가 발생했습니다: ' + error.message);
-        } finally {
-            setLoading(false);
-        }
+    // 결제 완료 처리
+    const handlePaymentComplete = () => {
+        alert(`✅ ${bookingData.selectedRoute.hotel.name} 예약이 완료되었습니다!`);
+        navigate('/mypage/payments');
     };
 
     if (error) {
@@ -348,16 +297,23 @@ const HotelBooking = () => {
                     </div>
                 </div>
 
-                {/* 결제 버튼 */}
+                {/* 결제 버튼 (수정된 부분) */}
                 <div className="booking-actions">
-                    <button
-                        onClick={proceedToPayment}
-                        className="payment-button"
-                        disabled={loading || nights === 0}
-                    >
-                        <CreditCard size={16} />
-                        {loading ? '처리중...' : `${totalPrice.toLocaleString()}원 결제하기`}
-                    </button>
+                    {!showPayment ? (
+                        <button
+                            onClick={proceedToPayment}
+                            className="payment-button"
+                            disabled={loading || nights === 0}
+                        >
+                            <CreditCard size={16} />
+                            {loading ? '처리중...' : `${totalPrice.toLocaleString()}원 결제하기`}
+                        </button>
+                    ) : (
+                        <PaymentButtonCom
+                            paymentMethod="card"
+                            onPaymentComplete={handlePaymentComplete}
+                        />
+                    )}
                 </div>
             </div>
         </div>
