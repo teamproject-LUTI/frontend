@@ -1,19 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { savePayment } from "../../services/PaymentService";
+import { savePaymentWithReservation } from "../../services/PaymentService";
 import { paymentMethodMap } from "../../util/paymentMethodMap";
 import "../../styles/payment/PaymentHistoryTable.css";
 
 const PaymentButtonCom = ({ paymentMethod, onPaymentComplete }) => {
     const navigate = useNavigate();
-
-    // 테스트용 결제 금액 (1박 기준 100원)
     const totalAmount = 100;
-
-    // 세션스토리지에서 사용자 정보 로딩
     const userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
 
-    // 결제 요청 처리
     const handlePayment = () => {
         if (!userInfo) {
             alert("사용자 정보가 없습니다. 로그인 후 다시 시도해주세요.");
@@ -58,26 +53,38 @@ const PaymentButtonCom = ({ paymentMethod, onPaymentComplete }) => {
                     paymentDate: nowKST.toISOString(),
                 };
 
-                console.log("📦 백엔드로 전송할 결제 데이터:", paymentData);
+                const reservationData = {
+                    paymentOwnno: 999001,
+                    accomodationInformationId: 1,
+                    userId: userInfo.userId,
+                    price: totalAmount,
+                    accomoStart: "2025-07-10",
+                    accomoEnd: "2025-07-11",
+                    userCount: 1,
+                    roomType: "테스트룸"
+                };
+
+                const paymentWithReservationData = {
+                    payment: paymentData,
+                    reservation: reservationData
+                };
+
+                console.log("📦 백엔드로 전송할 데이터:", paymentWithReservationData);
 
                 try {
-                    const savedPayment = await savePayment(paymentData);
-                    console.log("백엔드 저장 성공:", savedPayment);
+                    const saved = await savePaymentWithReservation(paymentWithReservationData);
+                    console.log("백엔드 저장 성공:", saved);
 
                     if (window.addNewPayment) {
-                        console.log("결제내역 테이블 동기화 중...");
                         await window.addNewPayment();
                     }
 
-                    alert("결제 & 저장 완료");
+                    alert("결제 및 예약 저장 완료");
                     onPaymentComplete?.();
                     navigate("/mypage/payments");
                 } catch (error) {
                     console.error("결제 정보 저장 실패:", error);
-                    alert(
-                        "결제 정보 저장에 실패했습니다: " +
-                        (error.response?.data?.message || error.message)
-                    );
+                    alert("결제 저장 실패: " + (error.response?.data?.message || error.message));
                 }
             }
         );
