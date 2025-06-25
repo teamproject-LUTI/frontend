@@ -1,3 +1,26 @@
+.review-list-main-layout{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #f9fafb;
+}
+
+.review-list-main-content-wrapper{
+    /*display: flex;*/
+    flex: 1;
+    overflow: hidden;
+}
+
+.review-list-main-content{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    box-sizing: border-box;
+    position: relative;
+}
+
 .review-header {
     display: flex;
     /*justify-content: space-between;*/
@@ -194,34 +217,34 @@
     color: #666;
 }
 
-/* 게시판 페이지네이션 스타일 */
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: 24px;
-}
+/*!* 게시판 페이지네이션 스타일 *!*/
+/*.pagination {*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    gap: 8px;*/
+/*    margin-top: 24px;*/
+/*}*/
 
-/* pagination 버튼 기본 스타일 */
-.pagination button {
-    padding: 6px 12px;
-    background: transparent;
-    border: none;
-    color: #333;
-    cursor: pointer;
-}
+/*!* pagination 버튼 기본 스타일 *!*/
+/*.pagination button {*/
+/*    padding: 6px 12px;*/
+/*    background: transparent;*/
+/*    border: none;*/
+/*    color: #333;*/
+/*    cursor: pointer;*/
+/*}*/
 
-/* 비활성화된 버튼 스타일 */
-.pagination button:disabled {
-    opacity: 0.5;
-    cursor: default;
-}
+/*!* 비활성화된 버튼 스타일 *!*/
+/*.pagination button:disabled {*/
+/*    opacity: 0.5;*/
+/*    cursor: default;*/
+/*}*/
 
-/* 현재 페이지 버튼 강조 */
-.pagination button.active {
-    background: #F76B59;
-    border-color: #F76B59;
-    color: #fff;
-    border-radius: 5px;
-}
+/*!* 현재 페이지 버튼 강조 *!*/
+/*.pagination button.active {*/
+/*    background: #F76B59;*/
+/*    border-color: #F76B59;*/
+/*    color: #fff;*/
+/*    border-radius: 5px;*/
+/*}*/

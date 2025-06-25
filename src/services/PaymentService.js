@@ -119,9 +119,23 @@ export const fetchAllPaymentsByDateRange = async (state, start, end) => {
   return res.data;
 };
 
-// 모듈 전체 export (선택적)
+// 예약 정보와 함께 결제 저장
+export const savePaymentWithReservation = async (paymentWithReservationData) => {
+  try {
+    console.log("[savePaymentWithReservation] 요청 payload:", paymentWithReservationData);
+    const response = await apiClient.post("/api/payments/with-reservation", paymentWithReservationData);
+    console.log("[savePaymentWithReservation] 응답:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("[savePaymentWithReservation] 오류:", error.response || error.message);
+    throw error;
+  }
+};
+
+// 모듈 전체 export
 export default {
   savePayment,
+  savePaymentWithReservation,
   fetchPaymentsByUser,
   cancelPayment,
   fetchPaymentsByPriceDesc,

@@ -8,7 +8,7 @@ import '../../../styles/MyPage/AccountRestorePage.css';
 
 const AccountRestorePage = () => {
   const navigate = useNavigate();
-  const { resetAuth } = useAuth();
+  const { resetAuth, forceCheckAuth } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
   const [withdrawInfo, setWithdrawInfo] = useState(null);
@@ -76,6 +76,8 @@ const AccountRestorePage = () => {
     setIsLoading(true);
 
     try {
+      console.log('계정 복구 요청 시작...');
+
       const response = await axios.post(`${API_BASE_URL}/api/mypage/restore`, {}, {
         withCredentials: true,
         headers: {
@@ -84,16 +86,43 @@ const AccountRestorePage = () => {
       });
 
       if (response.status === 200 && response.data.success) {
+        console.log('계정 복구 성공:', response.data);
+
+        // 1. AuthContext 상태 초기화 (먼저)
+        resetAuth();
+
+        // 2. 성공 메시지 표시
         await Swal.fire({
           title: '계정 복구 완료!',
-          text: response.data.message,
+          text: response.data.message || '계정이 성공적으로 복구되었습니다.',
           icon: 'success',
           confirmButtonColor: '#F76B59',
-          confirmButtonText: '확인'
+          confirmButtonText: '확인',
+          allowOutsideClick: false
         });
 
-        // 메인 페이지로 이동
-        navigate('/main', { replace: true });
+        // 3. 잠시 대기 후 강제 인증 재확인
+        console.log('복구 후 인증 상태 강제 재확인...');
+
+        setTimeout(async () => {
+          try {
+            // 강제로 인증 상태 재확인
+            const authResult = await forceCheckAuth();
+            console.log('복구 후 인증 확인 결과:', authResult);
+
+            if (authResult) {
+              console.log('복구 후 인증 성공 - 메인 페이지로 이동');
+              navigate('/main', { replace: true });
+            } else {
+              console.log('복구 후 인증 실패 - 로그인 페이지로 이동');
+              navigate('/', { replace: true });
+            }
+          } catch (error) {
+            console.error('복구 후 인증 확인 오류:', error);
+            navigate('/', { replace: true });
+          }
+        }, 500); // 500ms 대기
+
       } else {
         throw new Error(response.data.error || '계정 복구 중 오류가 발생했습니다.');
       }
@@ -160,6 +189,9 @@ const AccountRestorePage = () => {
               <div className="info-content">
                 <h4>시간 제한</h4>
                 <p>3시간이 지나면 계정이 완전히 삭제되며, 복구할 수 없습니다.</p>
+                {timeRemaining && (
+                    <p><strong>남은 시간: {timeRemaining}</strong></p>
+                )}
               </div>
             </div>
 
@@ -209,6 +241,23 @@ const AccountRestorePage = () => {
             >
               {isLoading ? '복구 중...' : '계정 복구'}
             </button>
+
+            <div className="alternative-actions">
+              <button
+                  onClick={handleLoginPage}
+                  className="login-button"
+                  disabled={isLoading}
+              >
+                로그인 페이지로
+              </button>
+              <button
+                  onClick={handleNewSignup}
+                  className="signup-button"
+                  disabled={isLoading}
+              >
+                새 계정 만들기
+              </button>
+            </div>
           </div>
         </div>
       </div>

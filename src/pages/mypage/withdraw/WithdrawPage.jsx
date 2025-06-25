@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AlertTriangle, ArrowLeft, Clock, UserX } from 'lucide-react';
-import Layout from '../../../components/layout/Layout';
 import { useAuth } from '../../../util/AuthContext';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -163,7 +162,6 @@ const WithdrawPage = (callback, deps) => {
   };
 
   return (
-      <Layout>
         <div className="withdraw-container">
           <div className="withdraw-content">
             {/* 헤더 */}
@@ -273,7 +271,6 @@ const WithdrawPage = (callback, deps) => {
             </div>
           </div>
         </div>
-      </Layout>
   );
 };
 export default WithdrawPage;
