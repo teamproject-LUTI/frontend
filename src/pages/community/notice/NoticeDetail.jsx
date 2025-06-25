@@ -10,7 +10,6 @@ const NoticeDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [notice, setNotice] = useState(null);
-    const [attachments, setAttachments] = useState([]);
     const token = localStorage.getItem('accessToken');
 
     // 중복 호출 방지를 위한 ref
@@ -37,48 +36,7 @@ const NoticeDetail = () => {
         };
 
         fetchNotice();
-    }, [id, token]);
-
-    // 첨부파일만 가져오는 useEffect 추가
-    useEffect(() => {
-        const fetchAttachments = async () => {
-            try {
-                const res = await axios.get(`/api/notices/${id}/attachments`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setAttachments(res.data.data || []);
-            } catch (err) {
-                console.error('첨부파일 조회 실패', err);
-            }
-        };
-        fetchAttachments();
-    }, [id, token]);
-
-    // 다운로드 핸들러
-    const handleDownload = async (fileNo, fileName) => {
-        try {
-            const res = await axios.get(
-                `/api/notices/${id}/attachments/${fileNo}/download`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    responseType: 'blob'
-                }
-            );
-            // Blob → Object URL 생성
-            const url = window.URL.createObjectURL(new Blob([res.data]));
-            // 임시 <a> 태그로 다운로드 트리거
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', fileName);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error('파일 다운로드 실패', err);
-            alert('다운로드에 실패했어요.');
-        }
-    };
+    }, [id, token]); // token이 변경될 때만 재실행
 
     // 공유 버튼 핸들러
     const handleShare = () => {
@@ -178,46 +136,21 @@ const NoticeDetail = () => {
                         </div>
                     </div>
 
-                    {/* 첨부파일 목록 (PDF, Excel 등) */}
-                    {attachments.length > 0 && (
-                        <div className="detail-files">
-                            <h3>첨부파일</h3>
-                            <ul>
-                                {attachments
-                                    .filter(att => !['png','jpg','jpeg','gif'].includes(att.extension.toLowerCase()))
-                                    .map(att => (
-                                        <li key={att.fileNo}>
-                                            <a
-                                                href={`/api/notices/${id}/attachments/${att.fileNo}/download`}
-                                                onClick={e => {
-                                                    e.preventDefault();
-                                                    handleDownload(att.fileNo, att.fileName);
-                                                }}
-                                            >
-                                                📄 {att.fileName}
-                                            </a>
-                                        </li>
-                                    ))}
-                            </ul>
-                        </div>
-                    )}
-
                     <div
                         className="detail-content"
                         dangerouslySetInnerHTML={{ __html: notice.content }}
                     ></div>
 
                     {notice.owner && (
-                        <div className="crud-buttons">
-                            <button className="edit-btn" onClick={handleEdit}>수정</button>
-                            <button className="delete-btn" onClick={handleDelete}>삭제</button>
+                        <div className="notice-detail-crud-buttons">
+                            <button className="notice-detail-edit-btn" onClick={handleEdit}>수정</button>
+                            <button className="notice-detail-delete-btn" onClick={handleDelete}>삭제</button>
                         </div>
                     )}
 
-                    <button className="back-btn" onClick={() => navigate('/community/notice')}>
+                    <button className="notice-detail-back-btn" onClick={() => navigate('/community/notice')}>
                         목록으로
                     </button>
-
                     {/* 댓글 섹션 추가 */}
                     <div className="comment-wrapper">
                         <CommentSection

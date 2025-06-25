@@ -90,52 +90,58 @@
     font-size: 16px;
 }
 
-.crud-buttons {
+/* 4. 버튼 영역 */
+/* 수정/삭제 버튼 묶음 왼쪽에 배치 */
+.notice-detail-crud-buttons {
+    float: left;
     display: flex;
     gap: 8px;
     margin-top: 24px;
 }
 
-.edit-btn,
-.delete-btn {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.edit-btn {
-    background-color: #f0f0f0;
-    color: #333;
-}
-
-.edit-btn:hover {
-    background-color: #e0e0e0;
-}
-
-.delete-btn {
-    background-color: #ffecec;
-    color: #c00;
-}
-
-.delete-btn:hover {
-    background-color: #ffd6d6;
-}
-
-.back-btn {
-    background-color: #f0f0f0;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    margin-left: auto;
-    display: block;
+/* 목록 버튼 오른쪽에 배치 */
+.notice-detail-back-btn {
+    float: right;
     margin-top: 24px;
 }
 
-.back-btn:hover {
-    background-color: #e0e0e0;
+/* 공통 버튼 스타일 (깔끔한 배경색) */
+.notice-detail-crud-buttons button,
+.notice-detail-back-btn{
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+/* 삭제 버튼 */
+.notice-detail-delete-btn {
+    background-color: #FFE2E2;
+    color: #FF7373;
+}
+
+.notice-detail-delete-btn:hover {
+    background-color: #FFBDBD;
+}
+
+/* 수정 버튼 */
+.notice-detail-edit-btn {
+    background-color: #E9F8E3;
+    color: #7AD25A;
+}
+
+.notice-detail-edit-btn:hover {
+    background-color: #D3F2C9;
+}
+
+/* 목록 버튼 */
+.notice-detail-back-btn {
+    background-color: #d4e7ff;
+    color: #268afa;
+}
+
+.notice-detail-back-btn:hover {
+    background-color: #b8d8ff;
 }
