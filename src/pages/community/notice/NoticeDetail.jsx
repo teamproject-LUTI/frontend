@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { Eye, Share2 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -9,7 +10,6 @@ const NoticeDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [notice, setNotice] = useState(null);
-    const [attachments, setAttachments] = useState([]);
     const token = localStorage.getItem('accessToken');
 
     // 중복 호출 방지를 위한 ref
@@ -36,47 +36,28 @@ const NoticeDetail = () => {
         };
 
         fetchNotice();
-    }, [id, token]);
+    }, [id, token]); // token이 변경될 때만 재실행
 
-    // 첨부파일만 가져오는 useEffect 추가
-    useEffect(() => {
-        const fetchAttachments = async () => {
-            try {
-                const res = await axios.get(`/api/notices/${id}/attachments`, {
-                    headers: { Authorization: `Bearer ${token}` }
+    // 공유 버튼 핸들러
+    const handleShare = () => {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url)
+            .then(() => {
+                Swal.fire({
+                    title: 'URL 복사됨!',
+                    text: '현재 페이지 주소가 클립보드에 복사되었습니다.',
+                    icon: 'success',
+                    confirmButtonColor: '#F76B59',
                 });
-                setAttachments(res.data.data || []);
-            } catch (err) {
-                console.error('첨부파일 조회 실패', err);
-            }
-        };
-        fetchAttachments();
-    }, [id, token]);
-
-    // 다운로드 핸들러
-    const handleDownload = async (fileNo, fileName) => {
-        try {
-            const res = await axios.get(
-                `/api/notices/${id}/attachments/${fileNo}/download`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    responseType: 'blob'
-                }
-            );
-            // Blob → Object URL 생성
-            const url = window.URL.createObjectURL(new Blob([res.data]));
-            // 임시 <a> 태그로 다운로드 트리거
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', fileName);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error('파일 다운로드 실패', err);
-            alert('다운로드에 실패했어요.');
-        }
+            })
+            .catch(() => {
+                Swal.fire({
+                    title: '복사 실패',
+                    text: 'URL 복사에 실패했어요. 직접 복사해주세요.',
+                    icon: 'error',
+                    confirmButtonColor: '#F76B59',
+                });
+            });
     };
 
     // 수정 버튼 핸들러
@@ -129,40 +110,31 @@ const NoticeDetail = () => {
                 <main className="main-content">
                     <h1 className="detail-title">{notice.title}</h1>
 
+                    {/* 작성자 + 날짜 + 공유/조회수 */}
                     <div className="detail-meta">
-                        <span className="detail-author">{notice.userName}</span>
-                        <span className="detail-date">
-                            {new Date(notice.createdAt).toLocaleDateString('ko-KR', {
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit',
-                            })}
-                        </span>
-                    </div>
-
-                    {/* 첨부파일 목록 (PDF, Excel 등) */}
-                    {attachments.length > 0 && (
-                        <div className="detail-files">
-                            <h3>첨부파일</h3>
-                            <ul>
-                                {attachments
-                                    .filter(att => !['png','jpg','jpeg','gif'].includes(att.extension.toLowerCase()))
-                                    .map(att => (
-                                        <li key={att.fileNo}>
-                                            <a
-                                                href={`/api/notices/${id}/attachments/${att.fileNo}/download`}
-                                                onClick={e => {
-                                                    e.preventDefault();
-                                                    handleDownload(att.fileNo, att.fileName);
-                                                }}
-                                            >
-                                                📄 {att.fileName}
-                                            </a>
-                                        </li>
-                                    ))}
-                            </ul>
+                        <div className="meta-left">
+                            <span className="detail-author">{notice.userName}</span>
+                            <span className="detail-date">
+                                {new Date(notice.createdAt).toLocaleDateString('ko-KR', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                })}
+                            </span>
                         </div>
-                    )}
+                        {/* 공유 + 조회수 */}
+                        <div className="interaction-section">
+                            <button className="share-btn" onClick={handleShare}>
+                                <Share2 className="share-icon" size={16} color="#000" />
+                                공유하기
+                            </button>
+                            {/* 조회수 추가 */}
+                            <span className="detail-views">
+                                <Eye className="view-icon" size={18} color="#000" />
+                                {notice.viewCount || 0}
+                            </span>
+                        </div>
+                    </div>
 
                     <div
                         className="detail-content"
@@ -170,21 +142,22 @@ const NoticeDetail = () => {
                     ></div>
 
                     {notice.owner && (
-                        <div className="crud-buttons">
-                            <button className="edit-btn" onClick={handleEdit}>수정</button>
-                            <button className="delete-btn" onClick={handleDelete}>삭제</button>
+                        <div className="notice-detail-crud-buttons">
+                            <button className="notice-detail-edit-btn" onClick={handleEdit}>수정</button>
+                            <button className="notice-detail-delete-btn" onClick={handleDelete}>삭제</button>
                         </div>
                     )}
 
-                    <button className="back-btn" onClick={() => navigate('/community/notice')}>
+                    <button className="notice-detail-back-btn" onClick={() => navigate('/community/notice')}>
                         목록으로
                     </button>
-
                     {/* 댓글 섹션 추가 */}
-                    <CommentSection
-                        parentType="NOTICE"
-                        parentId={id}
-                    />
+                    <div className="comment-wrapper">
+                        <CommentSection
+                            parentType="NOTICE"
+                            parentId={id}
+                        />
+                    </div>
                 </main>
             </div>
         </div>
