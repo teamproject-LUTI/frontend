@@ -145,17 +145,29 @@ const QnaDetail = () => {
                 navigate('/community/qna');
             } catch (err) {
                 console.error('삭제 실패', err);
-                Swal.fire({
-                    title: '삭제 실패',
-                    text: '문제가 발생했어요. 잠시 후 다시 시도해주세요.',
-                    icon: 'error',
-                    confirmButtonColor: '#F76B59',
-                });
+                if (err.response?.status === 403) {
+                    Swal.fire({
+                        title: '권한이 없습니다',
+                        text: '작성자 또는 관리자만 삭제할 수 있습니다.',
+                        icon: 'error',
+                        confirmButtonColor: '#F76B59',
+                    });
+                } else {
+                    Swal.fire({
+                        title: '삭제 실패',
+                        text: '문제가 발생했어요. 잠시 후 다시 시도해주세요.',
+                        icon: 'error',
+                        confirmButtonColor: '#F76B59',
+                    });
+                }
             }
         }
     };
 
     if (!ask) return null;
+
+    // 수정/삭제 권한 체크: 작성자이거나 관리자인 경우
+    const canModify = ask.owner || ask.isAdmin;
 
     return (
         <div className="main-layout">
@@ -223,8 +235,8 @@ const QnaDetail = () => {
                         dangerouslySetInnerHTML={{ __html: ask.content }}
                     ></div>
 
-                    {/* 내가 쓴 글일 때만 버튼 보이기 */}
-                    {ask.owner && (
+                    {/* 작성자이거나 관리자일 때만 버튼 보이기 */}
+                    {canModify && (
                         <div className="qna-detail-crud-buttons">
                             <button className="qna-detail-edit-btn" onClick={handleEdit}>수정</button>
                             <button className="qna-detail-delete-btn" onClick={handleDelete}>삭제</button>
