@@ -259,6 +259,14 @@
     color: #666;
     font-size: 14px;
 }
+.login-logo-image {
+    width: 120px;
+    height: auto;
+    border-radius: 12px;
+    align-items: center;
+    justify-content: center;
+    margin: 15px 15px;
+}
 
 @keyframes spin {
     0% {
@@ -268,6 +276,9 @@
         transform: rotate(360deg);
     }
 }
+
+
+
 
 /* 모바일 반응형 */
 @media (max-width: 480px) {
@@ -292,4 +303,8 @@
     .btn {
         padding: 10px;
     }
+
+
+
+
 }
