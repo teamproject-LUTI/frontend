@@ -7,6 +7,7 @@ import './styles/MyPage/MyAsk.css';
 import './styles/MyPage/WithdrawPage.css';
 import './styles/MyPage/PasswordConfirmPage.css';
 import './styles/MyPage/AccountRestorePage.css';
+import './styles/MyPage/PasswordChangePage.css'
 import './styles/layout/Topbar.css';
 import './styles/layout/Sidebar.css';
 import './styles/layout/Footer.css';
@@ -53,8 +54,7 @@ import MyAsk from "./pages/mypage/myask/MyAsk";
 import LikeReview from "./pages/mypage/likereview/LikeReview";
 import MenuManagement from "./pages/management/MenuManagement";
 import FindAccountPage from './pages/login/FindAccountPage';
-import AuthMAnagement from "./pages/management/AuthManagement";
-
+import AuthManagement from "./pages/management/AuthManagement";
 import PasswordChangePage from "./pages/mypage/password/PasswordChangePage";
 import PaymentManagement from "./pages/management/PaymentManagement";
 import RouteMark from "./pages/mypage/route/Route";
@@ -230,7 +230,7 @@ const App = () => {
                             } />
                             <Route path='/admin/permissions' element={
                                 <ProtectedRoute>
-                                    <AuthMAnagement />
+                                    <AuthManagement />
                                 </ProtectedRoute>
                             } />
                             <Route path='/admin/payments' element={
