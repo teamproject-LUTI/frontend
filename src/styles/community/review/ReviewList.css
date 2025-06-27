@@ -114,12 +114,8 @@
     height: 20px;
     flex-shrink: 0;
 }
-<<<<<<< HEAD
-.review-meta {
-=======
 
 .review-list-meta {
->>>>>>> 4b27a43c6c5bbfea5ff5afa8ca8bba1cc6f7d8ec
     display: flex;
     justify-content: space-between;
     font-size: 14px;
@@ -158,8 +154,6 @@
     position: relative;
     border-left: 1px solid #ccc;
 }
-
-<<<<<<< HEAD
 /* 현재 페이지 버튼 강조 */
 .pagination button.active {
     background: #F76B59;
@@ -186,7 +180,7 @@
     border-radius: 50%;
     object-fit: cover;
 }
-=======
+
 /* 검색어 입력 영역 너비 조절 */
 .search-input-wrapper {
     position: relative;
@@ -280,4 +274,3 @@
 /*    color: #fff;*/
 /*    border-radius: 5px;*/
 /*}*/
->>>>>>> 4b27a43c6c5bbfea5ff5afa8ca8bba1cc6f7d8ec
