@@ -3,22 +3,36 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { paymentMethodMap } from "../../util/paymentMethodMap";
 import "../../styles/payment/PaymentHistoryTable.css";
+import Swal from 'sweetalert2';
 
 const PaymentButtonCom = ({
                               paymentMethod = 'card',
                               onPaymentComplete,
                               bookingInfo,
-                              totalAmount
+                              totalAmount,
+                              validateBeforePayment // ✅ 새로 추가된 prop
                           }) => {
     const navigate = useNavigate();
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
     const handlePayment = async () => {
+        // ✅ 외부 검증 함수 실행 (HotelBooking에서 전달받은 검증 함수)
+        if (validateBeforePayment && typeof validateBeforePayment === 'function') {
+            if (!validateBeforePayment()) {
+                return; // 검증 실패시 결제 진행하지 않음
+            }
+        }
+
         console.log("결제 시작 - bookingInfo:", bookingInfo);
         console.log("결제 금액:", totalAmount);
 
         if (!bookingInfo) {
-            alert("예약 정보가 없습니다.");
+            Swal.fire({
+                icon: 'warning',
+                title: '예약 정보 없음',
+                text: '예약 정보가 없습니다.',
+                confirmButtonText: '확인'
+            });
             return;
         }
 
@@ -33,17 +47,32 @@ const PaymentButtonCom = ({
                 currentUser = userResponse.data.user;
                 console.log("현재 사용자 정보:", currentUser);
             } else {
-                alert("사용자 정보를 가져올 수 없습니다. 로그인 상태를 확인해주세요.");
+                Swal.fire({
+                    icon: 'warning',
+                    title: '인증 필요',
+                    text: '사용자 정보를 가져올 수 없습니다. 로그인 상태를 확인해주세요.',
+                    confirmButtonText: '확인'
+                });
                 return;
             }
         } catch (error) {
             console.error("사용자 정보 조회 실패:", error);
-            alert("로그인이 필요합니다.");
+            Swal.fire({
+                icon: 'error',
+                title: '로그인 필요',
+                text: '로그인이 필요합니다.',
+                confirmButtonText: '확인'
+            });
             return;
         }
 
         if (!window.IMP) {
-            alert("아임포트 모듈이 로드되지 않았습니다.");
+            Swal.fire({
+                icon: 'error',
+                title: '결제 모듈 오류',
+                text: '아임포트 모듈이 로드되지 않았습니다.',
+                confirmButtonText: '확인'
+            });
             return;
         }
 
@@ -68,7 +97,12 @@ const PaymentButtonCom = ({
 
                 if (!rsp.success) {
                     console.error("아임포트 결제 실패:", rsp);
-                    alert("결제가 실패했습니다: " + (rsp.error_msg || "알 수 없는 오류"));
+                    Swal.fire({
+                        icon: 'error',
+                        title: '결제 실패',
+                        text: "결제가 실패했습니다: " + (rsp.error_msg || "알 수 없는 오류"),
+                        confirmButtonText: '확인'
+                    });
                     return;
                 }
 
@@ -109,7 +143,10 @@ const PaymentButtonCom = ({
                         // 여행 패키지 정보
                         packageId: bookingInfo.packageId,
                         packageTitle: bookingInfo.packageTitle
-                    }
+                    },
+                    // ✅ 추가: 전체 여행 계획 데이터
+                    fullTravelPlan: bookingInfo.selectedRoute || null, // 전체 여행 루트 데이터
+                    searchInfo: bookingInfo.searchInfo || null // 검색 조건 정보
                 };
 
                 console.log("📦 호텔 예약 데이터 백엔드로 전송:", paymentWithReservationData);
@@ -123,25 +160,39 @@ const PaymentButtonCom = ({
 
                     console.log("호텔 예약 및 결제 저장 성공:", response.data);
 
-                    alert(`✅ ${bookingInfo.hotelName} 예약 및 결제가 완료되었습니다!`);
-                    onPaymentComplete?.();
+                    // ✅ SweetAlert2로 변경 (성공 메시지)
+                    Swal.fire({
+                        icon: 'success',
+                        title: '예약 완료!',
+                        text: `✅ ${bookingInfo.hotelName} 예약 및 결제가 완료되었습니다!`,
+                        confirmButtonText: '확인'
+                    }).then(() => {
+                        onPaymentComplete?.();
 
-                    // 결제 완료 후 결제 내역 새로고침
-                    if (window.addNewPayment) {
-                        setTimeout(() => {
-                            window.addNewPayment();
-                        }, 500); // 0.5초 후 새로고침 (DB 저장 완료 대기)
-                    }
-
-                    navigate("/mypage/payments", {
-                        state: {
-                            message: `${bookingInfo.hotelName} 예약이 완료되었습니다!`,
-                            bookingDetails: bookingInfo
+                        // 결제 완료 후 결제 내역 새로고침
+                        if (window.addNewPayment) {
+                            setTimeout(() => {
+                                window.addNewPayment();
+                            }, 500);
                         }
+
+                        navigate("/mypage/payments", {
+                            state: {
+                                message: `${bookingInfo.hotelName} 예약이 완료되었습니다!`,
+                                bookingDetails: bookingInfo
+                            }
+                        });
                     });
                 } catch (error) {
                     console.error("호텔 예약 정보 저장 실패:", error);
-                    alert("예약 저장 실패: " + (error.response?.data?.message || error.message));
+
+                    // ✅ SweetAlert2로 변경 (에러 메시지)
+                    Swal.fire({
+                        icon: 'error',
+                        title: '예약 저장 실패',
+                        text: "예약 저장 실패: " + (error.response?.data?.message || error.message),
+                        confirmButtonText: '확인'
+                    });
                 }
             }
         );
