@@ -133,7 +133,7 @@ const ReviewList = () => {
 
             <div className="pagination">
               <button disabled={page === 1} onClick={() => setPage(page - 1)}>
-                이전
+                &lt;
               </button>
 
               {/* 페이지 번호 버튼들 */}
@@ -148,7 +148,7 @@ const ReviewList = () => {
               ))}
 
               <button disabled={page === totalPages} onClick={() => setPage(page + 1)}>
-                다음
+                &gt;
               </button>
             </div>
 

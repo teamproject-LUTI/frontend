@@ -4,6 +4,7 @@ import axios from 'axios';
 import '../../../styles/community/qna/QnaWrite.css';
 import { Editor } from '@toast-ui/react-editor';
 import { useAuth } from '../../../util/AuthContext';
+import Swal from 'sweetalert2';
 
 const QnaWrite = () => {
     const navigate = useNavigate();
@@ -199,7 +200,12 @@ const QnaWrite = () => {
             }
 
             // 성공 메시지 표시
-            alert('문의글이 성공적으로 저장되었습니다.');
+            await Swal.fire({
+                icon: 'success',
+                title: '저장 완료',
+                text: '문의글이 성공적으로 저장되었습니다.',
+                confirmButtonColor: '#F76B59'
+            });
 
             // 작성 완료 후 Q&A 목록으로 이동
             navigate('/community/qna');
@@ -208,7 +214,12 @@ const QnaWrite = () => {
             console.error('문의 저장 실패:', err);
 
             const errorMessage = getErrorMessage(err);
-            alert(errorMessage);
+            await Swal.fire({
+                icon: 'error',
+                title: '저장 실패',
+                text: errorMessage,
+                confirmButtonColor: '#F76B59'
+            });
         } finally {
             setIsSubmitting(false);
         }
