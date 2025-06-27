@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import GoogleLoginButton from '../login/GoogleLoginButton';
 import KakaoLoginButton from '../login/KakaoLoginButton';
 import { authUtils } from '../../util/authUtils';
-import '../../styles/login/Login.css';
+import '../../styles/login/Login.css'
 import { useAuth } from "../../util/AuthContext";
 import Swal from 'sweetalert2';
 
@@ -119,7 +119,7 @@ const Login = () => {
         <div className="login-form-wrapper">
           {/* Logo Section */}
           <div className="login-header">
-            <img src="/images/topbar/luti_logo.png" alt="LUTI Logo" className="logo-image"/>
+            <img src="/images/topbar/luti_logo.png" alt="LUTI Logo" className="login-logo-image"/>
             <p className="tagline">Let's Use Travel Intelligence</p>
           </div>
 
