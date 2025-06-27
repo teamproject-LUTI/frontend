@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Trash2 } from 'lucide-react';
+import React, {useEffect, useState, useRef} from 'react';
+import {useParams, useNavigate} from 'react-router-dom';
+import {Trash2} from 'lucide-react';
 import axios from 'axios';
 import '../../../styles/community/review/ReviewEdit.css';
-import { Editor } from '@toast-ui/react-editor';
+import {Editor} from '@toast-ui/react-editor';
 
 const ReviewEdit = () => {
-    const { id } = useParams();
+    const {id} = useParams();
     const navigate = useNavigate();
     const token = localStorage.getItem('accessToken');
     const [title, setTitle] = useState('');
@@ -34,7 +34,7 @@ const ReviewEdit = () => {
             try {
                 // 리뷰 데이터
                 const revRes = await axios.get(`/api/reviews/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: {Authorization: `Bearer ${token}`}
                 });
                 const dto = revRes.data.data;
                 setTitle(dto.title);
@@ -52,10 +52,10 @@ const ReviewEdit = () => {
                     setStartDate('');
                     setEndDate('');
                 }
-            //  기존 첨부파일 목록도 같이 불러오기
+                //  기존 첨부파일 목록도 같이 불러오기
                 const attachRes = await axios.get(
                     `/api/reviews/${id}/attachments`,
-                    { headers: { Authorization: `Bearer ${token}` } });
+                    {headers: {Authorization: `Bearer ${token}`}});
                 setExistingFiles(attachRes.data.data || []);
 
             } catch (err) {
@@ -104,19 +104,19 @@ const ReviewEdit = () => {
             await Promise.all(toDeleteIds.map(fileNo =>
                 axios.delete(
                     `/api/reviews/${id}/attachments/${fileNo}`,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                    )
-                ));
+                    {headers: {Authorization: `Bearer ${token}`}}
+                )
+            ));
 
-                // 새로 추가된 파일 업로드
-                if (newFiles.length > 0) {
+            // 새로 추가된 파일 업로드
+            if (newFiles.length > 0) {
                 const formData = new FormData();
                 newFiles.forEach(f => formData.append('files', f));
-                    await axios.post(
+                await axios.post(
                     `/api/reviews/${id}/attachments`,
-                    formData, { headers: { Authorization: `Bearer ${token}` } }
-                    );
-               }
+                    formData, {headers: {Authorization: `Bearer ${token}`}}
+                );
+            }
 
             // 완료 후 상세 페이지로 이동
             navigate(`/community/review/${id}`);
@@ -128,119 +128,117 @@ const ReviewEdit = () => {
     if (!initialContent) return null;
 
     return (
-        <div className="main-layout">
-            <div className="main-content-wrapper">
-                <main className="main-content">
-                    <form className="review-form edit-form" onSubmit={handleSubmit}>
-                        <h2>리뷰 수정</h2>
+        <div className="main-content-wrapper">
+            <main className="main-content">
+                <form className="review-form edit-form" onSubmit={handleSubmit}>
+                    <h2>리뷰 수정</h2>
 
-                        <div className="form-group">
-                            <label>제목</label>
+                    <div className="form-group">
+                        <label>제목</label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={e => setTitle(e.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>여행지</label>
+                        <input
+                            type="text"
+                            value={destination}
+                            onChange={e => setDestination(e.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>여행 기간</label>
+                        <div className="date-range">
                             <input
-                                type="text"
-                                value={title}
-                                onChange={e => setTitle(e.target.value)}
+                                type="date"
+                                value={startDate}
+                                onChange={e => setStartDate(e.target.value)}
+                                required
+                            />
+                            <span className="separator">~</span>
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={e => setEndDate(e.target.value)}
                                 required
                             />
                         </div>
+                    </div>
 
-                        <div className="form-group">
-                            <label>여행지</label>
-                            <input
-                                type="text"
-                                value={destination}
-                                onChange={e => setDestination(e.target.value)}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>여행 기간</label>
-                            <div className="date-range">
-                                <input
-                                    type="date"
-                                    value={startDate}
-                                    onChange={e => setStartDate(e.target.value)}
-                                    required
-                                />
-                                <span className="separator">~</span>
-                                <input
-                                    type="date"
-                                    value={endDate}
-                                    onChange={e => setEndDate(e.target.value)}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="form-group">
-                            <Editor
-                                key={initialContent}        // initialContent 변경 시 에디터 리마운트
-                                previewStyle="vertical"
-                                initialEditType="wysiwyg"
-                                height="500px"
-                                useCommandShortcut={true}
-                                hideModeSwitch={true}
-                                initialValue={initialContent}  // 초기값: 기존 HTML
-                                ref={editorRef}               // 에디터 인스턴스 참조
-                                hooks={{
-                                    addImageBlobHook: async (blob, callback) => {
-                                        const formData = new FormData();
-                                        formData.append('image', blob);
-                                        // 에디터 전용 이미지 업로드 API 호출
-                                        const res = await axios.post(
-                                            '/api/review-attachments/image',
-                                            formData
-                                        );
-                                        // 서버가 반환한 URL을 에디터에 삽입
-                                        callback(res.data.url, '업로드된 이미지');
-                                    }
-                                }}
-                            />
-                        </div>
-                        {/* 5) 기존 첨부파일 목록 */}
-                        {existingFiles.length > 0 && (
-                            <div className="edit-attachments">
-                                <span className="edit-attachments-label">기존 첨부파일</span>
-                                <ul className="edit-attachments-list">
-                                    {existingFiles.map(att => (
-                                        <li key={att.fileNo}>
+                    <div className="form-group">
+                        <Editor
+                            key={initialContent}        // initialContent 변경 시 에디터 리마운트
+                            previewStyle="vertical"
+                            initialEditType="wysiwyg"
+                            height="500px"
+                            useCommandShortcut={true}
+                            hideModeSwitch={true}
+                            initialValue={initialContent}  // 초기값: 기존 HTML
+                            ref={editorRef}               // 에디터 인스턴스 참조
+                            hooks={{
+                                addImageBlobHook: async (blob, callback) => {
+                                    const formData = new FormData();
+                                    formData.append('image', blob);
+                                    // 에디터 전용 이미지 업로드 API 호출
+                                    const res = await axios.post(
+                                        '/api/review-attachments/image',
+                                        formData
+                                    );
+                                    // 서버가 반환한 URL을 에디터에 삽입
+                                    callback(res.data.url, '업로드된 이미지');
+                                }
+                            }}
+                        />
+                    </div>
+                    {/* 5) 기존 첨부파일 목록 */}
+                    {existingFiles.length > 0 && (
+                        <div className="edit-attachments">
+                            <span className="edit-attachments-label">기존 첨부파일</span>
+                            <ul className="edit-attachments-list">
+                                {existingFiles.map(att => (
+                                    <li key={att.fileNo}>
                                             <span className="edit-attachment-name">
                                                 📄 {att.fileName}
                                             </span>
-                                            <button
-                                                type="button"
-                                                className="edit-attachment-remove"
-                                                onClick={() => {
-                                                    setToDeleteIds(ids => [...ids, att.fileNo]);
-                                                    setExistingFiles(files => files.filter(f => f.fileNo !== att.fileNo));
-                                                }}
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                        {/* 6) 첨부파일 추가 */}
-                        <div className="form-group edit-attachment-upload">
-                            <label>첨부파일 추가</label>
-                            <input
-                                type="file"
-                                multiple
-                                accept=".pdf,.xls,.xlsx,.doc,.docx"
-                                ref={fileInputRef}
-                                onChange={e => setNewFiles([...e.target.files])}
-                            />
+                                        <button
+                                            type="button"
+                                            className="edit-attachment-remove"
+                                            onClick={() => {
+                                                setToDeleteIds(ids => [...ids, att.fileNo]);
+                                                setExistingFiles(files => files.filter(f => f.fileNo !== att.fileNo));
+                                            }}
+                                        >
+                                            <Trash2 size={16}/>
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
+                    )}
+                    {/* 6) 첨부파일 추가 */}
+                    <div className="form-group edit-attachment-upload">
+                        <label>첨부파일 추가</label>
+                        <input
+                            type="file"
+                            multiple
+                            accept=".pdf,.xls,.xlsx,.doc,.docx"
+                            ref={fileInputRef}
+                            onChange={e => setNewFiles([...e.target.files])}
+                        />
+                    </div>
 
-                        <div className="button-group">
-                            <button type="submit">수정 완료</button>
-                        </div>
-                    </form>
-                </main>
-            </div>
+                    <div className="button-group">
+                        <button type="submit">수정 완료</button>
+                    </div>
+                </form>
+            </main>
         </div>
     );
 };

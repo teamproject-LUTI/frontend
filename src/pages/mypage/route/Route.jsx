@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Heart, Trash2, MapPin, Calendar, Users, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import '../../../styles/MyPage/Route.css';
+import Swal from 'sweetalert2';
 
 const Route = () => {
     const [routes, setRoutes] = useState([]);
@@ -36,7 +37,17 @@ const Route = () => {
 
     // 루트 삭제
     const deleteRoute = async (routeId) => {
-        if (!window.confirm('정말로 이 루트를 삭제하시겠습니까?')) {
+        const result = await Swal.fire({
+            icon: 'question',
+            title: '삭제 확인',
+            text: '정말로 이 루트를 삭제하시겠습니까?',
+            showCancelButton: true,
+            confirmButtonText: '삭제',
+            cancelButtonText: '취소',
+            confirmButtonColor: '#d33'
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
@@ -48,13 +59,29 @@ const Route = () => {
             if (response.data.success) {
                 // 성공적으로 삭제되면 목록에서 제거
                 setRoutes(routes.filter(route => route.routeId !== routeId));
-                alert('루트가 삭제되었습니다.');
+
+                // ✅ SweetAlert2로 변경 (성공 토스트)
+                Swal.fire({
+                    icon: 'success',
+                    text: '루트가 삭제되었습니다.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
             } else {
                 throw new Error(response.data.message || '루트 삭제에 실패했습니다.');
             }
         } catch (error) {
             console.error('루트 삭제 실패:', error);
-            alert(error.response?.data?.message || '루트 삭제에 실패했습니다.');
+
+            // ✅ SweetAlert2로 변경 (에러 메시지)
+            Swal.fire({
+                icon: 'error',
+                title: '삭제 실패',
+                text: error.response?.data?.message || '루트 삭제에 실패했습니다.'
+            });
         }
     };
 

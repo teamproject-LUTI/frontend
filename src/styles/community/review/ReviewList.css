@@ -158,6 +158,32 @@
     position: relative;
     border-left: 1px solid #ccc;
 }
+/* 현재 페이지 버튼 강조 */
+.pagination button.active {
+    background: #F76B59;
+    border-color: #F76B59;
+    color: #fff;
+    border-radius: 5px;
+}
+
+.like-users {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    gap: 12px;
+}
+.like-user {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+}
+.like-user img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+}
 
 /* 검색어 입력 영역 너비 조절 */
 .search-input-wrapper {
