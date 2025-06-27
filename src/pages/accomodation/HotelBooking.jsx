@@ -4,6 +4,7 @@ import { Calendar, Users, MapPin, Heart, CreditCard, ArrowLeft, Calculator } fro
 import axios from 'axios';
 import '../../styles/accomodation/HotelBooking.css';
 import PaymentButtonCom from '../../components/payment/PaymentButtonCom';
+import Swal from 'sweetalert2';
 
 const HotelBooking = () => {
     const location = useLocation();
@@ -11,7 +12,7 @@ const HotelBooking = () => {
     const [bookingData, setBookingData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [showPayment, setShowPayment] = useState(false); // 결제 버튼 표시 상태 추가
+    // ❌ const [showPayment, setShowPayment] = useState(false); // 제거됨
 
     // 예약 정보 상태
     const [reservationInfo, setReservationInfo] = useState({
@@ -70,6 +71,8 @@ const HotelBooking = () => {
         }
     }, [reservationInfo.checkInDate, reservationInfo.checkOutDate, pricePerNight]);
 
+    // ❌ showPayment 관련 useEffect 제거됨
+
     // 입력값 변경 핸들러
     const handleInputChange = (field, value) => {
         setReservationInfo(prev => ({
@@ -98,36 +101,69 @@ const HotelBooking = () => {
             });
 
             if (response.data.success) {
-                alert('💖 즐겨찾기에 저장되었습니다!');
+                Swal.fire({
+                    icon: 'success',
+                    text: '💖 즐겨찾기에 저장되었습니다!',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
             }
         } catch (error) {
             console.error('즐겨찾기 저장 실패:', error);
-            alert('즐겨찾기 저장 중 오류가 발생했습니다.');
+
+            // ✅ SweetAlert2로 변경 (에러 메시지)
+            Swal.fire({
+                icon: 'error',
+                title: '저장 실패',
+                text: '즐겨찾기 저장 중 오류가 발생했습니다.',
+                confirmButtonText: '확인'
+            });
         } finally {
             setLoading(false);
         }
     };
 
-    // 예약 및 결제 진행 (수정된 함수)
-    const proceedToPayment = () => {
+    // ✅ 검증 함수 (PaymentButtonCom에 전달할 함수)
+    const validateBookingInfo = () => {
         // 필수 정보 검증
         if (!reservationInfo.guestName || !reservationInfo.guestPhone || !reservationInfo.guestEmail) {
-            alert('예약자 정보를 모두 입력해주세요.');
-            return;
+            Swal.fire({
+                icon: 'warning',
+                title: '입력 정보 확인',
+                text: '예약자 정보를 모두 입력해주세요.',
+                confirmButtonText: '확인'
+            });
+            return false;
         }
 
         if (!reservationInfo.checkInDate || !reservationInfo.checkOutDate) {
-            alert('숙박 날짜를 선택해주세요.');
-            return;
+            Swal.fire({
+                icon: 'warning',
+                title: '날짜 선택 필요',
+                text: '숙박 날짜를 선택해주세요.',
+                confirmButtonText: '확인'
+            });
+            return false;
         }
 
-        // 결제 버튼 표시
-        setShowPayment(true);
+        if (nights <= 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: '날짜 확인',
+                text: '올바른 숙박 기간을 선택해주세요.',
+                confirmButtonText: '확인'
+            });
+            return false;
+        }
+
+        return true;
     };
 
     // 결제 완료 처리
     const handlePaymentComplete = () => {
-        alert(`✅ ${bookingData.selectedRoute.hotel.name} 예약이 완료되었습니다!`);
         navigate('/mypage/payments');
     };
 
@@ -157,6 +193,27 @@ const HotelBooking = () => {
     }
 
     const { selectedRoute, searchInfo } = bookingData;
+
+    // PaymentButtonCom에 전달할 예약 정보 구성
+    const paymentBookingInfo = {
+        hotelName: selectedRoute.hotel.name, //호텔 이름
+        hotelLocation: selectedRoute.hotel.location, //호텔 위치
+        hotelCategory: selectedRoute.hotel.category, //호텔 카테고리
+        roomType: '스탠다드',
+        checkInDate: reservationInfo.checkInDate, //체크인
+        checkOutDate: reservationInfo.checkOutDate, //체크아웃
+        nights: nights, //박 수
+        adults: reservationInfo.adults, //성인 인원
+        pricePerNight: pricePerNight, // 박 당 가격
+        guestName: reservationInfo.guestName, // 예약자 이름
+        guestPhone: reservationInfo.guestPhone, // 예약자 번호
+        guestEmail: reservationInfo.guestEmail, // 예약자 이메일
+        specialRequests: reservationInfo.specialRequests, // 별도 요청사항
+        packageId: selectedRoute.packageId, // 루트 id
+        packageTitle: selectedRoute.title, // 루트 제목
+        selectedRoute: selectedRoute, // 전체 여행 계획 (여행 일정 포함)
+        searchInfo: searchInfo // 검색 조건 정보
+    };
 
     return (
         <div className="booking-container">
@@ -297,23 +354,15 @@ const HotelBooking = () => {
                     </div>
                 </div>
 
-                {/* 결제 버튼 (수정된 부분) */}
+                {/* ✅ 수정된 결제 버튼 - 바로 PaymentButtonCom 렌더링 */}
                 <div className="booking-actions">
-                    {!showPayment ? (
-                        <button
-                            onClick={proceedToPayment}
-                            className="payment-button"
-                            disabled={loading || nights === 0}
-                        >
-                            <CreditCard size={16} />
-                            {loading ? '처리중...' : `${totalPrice.toLocaleString()}원 결제하기`}
-                        </button>
-                    ) : (
-                        <PaymentButtonCom
-                            paymentMethod="card"
-                            onPaymentComplete={handlePaymentComplete}
-                        />
-                    )}
+                    <PaymentButtonCom
+                        paymentMethod="card"
+                        onPaymentComplete={handlePaymentComplete}
+                        bookingInfo={paymentBookingInfo}
+                        totalAmount={totalPrice}
+                        validateBeforePayment={validateBookingInfo}
+                    />
                 </div>
             </div>
         </div>

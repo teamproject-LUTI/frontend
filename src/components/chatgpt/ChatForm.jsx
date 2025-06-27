@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Search, MapPin, Calendar, Users, Loader2, Send} from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import '../../styles/chatgpt/ChatForm.css';
+import Swal from 'sweetalert2';
 
 /* ────────── 추천 여행 루트 카드 ────────── */
 const TravelRouteCard = ({route, isSelected, onSelect, loading, searchInfo}) => {
@@ -30,7 +31,13 @@ const TravelRouteCard = ({route, isSelected, onSelect, loading, searchInfo}) => 
     // 숙소 예약 페이지로 이동
     const handleBookingClick = () => {
         if (isDayTrip) {
-            alert('당일치기 여행은 숙소 예약이 필요하지 않습니다! 😊');
+            // ✅ SweetAlert2로 변경
+            Swal.fire({
+                icon: 'info',
+                title: '당일치기 여행',
+                text: '당일치기 여행은 숙소 예약이 필요하지 않습니다! 😊',
+                confirmButtonText: '확인'
+            });
             return;
         }
 
@@ -286,7 +293,11 @@ const ChatForm = () => {
             const data = await res.json();
 
             if (data.success) {
-                alert('💖 즐겨찾기에 저장되었습니다!');
+                Swal.fire({
+                    icon: 'success',
+                    text: '💖 즐겨찾기에 저장되었습니다!',
+                    showConfirmButton: false,
+                });
                 console.log('즐겨찾기 저장 완료:', data);
             } else {
                 throw new Error(data.message || '즐겨찾기 저장에 실패했습니다.');
@@ -294,7 +305,13 @@ const ChatForm = () => {
 
         } catch (error) {
             console.error('즐겨찾기 저장 실패:', error);
-            alert('즐겨찾기 저장 중 오류가 발생했습니다: ' + error.message);
+
+            // ✅ SweetAlert2로 변경 (에러 메시지)
+            Swal.fire({
+                icon: 'error',
+                title: '저장 실패',
+                text: '즐겨찾기 저장 중 오류가 발생했습니다: ' + error.message
+            });
         } finally {
             setLoading(false);
         }
@@ -309,12 +326,22 @@ const ChatForm = () => {
             (currentSearchInfo && currentSearchInfo.checkInDate === currentSearchInfo.checkOutDate);
 
         if (isDayTrip) {
-            alert('당일치기 여행은 숙소 예약이 필요하지 않습니다! 😊');
+            Swal.fire({
+                icon: 'info',
+                title: '당일치기 여행',
+                text: '당일치기 여행은 숙소 예약이 필요하지 않습니다! 😊',
+                confirmButtonText: '확인'
+            });
             return;
         }
 
         if (!selectedRoute.hotel) {
-            alert('선택된 루트에 호텔 정보가 없습니다.');
+            Swal.fire({
+                icon: 'warning',
+                title: '호텔 정보 없음',
+                text: '선택된 루트에 호텔 정보가 없습니다.',
+                confirmButtonText: '확인'
+            });
             return;
         }
 

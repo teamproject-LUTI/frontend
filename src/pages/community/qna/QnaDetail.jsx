@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { Eye, Share2 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -56,11 +57,6 @@ const QnaDetail = () => {
 
             // 문의글 정보 다시 불러오기 (답변 상태 반영)
             await fetchAskData();
-
-            // QnaList 컴포넌트의 상태도 업데이트 (전역 함수 사용)
-            if (window.updateQnaAnswerStatus) {
-                window.updateQnaAnswerStatus(parseInt(id), true);
-            }
 
             console.log('문의글 답변 상태가 업데이트되었습니다.');
         } catch (err) {
@@ -167,25 +163,33 @@ const QnaDetail = () => {
                 <main className="main-content">
                     <h1 className="detail-title">{ask.title}</h1>
 
-                    {/* 작성자 + 날짜 + 답변 상태 */}
+                    {/* 작성자 + 날짜 + 답변 상태 + 공유/조회수 */}
                     <div className="detail-meta">
-                        <span className="detail-author">{ask.userName}</span>
-                        <span className="detail-date">
-                            {new Date(ask.createdAt).toLocaleDateString('ko-KR', {
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit',
-                            })}
-                        </span>
-                        {/* 답변 상태 배지 추가 */}
-                        <span className={`status-badge ${ask.answered ? 'answered' : 'pending'}`}>
-                            {ask.answered ? '답변 완료' : '답변 대기중'}
-                        </span>
-                        {/* 공유 버튼 */}
+                        <div className="meta-left">
+                            <span className="detail-author">{ask.userName}</span>
+                            <span className="detail-date">
+                                {new Date(ask.createdAt).toLocaleDateString('ko-KR', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                })}
+                            </span>
+                            {/* 답변 상태 배지 */}
+                            <span className={`status-badge ${ask.answered ? 'answered' : 'pending'}`}>
+                                {ask.answered ? '답변 완료' : '답변 대기중'}
+                            </span>
+                        </div>
+                        {/* 공유 + 조회수 */}
                         <div className="interaction-section">
                             <button className="share-btn" onClick={handleShare}>
+                                <Share2 className="share-icon" size={16} color="#000" />
                                 공유하기
                             </button>
+                            {/* 조회수 추가 */}
+                            <span className="detail-views">
+                                <Eye className="view-icon" size={18} color="#000" />
+                                {ask.viewCount || 0}
+                            </span>
                         </div>
                     </div>
 
@@ -213,45 +217,32 @@ const QnaDetail = () => {
                         </div>
                     )}
 
-                    {/* 첨부 이미지 갤러리 */}
-                    {attachments.filter(att => ['png','jpg','jpeg','gif'].includes(att.extension.toLowerCase())).length > 0 && (
-                        <div className="detail-images">
-                            {attachments
-                                .filter(att => ['png','jpg','jpeg','gif'].includes(att.extension.toLowerCase()))
-                                .map(att => (
-                                    <img
-                                        key={att.askAttachmentId}
-                                        src={att.logicalPath}
-                                        alt={att.fileName}
-                                        className="detail-image"
-                                    />
-                                ))}
-                        </div>
-                    )}
-
+                    {/* 본문 */}
                     <div
-                        className="detail-content"
+                        className="qna-detail-content"
                         dangerouslySetInnerHTML={{ __html: ask.content }}
                     ></div>
 
                     {/* 내가 쓴 글일 때만 버튼 보이기 */}
                     {ask.owner && (
-                        <div className="crud-buttons">
-                            <button className="edit-btn" onClick={handleEdit}>수정</button>
-                            <button className="delete-btn" onClick={handleDelete}>삭제</button>
+                        <div className="qna-detail-crud-buttons">
+                            <button className="qna-detail-edit-btn" onClick={handleEdit}>수정</button>
+                            <button className="qna-detail-delete-btn" onClick={handleDelete}>삭제</button>
                         </div>
                     )}
 
-                    <button className="back-btn" onClick={() => navigate('/community/qna')}>
+                    <button className="qna-detail-back-btn" onClick={() => navigate('/community/qna')}>
                         목록으로
                     </button>
 
                     {/* 댓글 섹션 추가 - onCommentAdded 콜백 전달 */}
-                    <CommentSection
-                        parentType="ASK"
-                        parentId={id}
-                        onCommentAdded={handleCommentAdded}
-                    />
+                    <div className="comment-wrapper">
+                        <CommentSection
+                            parentType="ASK"
+                            parentId={id}
+                            onCommentAdded={handleCommentAdded}
+                        />
+                    </div>
                 </main>
             </div>
         </div>

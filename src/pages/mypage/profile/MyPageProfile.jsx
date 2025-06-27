@@ -145,6 +145,48 @@ const MyPageProfile = () => {
     return phoneNumber;
   };
 
+  const parsePhoneNumber = (phoneNumber) => {
+    if (!phoneNumber || phoneNumber === '정보 없음') {
+      return {
+        phonePrefix: '010',
+        phoneMiddle: '',
+        phoneLast: ''
+      };
+    }
+
+    // 하이픈이 있는 경우
+    if (phoneNumber.includes('-')) {
+      const parts = phoneNumber.split('-');
+      return {
+        phonePrefix: parts[0] || '010',
+        phoneMiddle: parts[1] || '',
+        phoneLast: parts[2] || ''
+      };
+    }
+
+    // 숫자만 있는 경우
+    const numbers = phoneNumber.replace(/\D/g, '');
+    if (numbers.length === 11) {
+      return {
+        phonePrefix: numbers.slice(0, 3),
+        phoneMiddle: numbers.slice(3, 7),
+        phoneLast: numbers.slice(7)
+      };
+    } else if (numbers.length === 10) {
+      return {
+        phonePrefix: numbers.slice(0, 3),
+        phoneMiddle: numbers.slice(3, 6),
+        phoneLast: numbers.slice(6)
+      };
+    }
+
+    return {
+      phonePrefix: '010',
+      phoneMiddle: '',
+      phoneLast: ''
+    };
+  };
+
   // 날짜 형식 변환
   const formatDateForInput = (dateString) => {
     if (!dateString || dateString === '정보 없음') return '';
@@ -344,19 +386,24 @@ const MyPageProfile = () => {
 
   useEffect(() => {
     if (!loading && userInfo.name !== '로딩중...') {
-      const phoneMatch = userInfo.phone?.match(/(\d{3})-(\d{3,4})-(\d{4})/);
+      // 전화번호 분해
+      const phoneParts = parsePhoneNumber(userInfo.phone);
+
+      // 이메일 분해
       const emailMatch = userInfo.email?.match(/^([^@]+)@(.+)$/);
 
-      setEditForm({
+      const newEditForm = {
         ...userInfo,
-        phonePrefix: phoneMatch ? phoneMatch[1] : '010',
-        phoneMiddle: phoneMatch ? phoneMatch[2] : '',
-        phoneLast: phoneMatch ? phoneMatch[3] : '',
+        phonePrefix: phoneParts.phonePrefix,
+        phoneMiddle: phoneParts.phoneMiddle,
+        phoneLast: phoneParts.phoneLast,
         emailLocal: emailMatch ? emailMatch[1] : '',
         emailDomain: emailMatch ? emailMatch[2] : 'gmail.com',
         emailDomainType: emailMatch && EMAIL_DOMAINS.includes(emailMatch[2]) ? emailMatch[2] : '직접입력',
         customEmailDomain: emailMatch && !EMAIL_DOMAINS.includes(emailMatch[2]) ? emailMatch[2] : ''
-      });
+      };
+
+      setEditForm(newEditForm);
     }
   }, [userInfo, loading]);
 
@@ -569,6 +616,8 @@ const MyPageProfile = () => {
 
         if (updateResponse.status === 200 && updateResponse.data.success) {
           // 3. 로컬 상태 업데이트
+          const formattedPhoneForDisplay = formatPhoneNumber(phoneNumber);
+
           const updatedUserInfo = {
             ...editForm,
             phone: phoneNumber,
@@ -577,6 +626,20 @@ const MyPageProfile = () => {
           };
 
           setUserInfo(updatedUserInfo);
+
+          const updatedPhoneParts = parsePhoneNumber(formattedPhoneForDisplay);
+          setEditForm(prev => ({
+            ...prev,
+            nickname: editForm.nickname.trim(),
+            birthDate: isSocialLogin() ? editForm.birthDate : prev.birthDate,
+            gender: editForm.gender,
+            phone: formattedPhoneForDisplay,
+            phonePrefix: updatedPhoneParts.phonePrefix,
+            phoneMiddle: updatedPhoneParts.phoneMiddle,
+            phoneLast: updatedPhoneParts.phoneLast,
+            address: fullAddress,
+            profileImage: updatedImageUrl
+          }));
 
           // 4. AuthContext 업데이트
           const authUpdateData = {

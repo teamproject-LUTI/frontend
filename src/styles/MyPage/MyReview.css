@@ -352,7 +352,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 2rem;
-    border-top: 1px solid #e5e7eb;
+    /*border-top: 1px solid #e5e7eb;*/
 }
 
 .pagination-button {

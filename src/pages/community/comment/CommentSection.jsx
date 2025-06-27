@@ -10,24 +10,43 @@ const CommentSection = ({ parentType, parentId, onCommentAdded }) => {
     const [editContent, setEditContent] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    // 인증 토큰 가져오기
+    const token = localStorage.getItem('accessToken');
+
     // 댓글 목록 조회
     const fetchComments = async () => {
         try {
             setIsLoading(true);
-            const response = await axios.get(`/api/comments/${parentType}/${parentId}`);
+            const response = await axios.get(`/api/comments/${parentType}/${parentId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             const commentsData = response.data.data || [];
 
             // 디버깅 로그 추가
+            console.log('=== 댓글 조회 디버깅 ===');
+            console.log('전체 응답:', response.data);
             console.log('댓글 데이터:', commentsData);
+            console.log('댓글 개수:', commentsData.length);
+
             if (commentsData.length > 0) {
-                console.log('첫 번째 댓글:', commentsData[0]);
-                console.log('isOwner 값:', commentsData[0].isOwner);
-                console.log('userName 값:', commentsData[0].userName);
+                commentsData.forEach((comment, index) => {
+                    console.log(`댓글 ${index + 1}:`, {
+                        commentId: comment.commentId,
+                        content: comment.content,
+                        userName: comment.userName,
+                        userId: comment.userId,
+                        isOwner: comment.isOwner,
+                        createdAt: comment.createdAt
+                    });
+                });
             }
 
             setComments(commentsData);
         } catch (error) {
             console.error('댓글 조회 실패:', error);
+            console.error('에러 상세:', error.response?.data);
             await Swal.fire({
                 title: '오류',
                 text: '댓글을 불러오는데 실패했습니다.',
@@ -44,7 +63,7 @@ const CommentSection = ({ parentType, parentId, onCommentAdded }) => {
         if (parentType && parentId) {
             fetchComments();
         }
-    }, [parentType, parentId]);
+    }, [parentType, parentId, token]);
 
     // 댓글 등록
     const handleSubmitComment = async (e) => {
@@ -61,10 +80,23 @@ const CommentSection = ({ parentType, parentId, onCommentAdded }) => {
         }
 
         try {
+            console.log('=== 댓글 등록 요청 ===');
+            console.log('parentType:', parentType);
+            console.log('parentId:', parentId);
+            console.log('content:', newComment.trim());
+            console.log('token:', token ? 'exists' : 'missing');
+
             // 댓글 등록 API 호출
-            await axios.post(`/api/comments/${parentType}/${parentId}`, {
+            const response = await axios.post(`/api/comments/${parentType}/${parentId}`, {
                 content: newComment.trim()
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
+
+            console.log('댓글 등록 응답:', response.data);
 
             setNewComment('');
             await fetchComments(); // 댓글 목록 새로고침
@@ -84,6 +116,7 @@ const CommentSection = ({ parentType, parentId, onCommentAdded }) => {
             });
         } catch (error) {
             console.error('댓글 등록 실패:', error);
+            console.error('에러 상세:', error.response?.data);
             await Swal.fire({
                 title: '등록 실패',
                 text: '댓글 등록에 실패했습니다.',
@@ -118,9 +151,20 @@ const CommentSection = ({ parentType, parentId, onCommentAdded }) => {
         }
 
         try {
-            await axios.patch(`/api/comments/${commentId}`, {
+            console.log('=== 댓글 수정 요청 ===');
+            console.log('commentId:', commentId);
+            console.log('content:', editContent.trim());
+
+            const response = await axios.patch(`/api/comments/${commentId}`, {
                 content: editContent.trim()
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
+
+            console.log('댓글 수정 응답:', response.data);
 
             setEditingId(null);
             setEditContent('');
@@ -135,6 +179,7 @@ const CommentSection = ({ parentType, parentId, onCommentAdded }) => {
             });
         } catch (error) {
             console.error('댓글 수정 실패:', error);
+            console.error('에러 상세:', error.response?.data);
             await Swal.fire({
                 title: '수정 실패',
                 text: '댓글 수정에 실패했습니다.',
@@ -159,7 +204,17 @@ const CommentSection = ({ parentType, parentId, onCommentAdded }) => {
 
         if (result.isConfirmed) {
             try {
-                await axios.delete(`/api/comments/${commentId}`);
+                console.log('=== 댓글 삭제 요청 ===');
+                console.log('commentId:', commentId);
+
+                const response = await axios.delete(`/api/comments/${commentId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                console.log('댓글 삭제 응답:', response.data);
+
                 await fetchComments();
 
                 await Swal.fire({
@@ -171,6 +226,7 @@ const CommentSection = ({ parentType, parentId, onCommentAdded }) => {
                 });
             } catch (error) {
                 console.error('댓글 삭제 실패:', error);
+                console.error('에러 상세:', error.response?.data);
                 await Swal.fire({
                     title: '삭제 실패',
                     text: '댓글 삭제에 실패했습니다.',
@@ -242,42 +298,47 @@ const CommentSection = ({ parentType, parentId, onCommentAdded }) => {
                                         {formatDate(comment.createdAt)}
                                     </span>
                                 </div>
-                                {/* 소유자인 경우에만 수정/삭제 버튼 표시 */}
-                                {comment.isOwner && (
-                                    <div className="comment-actions">
-                                        {editingId === comment.commentId ? (
-                                            <>
-                                                <button
-                                                    onClick={() => handleUpdateComment(comment.commentId)}
-                                                    className="comment-action-btn save"
-                                                >
-                                                    저장
-                                                </button>
-                                                <button
-                                                    onClick={handleCancelEdit}
-                                                    className="comment-action-btn cancel"
-                                                >
-                                                    취소
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <button
-                                                    onClick={() => handleStartEdit(comment)}
-                                                    className="comment-action-btn edit"
-                                                >
-                                                    수정
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteComment(comment.commentId)}
-                                                    className="comment-action-btn delete"
-                                                >
-                                                    삭제
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
-                                )}
+
+                                {/*/!* 디버깅 정보 표시 *!/*/}
+                                {/*<div className="comment-debug" style={{fontSize: '12px', color: '#999', margin: '4px 0'}}>*/}
+                                {/*    isOwner: {comment.isOwner?.toString() || 'undefined'} |*/}
+                                {/*    userId: {comment.userId || 'undefined'}*/}
+                                {/*</div>*/}
+
+                                {/* 임시로 모든 댓글에 수정/삭제 버튼 표시 (디버깅용) */}
+                                <div className="comment-actions">
+                                    {editingId === comment.commentId ? (
+                                        <>
+                                            <button
+                                                onClick={() => handleUpdateComment(comment.commentId)}
+                                                className="comment-action-btn save"
+                                            >
+                                                저장
+                                            </button>
+                                            <button
+                                                onClick={handleCancelEdit}
+                                                className="comment-action-btn cancel"
+                                            >
+                                                취소
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                onClick={() => handleStartEdit(comment)}
+                                                className="comment-action-btn edit"
+                                            >
+                                                수정
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteComment(comment.commentId)}
+                                                className="comment-action-btn delete"
+                                            >
+                                                삭제
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="comment-content">

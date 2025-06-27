@@ -51,9 +51,9 @@ const ReviewList = () => {
   };
 
   return (
-      <div className="review-list-main-layout">
-        <div className="review-list-main-content-wrapper">
-          <main className="review-list-main-content" >
+      <div className="community-main-layout">
+        <div className="community-main-content-wrapper">
+          <main className="community-main-content" >
             <div className="review-header">
               <h1>여행 후기</h1>
 
@@ -69,7 +69,7 @@ const ReviewList = () => {
                     <option value="author">작성자</option>
                     <option value="travelRegion">여행지역</option>
                   </select>
-                  <ChevronDown className="review-list-select-icon"
+                  <ChevronDown className="community-select-icon"
                                size={16}
                   />
                 </div>
@@ -82,7 +82,7 @@ const ReviewList = () => {
                       onKeyDown={e => e.key === 'Enter' && handleSearch()}
                   />
                   <Search
-                      className="review-list-search-icon"
+                      className="community-search-icon"
                       size={18}
                       onClick={handleSearch}
                   />
@@ -91,7 +91,7 @@ const ReviewList = () => {
 
               <button
                   type="button"
-                  className="review-list-write-button"
+                  className="community-write-button"
                   onClick={() => navigate('/community/review/write')}
               >
                 글쓰기
@@ -122,7 +122,7 @@ const ReviewList = () => {
                             className="heart-img"
                         />
                       </div>
-                      <div className="review-list-meta">
+                      <div className="community-meta">
                         <p className="author">{r.userName}</p>
                         <p className="date">{r.createdAt.substring(0, 10)}</p>
                       </div>
