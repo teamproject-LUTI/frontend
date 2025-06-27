@@ -187,7 +187,6 @@ const PaymentManagement = () => {
                         <th>사용자 ID</th>
                         <th>결제일시</th>
                         <th>impUid</th>
-                        <th>merchantUid</th>
                         <th>결제금액</th>
                         <th>결제 상태</th>
                         <th>환불</th>
@@ -201,7 +200,6 @@ const PaymentManagement = () => {
                                 <td>{payment.userId}</td>
                                 <td>{dayjs(payment.paymentDate).format("LLL")}</td>
                                 <td>{payment.impUid}</td>
-                                <td>{payment.merchantUid}</td>
                                 <td>{payment.totalPrice.toLocaleString()}원</td>
                                 <td>
                                         <span

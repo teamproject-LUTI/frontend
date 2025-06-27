@@ -1,4 +1,4 @@
-.review-list-main-layout{
+.community-main-layout{
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -7,13 +7,13 @@
     background-color: #f9fafb;
 }
 
-.review-list-main-content-wrapper{
+.community-main-content-wrapper{
     /*display: flex;*/
     flex: 1;
     overflow: hidden;
 }
 
-.review-list-main-content{
+.community-main-content{
     max-width: 1200px;
     margin: 0 auto;
     padding: 24px;
@@ -33,7 +33,7 @@
 }
 
 /* 글쓰기 버튼 스타일 */
-.review-list-write-button {
+.community-write-button {
     padding: 8px 16px;
     background-color: #F76B59;
     color: white;
@@ -46,6 +46,10 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
+}
+
+.review-button:hover {
+    background-color: #e55a48;
 }
 
 .review-link {
@@ -115,7 +119,7 @@
     flex-shrink: 0;
 }
 
-.review-list-meta {
+.community-meta {
     display: flex;
     justify-content: space-between;
     font-size: 14px;
@@ -201,7 +205,7 @@
 }
 
 /* 돋보기 아이콘 위치 */
-.review-list-search-icon {
+.community-search-icon {
     position: absolute;
     top: 50%;
     right: 8px;
@@ -234,7 +238,7 @@
     outline: none;
 }
 
-.review-list-select-icon {
+.community-select-icon {
     position: absolute;
     top: 11px;
     right: 5px;
