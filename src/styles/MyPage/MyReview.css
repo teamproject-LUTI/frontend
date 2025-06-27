@@ -13,6 +13,16 @@
     text-decoration: none;
     border: none;
 }
+.review-stats {
+    list-style: none;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 2rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
 
 .review-link {
     text-decoration: none;
@@ -85,7 +95,6 @@
     display: flex;
     justify-content: space-between;
     font-size: 14px;
-    color: #666;
 }
 
 /** 게시판 페이지네이션 스타일 */

@@ -2,10 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { User, Search, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../util/AuthContext';
 import { authUtils } from '../../util/authUtils';
+import { useNavigate} from "react-router-dom";
 import Swal from 'sweetalert2';
 import '../../styles/layout/Topbar.css';
 
 const Topbar = () => {
+  const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [imageLoadError, setImageLoadError] = useState(false);
@@ -180,11 +182,13 @@ const Topbar = () => {
           <div className="topbar-content">
             {/* Logo */}
             <div className="logo-section">
-              <div className="logo-container">
+              <div className="logo-container"
+              onClick={() => navigate('main')}
+                   style={{ cursor: 'pointer'}}
+              >
                 <img src="/images/topbar/luti_logo.png" alt="LUTI Logo" className="logo-image"/>
               </div>
             </div>
-
             {/* Search Bar */}
             <div className="search-section">
               <form onSubmit={handleSearch} className="search-container">

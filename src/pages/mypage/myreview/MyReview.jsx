@@ -77,7 +77,6 @@ const ReviewList = () => {
                                 글쓰기
                             </button>
                         </div>
-
                         {/* 통계 */}
                         <ul className="review-stats">
                             <li><p className="stat-count">{myStats.posts}</p><p className="stat-label">총 리뷰</p></li>
@@ -115,13 +114,12 @@ const ReviewList = () => {
 
                                         {/* 조회 / 좋아요 */}
                                         <div className="review-meta">
-                                            <span className="view-count">{r.viewCount}</span>
+                                            <span className="view-count">조회수 {r.viewCount}</span>
                                             <span
                                                 className="like-count"
                                                 style={{cursor: 'pointer'}}
                                                 onClick={(e) => openModal(e, r.reviewId)}
-                                            >
-                                                {r.likeCount}
+                                            >{r.likeCount}
                                             </span>
                                         </div>
 

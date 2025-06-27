@@ -18,7 +18,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 4rem;
+    height: 7rem;
 }
 
 /* Logo Section */
@@ -35,8 +35,13 @@
 }
 
 .logo-image {
-    height: 2.5rem;
-    width: auto;
+    width: 200px;
+    height: auto;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
 }
 
 .logo-text {
@@ -231,10 +236,6 @@
         min-width: 150px;
     }
 
-    .logo-image {
-        height: 2rem;
-    }
-
     .search-section {
         margin: 0 1rem;
     }
@@ -259,10 +260,6 @@
 
     .logo-section {
         min-width: 120px;
-    }
-
-    .logo-image {
-        height: 1.75rem;
     }
 
     .search-section {
