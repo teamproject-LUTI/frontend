@@ -31,12 +31,23 @@ const NoticeDetail = () => {
                 hasViewCountIncreased.current = true;
             } catch (err) {
                 console.error('공지글 조회 실패', err);
-                alert('공지 내용을 불러오지 못했습니다.');
+                if (err.response?.status === 404) {
+                    Swal.fire({
+                        title: '글을 찾을 수 없습니다',
+                        text: '삭제되었거나 존재하지 않는 글입니다.',
+                        icon: 'error',
+                        confirmButtonColor: '#F76B59',
+                    }).then(() => {
+                        navigate('/community/notice');
+                    });
+                } else {
+                    alert('공지 내용을 불러오지 못했습니다.');
+                }
             }
         };
 
         fetchNotice();
-    }, [id, token]); // token이 변경될 때만 재실행
+    }, [id, token, navigate]);
 
     // 공유 버튼 핸들러
     const handleShare = () => {
@@ -92,17 +103,29 @@ const NoticeDetail = () => {
                 navigate('/community/notice');
             } catch (err) {
                 console.error('삭제 실패', err);
-                Swal.fire({
-                    title: '삭제 실패',
-                    text: '문제가 발생했어요. 잠시 후 다시 시도해주세요.',
-                    icon: 'error',
-                    confirmButtonColor: '#F76B59',
-                });
+                if (err.response?.status === 403) {
+                    Swal.fire({
+                        title: '권한이 없습니다',
+                        text: '관리자만 삭제할 수 있습니다.',
+                        icon: 'error',
+                        confirmButtonColor: '#F76B59',
+                    });
+                } else {
+                    Swal.fire({
+                        title: '삭제 실패',
+                        text: '문제가 발생했어요. 잠시 후 다시 시도해주세요.',
+                        icon: 'error',
+                        confirmButtonColor: '#F76B59',
+                    });
+                }
             }
         }
     };
 
     if (!notice) return null;
+
+    // 관리자만 수정/삭제 가능
+    const canModify = notice.isAdmin;
 
     return (
         <div className="main-layout">
@@ -141,7 +164,8 @@ const NoticeDetail = () => {
                         dangerouslySetInnerHTML={{ __html: notice.content }}
                     ></div>
 
-                    {notice.owner && (
+                    {/* 관리자만 수정/삭제 버튼 보이기 */}
+                    {canModify && (
                         <div className="notice-detail-crud-buttons">
                             <button className="notice-detail-edit-btn" onClick={handleEdit}>수정</button>
                             <button className="notice-detail-delete-btn" onClick={handleDelete}>삭제</button>
