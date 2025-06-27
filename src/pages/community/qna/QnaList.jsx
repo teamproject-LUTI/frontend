@@ -1,6 +1,7 @@
 // src/pages/community/qna/QnaList.jsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
+import { Search, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import '../../../styles/community/qna/QnaList.css';
 
@@ -11,13 +12,26 @@ const QnaList = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [refreshTrigger, setRefreshTrigger] = useState(0); // 새로고침 트리거
 
+    // 검색창 - 입력 중 상태
+    const [inputSearchType, setInputSearchType] = useState('title');
+    const [inputKeyword, setInputKeyword] = useState('');
+    // 검색창 - 실제 검색에 사용될 상태
+    const [searchType, setSearchType] = useState('title');
+    const [keyword, setKeyword] = useState('');
+    const selectRef = useRef(null);
+
     const navigate = useNavigate();
 
     // 문의글 목록을 가져오는 함수
     const fetchAsks = useCallback(async () => {
         try {
             const res = await axios.get('/api/asks', {
-                params: { page, size }
+                params: {
+                    page,
+                    size,
+                    searchType,   // 실제 검색용 상태
+                    keyword       // handleSearch 시점에만 바뀜
+                }
             });
             // 응답 예시: { data: [ {...}, ... ], pageInfo: { totalPages: x, ... } }
             setAsks(res.data.data || []);
@@ -25,7 +39,7 @@ const QnaList = () => {
         } catch (err) {
             console.error('문의 목록 조회 실패', err);
         }
-    }, [page, size]);
+    }, [page, size, searchType, keyword]);
 
     // 페이지 변경 시 또는 새로고침 트리거 변경 시 목록 재조회
     useEffect(() => {
@@ -69,6 +83,14 @@ const QnaList = () => {
         setRefreshTrigger(prev => prev + 1);
     };
 
+    // 검색 버튼 클릭 핸들러: 페이지를 1로 초기화
+    const handleSearch = () => {
+        setPage(1);
+        // useEffect에서 searchType, keyword가 바뀌면 자동으로 재호출 됩니다.
+        setSearchType(inputSearchType);
+        setKeyword(inputKeyword);
+    };
+
     // 특정 문의글의 답변 상태를 업데이트하는 함수
     const updateAskAnswerStatus = useCallback((askId, answered) => {
         setAsks(prevAsks =>
@@ -92,21 +114,44 @@ const QnaList = () => {
     }, [updateAskAnswerStatus]);
 
     return (
-        <div className="main-layout">
-            <div className="main-content-wrapper">
-                <main className="main-content">
+        <div className="community-main-layout">
+            <div className="community-main-content-wrapper">
+                <main className="community-main-content">
                     {/* 헤더 */}
                     <div className="qna-header">
                         <h1>문의 내역</h1>
+
+                        {/* 검색 컨트롤: 질문하기 버튼 왼쪽 배치 */}
+                        <div className="search-controls">
+                            <div className="select-wrapper">
+                                <select
+                                    ref={selectRef}
+                                    value={inputSearchType}
+                                    onChange={e => setInputSearchType(e.target.value)}
+                                >
+                                    <option value="title">제목</option>
+                                    <option value="author">작성자</option>
+                                    <option value="content">내용</option>
+                                </select>
+                                <ChevronDown className="community-select-icon" size={16} />
+                            </div>
+                            <div className="search-input-wrapper">
+                                <input
+                                    type="text"
+                                    placeholder="검색어를 입력하세요"
+                                    value={inputKeyword}
+                                    onChange={e => setInputKeyword(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                                />
+                                <Search
+                                    className="community-search-icon"
+                                    size={18}
+                                    onClick={handleSearch}
+                                />
+                            </div>
+                        </div>
+
                         <div className="qna-header-actions">
-                            <button
-                                type="button"
-                                className="refresh-button"
-                                onClick={handleRefresh}
-                                title="목록 새로고침"
-                            >
-                                🔄
-                            </button>
                             <button
                                 type="button"
                                 className="ask-button"
@@ -144,7 +189,7 @@ const QnaList = () => {
                                         className={`badge ${a.answered ? 'badge-success' : 'badge-pending'}`}
                                         key={`${a.askId}-${a.answered}`} // 상태 변경 시 리렌더링 강제
                                     >
-                                        {a.answered ? '답변 완료' : '답변 대기중'}
+                                        {a.answered ? '답변 완료' : '답변 대기'}
                                     </span>
                                 </td>
                             </tr>
@@ -155,7 +200,12 @@ const QnaList = () => {
                     {/* 목록이 비어있을 때 */}
                     {asks.length === 0 && (
                         <div className="qna-empty">
-                            <p>등록된 문의가 없습니다.</p>
+                            <p>
+                                {keyword ?
+                                    `"${keyword}" 검색 결과가 없습니다.` :
+                                    '등록된 문의가 없습니다.'
+                                }
+                            </p>
                         </div>
                     )}
 
